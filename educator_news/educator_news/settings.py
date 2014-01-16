@@ -26,6 +26,11 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+DIRNAME = os.path.dirname(__file__)
+TEMPLATE_DIRS = (
+    os.path.join(DIRNAME, 'static/templates'),
+)
+print(DIRNAME)
 
 # Application definition
 
@@ -60,6 +65,7 @@ WSGI_APPLICATION = 'educator_news.wsgi.application'
 
 import dj_database_url
 DATABASES = {'default': dj_database_url.config(default=os.environ.get('DATABASE_URL')) }
+DATABASES = {'default': dj_database_url.config() }
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
