@@ -43,6 +43,9 @@ INSTALLED_APPS = (
 
     # Utilities/ libraries
     'south',
+
+    # My apps
+    'ed_news',
 )
 
 MIDDLEWARE_CLASSES = (
