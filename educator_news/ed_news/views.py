@@ -15,3 +15,8 @@ def logout_view(request):
     logout(request)
     # Redirect to home page.
     return redirect('/')
+
+def profile(request):
+    return render_to_response('registration/profile.html',
+                              {},
+                              context_instance = RequestContext(request))
