@@ -14,4 +14,6 @@ urlpatterns = patterns('',
     url(r'^login/', 'django.contrib.auth.views.login', name='login'),
     url(r'^logout/', 'ed_news.views.logout_view', name='logout_view'),
     url(r'^profile/', 'ed_news.views.profile', name='profile'),
+    url(r'^password_change/', 'ed_news.views.password_change_form', name='password_change_form'),
+    url(r'^password_change_successful/', 'ed_news.views.password_change_successful', name='password_change_successful'),
 )
