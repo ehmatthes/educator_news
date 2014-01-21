@@ -7,7 +7,8 @@
 
     {% if user_form.errors %}
         <p>Something went wrong. Please try again.</p>
-		  {{ user_form.errors %}
+		  <p>User form errors: {{ user_form.errors }}</p>
+		  <p>Profile form errors: {{ profile_form.errors }}</p>
     {% endif %}
 
 	 {% if registered %}
@@ -19,6 +20,7 @@
 			 {% csrf_token %}
 
 			 {{ user_form.as_p }}
+			 {{ profile_form.as_p }}
 
 			 <p><input type="submit" name='submit' value="Register" />
 		  </form>
