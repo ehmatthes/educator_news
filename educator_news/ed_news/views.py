@@ -4,7 +4,6 @@ from django.contrib.auth import logout, login, authenticate
 from django.core.urlresolvers import reverse
 from django.contrib.auth.views import password_change
 from ed_news.forms import UserForm, UserProfileForm
-from ed_news.models import UserProfile
 
 def index(request):
     # Static index page for now.
@@ -49,7 +48,6 @@ def register(request):
         if user_form.is_valid() and profile_form.is_valid():
             # Save user's form data.
             user = user_form.save()
-            print 'un', user.username
 
             user.set_password(user.password)
             user.save()
@@ -61,16 +59,10 @@ def register(request):
             # Registration was successful.
             registered = True
 
-            # Not requiring email validation yet, so log user in.
-            #user = authenticate(username=user.username, password=user.password)
-            #login(request, user)
-            print 'un, pw', user.username,  user.password
-
         else:
             # Invalid form/s.
-            print 'uf', user_form
+            #  Print errors to console; should log these?
             print 'ufe', user_form.errors
-            print 'pf', profile_form
             print 'pfe', profile_form.errors
 
     else:
