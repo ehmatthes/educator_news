@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h2>Register:</h2>
+    <p>This page allows you to register a new account.</p>
+
+    {% if user_form.errors %}
+        <p>Something went wrong. Please try again.</p>
+		  {{ user_form.errors %}
+    {% endif %}
+
+	 {% if registered %}
+	     <p>Thank you for registering!</p>
+	     <p>Return to the <a href="{% url 'ed_news:index' %}">homepage</a>.</p>
+
+	 {% else %}
+		  <form id='user_form' method="post" action="{% url 'register' %}" enctype='multipart/form-data'>
+			 {% csrf_token %}
+
+			 {{ user_form.as_p }}
+
+			 <p><input type="submit" name='submit' value="Register" />
+		  </form>
+	 
+	 {% endif %}
+
+{% endblock %}

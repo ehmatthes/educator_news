@@ -53,7 +53,7 @@
                 <li><a href="{% url 'logout_view' %}">logout</a></li>
 				{% else %}
                 <li><a href="{% url 'login' %}">login</a></li>
-                <li><a href="">register</a></li>
+                <li><a href="{% url 'register' %}">register</a></li>
 				{% endif %}
 
           </ul>
