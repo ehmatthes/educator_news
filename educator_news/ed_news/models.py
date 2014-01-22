@@ -42,59 +42,8 @@ class Submission(models.Model):
                                        choices=SUBMISSION_TYPE_CHOICES,
                                        default=ARTICLE)
 
-class Article(Submission):
-    url = URLField()
-
-    Using multi-table inheritance rather than abstract base class,
-    because I want to be able to query back to a general submission,
-    and then deal with the specific type.
-    """
-
-    ARTICLE = 'ART'
-    TEXT = 'TXT'
-    SUBMISSION_TYPE_CHOICES = (
-        (ARTICLE, 'Article'),
-        (TEXT, 'Text'),
-        )
-
-    # Stick with programming 80-char limit for now.
-    #  It's what HN uses, which fits nicely on mobile.
-    title = models.CharField(max_length=80)
-    author = models.OneToOneField(UserProfile)
-    upvotes = models.IntegerField(default=0)
-    downvotes = models.IntegerField(default=0)
-    points = models.IntegerField(default=0)
-    submission_time = models.DateTimeField(auto_now_add=True)
-    submission_type = models.CharField(max_length=3,
-                                       choices=SUBMISSION_TYPE_CHOICES,
-                                       default=ARTICLE)
+    def __unicode__(self):
+        return self.title
 
 class Article(Submission):
-    url = URLField()
-
-    Using multi-table inheritance rather than abstract base class,
-    because I want to be able to query back to a general submission,
-    and then deal with the specific type.
-    """
-
-    ARTICLE = 'ART'
-    TEXT = 'TXT'
-    SUBMISSION_TYPE_CHOICES = (
-        (ARTICLE, 'Article'),
-        (TEXT, 'Text'),
-        )
-
-    # Stick with programming 80-char limit for now.
-    #  It's what HN uses, which fits nicely on mobile.
-    title = models.CharField(max_length=80)
-    author = models.OneToOneField(UserProfile)
-    upvotes = models.IntegerField(default=0)
-    downvotes = models.IntegerField(default=0)
-    points = models.IntegerField(default=0)
-    submission_time = models.DateTimeField(auto_now_add=True)
-    submission_type = models.CharField(max_length=3,
-                                       choices=SUBMISSION_TYPE_CHOICES,
-                                       default=ARTICLE)
-
-class Article(Submission):
-    url = URLField()
+    url = models.URLField()
