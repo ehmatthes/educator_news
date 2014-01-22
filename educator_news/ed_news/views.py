@@ -12,7 +12,7 @@ def index(request):
                               context_instance = RequestContext(request))
 
 
-# Authentication views
+# --- Authentication views ---
 def logout_view(request):
     logout(request)
     # Redirect to home page.
@@ -76,3 +76,10 @@ def register(request):
                                    'registered': registered,
                                    },
                                   context_instance = RequestContext(request))
+
+# --- Educator News views ---
+def submit(request):
+
+    return render_to_response('ed_news/submit.html',
+                              {},
+                              context_instance = RequestContext(request))
