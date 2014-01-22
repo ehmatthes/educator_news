@@ -5,12 +5,6 @@
     <h2>Register:</h2>
     <p>This page allows you to register a new account.</p>
 
-    {% if user_form.errors %}
-        <p>Something went wrong. Please try again.</p>
-		  <p>User form errors: {{ user_form.errors }}</p>
-		  <p>Profile form errors: {{ profile_form.errors }}</p>
-    {% endif %}
-
 	 {% if registered %}
 	     <p>Thank you for registering!</p>
 	     <p>Return to the <a href="{% url 'ed_news:index' %}">homepage</a>.</p>

@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from django.contrib.auth import logout, login, authenticate
+from django.contrib.auth import logout
 from django.core.urlresolvers import reverse
 from django.contrib.auth.views import password_change
 from ed_news.forms import UserForm, UserProfileForm
