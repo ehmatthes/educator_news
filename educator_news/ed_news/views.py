@@ -7,7 +7,7 @@ from django.contrib.auth.views import password_change
 from ed_news.forms import UserForm, UserProfileForm
 from ed_news.forms import ArticleForm
 
-from ed_news.models import Submission
+from ed_news.models import Article
 
 
 def index(request):
@@ -84,6 +84,9 @@ def register(request):
 
 # --- Educator News views ---
 def submit(request):
+    """Page to allow users to submit a new article.
+    Will also allow users to submit a text post later.
+    """
 
     submission_accepted = False
     if request.method == 'POST':
@@ -114,5 +117,25 @@ def submit(request):
     return render_to_response('ed_news/submit.html',
                               {'article_form': article_form,
                                'submission_accepted': submission_accepted,
+                               },
+                              context_instance = RequestContext(request))
+
+
+def new(request):
+    """Page to show the newest submissions.
+    """
+
+    # Should this be in a settings/config file? Best practice says...
+    #  Continue to follow HN example, which is 30 articles per screen.
+    MAX_SUBMISSIONS = 30
+    
+    # Get a list of submissions, sorted by date.
+    #  This is where MTI inheritance might be better; query all submissions,
+    #  rather than building a list of submissions from separate articles
+    #  and posts.
+    articles = Article.objects.all().order_by('submission_time').reverse()[:30]
+
+    return render_to_response('ed_news/new.html',
+                              {'articles': articles,
                                },
                               context_instance = RequestContext(request))
