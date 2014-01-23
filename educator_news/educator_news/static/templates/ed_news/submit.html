@@ -5,12 +5,14 @@
     <h2>Submit</h2>
     <p>You can use this form to submit an article.</p>
 
-	 {% if user.is_authenticated %}
+	 {% if user.is_authenticated and submission_accepted %}
+	     <p>Thank you for your submission!</p>
+
+	 {% elif user.is_authenticated %}
 	     <p>Submit form</p>
 		  <form id='submission_form' method="post" action="{% url 'ed_news:submit' %}" enctype='multipart/form-data'>
 			 {% csrf_token %}
 
-			 {{ submission_form.as_p }}
 			 {{ article_form.as_p }}
 
 			 <p><input type="submit" name='submit' value="Submit" />
