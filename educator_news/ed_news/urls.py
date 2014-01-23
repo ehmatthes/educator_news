@@ -7,5 +7,7 @@ urlpatterns = patterns('',
 
     # --- Educator News home page ---
     url(r'^$', views.index, name='index'),
+
+    url(r'^new/', views.new, name='new'),
     url(r'^submit/', views.submit, name='submit'),
 )

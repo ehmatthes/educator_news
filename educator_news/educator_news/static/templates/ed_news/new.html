@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h2>New Submissions</h2>
+	 {% for article in articles %}
+	     <div class='title_line'>{{ forloop.counter }}. <a href="{{ article.url }}">{{ article.title }}</a></div>
+		  <div class='points_line'>
+			 {{ article.points }}{% if article.points != 1 %} points{% else %} point{% endif %}
+			 by {{ article.author }}
+		  </div>
+	 {% endfor %}
+
+
+{% endblock %}
