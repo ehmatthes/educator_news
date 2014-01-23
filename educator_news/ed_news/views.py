@@ -3,7 +3,12 @@ from django.template import RequestContext
 from django.contrib.auth import logout
 from django.core.urlresolvers import reverse
 from django.contrib.auth.views import password_change
+
 from ed_news.forms import UserForm, UserProfileForm
+from ed_news.forms import SubmissionForm, ArticleForm
+
+from ed_news.models import Submission
+
 
 def index(request):
     # Static index page for now.
@@ -80,6 +85,40 @@ def register(request):
 # --- Educator News views ---
 def submit(request):
 
+    if request.method == 'POST':
+        submission_form = SubmissionForm(data=request.POST)
+        article_form = ArticleForm(data=request.POST)
+
+        if submission_form.is_valid() and article_form.is_valid():
+            print 'sf', submission_form
+            print 'af', article_form
+            print 'sfcd', submission_form.cleaned_data
+            print 'afcd', article_form.cleaned_data
+            print 'u', request.user
+            print 'uid', request.user.id
+            print 'utype', type(request.user)
+            print article_form.cleaned_data['url']
+
+            submission = submission_form.save(commit=False)
+            submission.author = request.user
+            submission_type = Submission.ARTICLE
+            submission.save()
+            
+            article = article_form.save()
+
+        else:
+            # Invalid form/s.
+            #  Print errors to console; should log these?
+            print 'se', submission_form.errors
+            print 'ae', article_form.errors
+
+    else:
+        # Send blank forms.
+        submission_form = SubmissionForm()
+        article_form = ArticleForm()
+
     return render_to_response('ed_news/submit.html',
-                              {},
+                              {'submission_form': submission_form,
+                               'article_form': article_form,
+                               },
                               context_instance = RequestContext(request))

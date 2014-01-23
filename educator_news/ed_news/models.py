@@ -33,7 +33,7 @@ class Submission(models.Model):
     # Stick with programming 80-char limit for now.
     #  It's what HN uses, which fits nicely on mobile.
     title = models.CharField(max_length=80)
-    author = models.OneToOneField(UserProfile)
+    author = models.OneToOneField(User)
     upvotes = models.IntegerField(default=0)
     downvotes = models.IntegerField(default=0)
     points = models.IntegerField(default=0)
@@ -41,6 +41,9 @@ class Submission(models.Model):
     submission_type = models.CharField(max_length=3,
                                        choices=SUBMISSION_TYPE_CHOICES,
                                        default=ARTICLE)
+
+    class Meta:
+        abstract = True
 
     def __unicode__(self):
         return self.title
