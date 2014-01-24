@@ -27,9 +27,17 @@ def logout_view(request):
 def profile(request, profile_id):
     # The value of profile_id is the profile to be displayed, which
     #  may not be the current user.
+    # The value own_profile is true when user is viewing their own
+    #  profile.
     target_user = User.objects.get(id=profile_id)
+    if target_user == request.user:
+        own_profile = True
+    else:
+        own_profile = False
+
     return render_to_response('registration/profile.html',
                               {'target_user': target_user,
+                               'own_profile': own_profile,
                                },
                               context_instance = RequestContext(request))
 
