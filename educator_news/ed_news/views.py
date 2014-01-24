@@ -3,6 +3,7 @@ from django.template import RequestContext
 from django.contrib.auth import logout
 from django.core.urlresolvers import reverse
 from django.contrib.auth.views import password_change
+from django.contrib.auth.models import User
 
 from ed_news.forms import UserForm, UserProfileForm
 from ed_news.forms import ArticleForm
@@ -23,9 +24,13 @@ def logout_view(request):
     # Redirect to home page.
     return redirect('/')
 
-def profile(request):
+def profile(request, profile_id):
+    # The value of profile_id is the profile to be displayed, which
+    #  may not be the current user.
+    target_user = User.objects.get(id=profile_id)
     return render_to_response('registration/profile.html',
-                              {},
+                              {'target_user': target_user,
+                               },
                               context_instance = RequestContext(request))
 
 def password_change_form(request):

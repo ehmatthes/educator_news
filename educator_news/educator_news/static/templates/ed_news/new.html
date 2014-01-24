@@ -7,7 +7,7 @@
 	     <div class='title_line'>{{ forloop.counter }}. <a href="{{ article.url }}">{{ article.title }}</a></div>
 		  <div class='points_line'>
 			 {{ article.points }}{% if article.points != 1 %} points{% else %} point{% endif %}
-			 by {{ article.author }}
+			 by <a href="{% url 'profile' article.author.id %}">{{ article.author }}</a>
 		  </div>
 	 {% endfor %}
 

@@ -2,10 +2,10 @@
 
 {% block content %}
 
-    <h3>Username: {{ user.username }}</h3>
-    <h4>First Name: {{ user.first_name }}</h4>
-    <h4>Last Name: {{ user.last_name }}</h4>
-    <p>Email: {{ user.email }}</p>
+    <h3>Username: {{ target_user.username }}</h3>
+    <h4>First Name: {{ target_user.first_name }}</h4>
+    <h4>Last Name: {{ target_user.last_name }}</h4>
+    <p>Email: {{ target_user.email }}</p>
 
     <p><a href="{% url 'password_change_form' %}">Change password</a><p>
 
