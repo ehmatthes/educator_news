@@ -170,14 +170,18 @@ def new(request):
     #  rather than building a list of submissions from separate articles
     #  and posts.
     articles = Article.objects.all().order_by('submission_time').reverse()[:30]
-    #article_age = get_submission_age(article)
     article_ages = [get_submission_age(article) for article in articles]
     for article_age in article_ages:
         print article_age
+    # Build a list of articles, and their ages.
+    articles_ages = []
+    for article in articles:
+        article_age = get_submission_age(article)
+        articles_ages.append({'article': article, 'age': article_age})
+
 
     return render_to_response('ed_news/new.html',
-                              {'articles': articles,
-                               'article_ages': article_ages,
+                              {'articles_ages': articles_ages,
                                },
                               context_instance = RequestContext(request))
 
@@ -189,10 +193,10 @@ def get_submission_age(submission):
         return "1 day"
     elif age.days > 1:
         return "%d days" % age.days
-    elif age.seconds > 3600:
-        return "%d hours" % age.seconds/3600
+    elif int(age.seconds) > 3600:
+        return "%d hours" % (age.seconds/3600)
     elif age.seconds > 120:
-        return "%d minutes" % age.seconds/60
+        return "%d minutes" % (age.seconds/60)
     elif age.seconds > 60:
         return "1 minute"
     elif age.seconds > 1:
