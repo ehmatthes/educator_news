@@ -41,6 +41,11 @@ def profile(request, profile_id):
                                },
                               context_instance = RequestContext(request))
 
+def edit_profile(request):
+    return render_to_response('registration/edit_profile.html',
+                              {},
+                              context_instance = RequestContext(request))
+
 def password_change_form(request):
     if request.method == 'POST':
         return password_change(request, post_change_redirect='/password_change_successful')
