@@ -8,12 +8,12 @@
     <p>
 		{% if own_profile %}
 		    Email: {{ target_user.email }}
-		    {% if target_user.email.public %}
+		    {% if target_user.userprofile.email_public %}
 		        (public)
 		    {% else %}
 		        (private)
 		    {% endif %}
-		{% elif target_user.email.public %}
+		{% elif target_user.userprofile.email_public %}
 		    Email: {{ target_user.email }}
 		{% endif %}
 	 </p>

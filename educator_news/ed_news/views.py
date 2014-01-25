@@ -1,12 +1,15 @@
+from datetime import datetime
+
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from django.contrib.auth import logout
 from django.core.urlresolvers import reverse
 from django.contrib.auth.views import password_change
 from django.contrib.auth.models import User
+from django.utils.timezone import utc
 
 from ed_news.forms import UserForm, UserProfileForm
-from ed_news.forms import EditUserForm
+from ed_news.forms import EditUserForm, EditUserProfileForm
 from ed_news.forms import ArticleForm
 
 from ed_news.models import Article
@@ -46,20 +49,25 @@ def edit_profile(request):
     user = request.user
     if request.method == 'POST':
         edit_user_form = EditUserForm(data=request.POST, instance=request.user)
+        edit_user_profile_form = EditUserProfileForm(data=request.POST, instance=request.user.userprofile)
 
         if edit_user_form.is_valid():
             user = edit_user_form.save()
+            user_profile = edit_user_profile_form.save()
 
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
             print 'eue', edit_user_form.errors
+            print 'eupe', edit_user_profile_form.errors
 
     else:
         # Send blank forms.
         edit_user_form = EditUserForm(instance=request.user)
+        edit_user_profile_form = EditUserProfileForm(instance=request.user.userprofile)
     return render_to_response('registration/edit_profile.html',
                               {'edit_user_form': edit_user_form,
+                               'edit_user_profile_form': edit_user_profile_form,
                                },
                               context_instance = RequestContext(request))
 
@@ -162,8 +170,36 @@ def new(request):
     #  rather than building a list of submissions from separate articles
     #  and posts.
     articles = Article.objects.all().order_by('submission_time').reverse()[:30]
+    article_ages = [get_submission_age(article) for article in articles]
+    for article_age in article_ages:
+        print article_age
+    # Build a list of articles, and their ages.
+    articles_ages = []
+    for article in articles:
+        article_age = get_submission_age(article)
+        articles_ages.append({'article': article, 'age': article_age})
+
 
     return render_to_response('ed_news/new.html',
-                              {'articles': articles,
+                              {'articles_ages': articles_ages,
                                },
                               context_instance = RequestContext(request))
+
+
+# --- Utility functions ---
+def get_submission_age(submission):
+    age = datetime.utcnow().replace(tzinfo=utc) - submission.submission_time
+    if age.days == 1:
+        return "1 day"
+    elif age.days > 1:
+        return "%d days" % age.days
+    elif int(age.seconds) > 3600:
+        return "%d hours" % (age.seconds/3600)
+    elif age.seconds > 120:
+        return "%d minutes" % (age.seconds/60)
+    elif age.seconds > 60:
+        return "1 minute"
+    elif age.seconds > 1:
+        return "%d seconds" % age.seconds
+    else:
+        return "1 second"

@@ -3,12 +3,23 @@
 {% block content %}
 
     <h2>New Submissions</h2>
-	 {% for article in articles %}
-	     <div class='title_line'>{{ forloop.counter }}. <a href="{{ article.url }}">{{ article.title }}</a></div>
+	 {% for article_age in articles_ages %}
+	 {% comment %}
+	 <p>article_age: {{ article_age }}
+	 <p>article_age.article: {{ article_age.article }}
+	 <p>article_age.article.title: {{ article_age.article.title }}
+	 <p>article_age.article.url: {{ article_age.article.url }}
+    <p>article_age.age: {{ article_age.age }}
+	 <p>end</p>
+	 {% endcomment %}
+
+	     <div class='title_line'>{{ forloop.counter }}. <a href="{{ article_age.article.url }}">{{ article_age.article.title }}</a></div>
 		  <div class='points_line'>
-			 {{ article.points }}{% if article.points != 1 %} points{% else %} point{% endif %}
-			 by <a href="{% url 'profile' article.author.id %}">{{ article.author }}</a>
+			 {{ article_age.article.points }}{% if article_age.article.points != 1 %} points{% else %} point{% endif %}
+			 by <a href="{% url 'profile' article_age.article.author.id %}">{{ article_age.article.author }}</a>
+			 {{ article_age.age }} ago
 		  </div>
+
 	 {% endfor %}
 
 
