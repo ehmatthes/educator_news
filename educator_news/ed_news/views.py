@@ -6,7 +6,7 @@ from django.contrib.auth.views import password_change
 from django.contrib.auth.models import User
 
 from ed_news.forms import UserForm, UserProfileForm
-from ed_news.forms import EditUserForm
+from ed_news.forms import EditUserForm, EditUserProfileForm
 from ed_news.forms import ArticleForm
 
 from ed_news.models import Article
@@ -46,20 +46,25 @@ def edit_profile(request):
     user = request.user
     if request.method == 'POST':
         edit_user_form = EditUserForm(data=request.POST, instance=request.user)
+        edit_user_profile_form = EditUserProfileForm(data=request.POST, instance=request.user.userprofile)
 
         if edit_user_form.is_valid():
             user = edit_user_form.save()
+            user_profile = edit_user_profile_form.save()
 
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
             print 'eue', edit_user_form.errors
+            print 'eupe', edit_user_profile_form.errors
 
     else:
         # Send blank forms.
         edit_user_form = EditUserForm(instance=request.user)
+        edit_user_profile_form = EditUserProfileForm(instance=request.user.userprofile)
     return render_to_response('registration/edit_profile.html',
                               {'edit_user_form': edit_user_form,
+                               'edit_user_profile_form': edit_user_profile_form,
                                },
                               context_instance = RequestContext(request))
 
