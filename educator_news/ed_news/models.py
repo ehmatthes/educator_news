@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 class UserProfile(models.Model):
     # Link UserProfile to a User instance.
     user = models.OneToOneField(User)
+    email_public = models.BooleanField(default=False)
 
     # Custom user fields, not in User model.
 
