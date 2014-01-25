@@ -3,8 +3,10 @@ from django.template import RequestContext
 from django.contrib.auth import logout
 from django.core.urlresolvers import reverse
 from django.contrib.auth.views import password_change
+from django.contrib.auth.models import User
 
 from ed_news.forms import UserForm, UserProfileForm
+from ed_news.forms import EditUserForm
 from ed_news.forms import ArticleForm
 
 from ed_news.models import Article
@@ -23,9 +25,42 @@ def logout_view(request):
     # Redirect to home page.
     return redirect('/')
 
-def profile(request):
+def profile(request, profile_id):
+    # The value of profile_id is the profile to be displayed, which
+    #  may not be the current user.
+    # The value own_profile is true when user is viewing their own
+    #  profile.
+    target_user = User.objects.get(id=profile_id)
+    if target_user == request.user:
+        own_profile = True
+    else:
+        own_profile = False
+
     return render_to_response('registration/profile.html',
-                              {},
+                              {'target_user': target_user,
+                               'own_profile': own_profile,
+                               },
+                              context_instance = RequestContext(request))
+
+def edit_profile(request):
+    user = request.user
+    if request.method == 'POST':
+        edit_user_form = EditUserForm(data=request.POST, instance=request.user)
+
+        if edit_user_form.is_valid():
+            user = edit_user_form.save()
+
+        else:
+            # Invalid form/s.
+            #  Print errors to console; should log these?
+            print 'eue', edit_user_form.errors
+
+    else:
+        # Send blank forms.
+        edit_user_form = EditUserForm(instance=request.user)
+    return render_to_response('registration/edit_profile.html',
+                              {'edit_user_form': edit_user_form,
+                               },
                               context_instance = RequestContext(request))
 
 def password_change_form(request):
@@ -93,13 +128,6 @@ def submit(request):
         article_form = ArticleForm(data=request.POST)
 
         if article_form.is_valid():
-            print 'af', article_form
-            print 'afcd', article_form.cleaned_data
-            print 'u', request.user
-            print 'uid', request.user.id
-            print 'utype', type(request.user)
-            print article_form.cleaned_data['url']
-
             article = article_form.save(commit=False)
             article.author = request.user
             article.save()
