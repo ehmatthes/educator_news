@@ -169,16 +169,12 @@ def new(request):
     #  This is where MTI inheritance might be better; query all submissions,
     #  rather than building a list of submissions from separate articles
     #  and posts.
-    articles = Article.objects.all().order_by('submission_time').reverse()[:30]
-    article_ages = [get_submission_age(article) for article in articles]
-    for article_age in article_ages:
-        print article_age
+    articles = Article.objects.all().order_by('submission_time').reverse()[:MAX_SUBMISSIONS]
     # Build a list of articles, and their ages.
     articles_ages = []
     for article in articles:
         article_age = get_submission_age(article)
         articles_ages.append({'article': article, 'age': article_age})
-
 
     return render_to_response('ed_news/new.html',
                               {'articles_ages': articles_ages,
