@@ -169,22 +169,38 @@ def new(request):
     #  This is where MTI inheritance might be better; query all submissions,
     #  rather than building a list of submissions from separate articles
     #  and posts.
-    articles = Article.objects.all().order_by('submission_time').reverse()[:30]
-    article_ages = [get_submission_age(article) for article in articles]
-    for article_age in article_ages:
-        print article_age
+    articles = Article.objects.all().order_by('submission_time').reverse()[:MAX_SUBMISSIONS]
+    
+    # Note which articles should not get upvotes.
     # Build a list of articles, and their ages.
     articles_ages = []
+    user_articles = []
     for article in articles:
         article_age = get_submission_age(article)
         articles_ages.append({'article': article, 'age': article_age})
-
+        if article in request.user.userprofile.articles.all():
+            user_articles.append(article)
 
     return render_to_response('ed_news/new.html',
                               {'articles_ages': articles_ages,
+                               'user_articles': user_articles,
                                },
                               context_instance = RequestContext(request))
 
+def upvote_article(request, article_id):
+    # Check if user has upvoted this article.
+    #  If not, increment article points.
+    #  Save article for this user.
+    article = Article.objects.get(id=article_id)
+    # Add this to user's articles, if not already there.
+    user_articles = request.user.userprofile.articles.all()
+    if article in user_articles:
+        return redirect('ed_news:new')
+    else:
+        request.user.userprofile.articles.add(article)
+        article.points += 1
+        article.save()
+        return redirect('ed_news:new')
 
 # --- Utility functions ---
 def get_submission_age(submission):

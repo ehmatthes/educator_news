@@ -3,17 +3,6 @@ from django.contrib.auth.models import User
 
 # --- Educator News models ---
 
-class UserProfile(models.Model):
-    # Link UserProfile to a User instance.
-    user = models.OneToOneField(User)
-    email_public = models.BooleanField(default=False)
-
-    # Custom user fields, not in User model.
-
-    # Use username to refer to user.
-    def __unicode__(self):
-        return self.user.username
-
 class Submission(models.Model):
     """An abstract class for the two types of submission,
     which are an article and a text submission. Text submissions
@@ -37,3 +26,15 @@ class Submission(models.Model):
 
 class Article(Submission):
     url = models.URLField()
+
+class UserProfile(models.Model):
+    # Link UserProfile to a User instance.
+    user = models.OneToOneField(User)
+    email_public = models.BooleanField(default=False)
+    articles = models.ManyToManyField(Article, blank=True, null=True)
+
+    # Custom user fields, not in User model.
+
+    # Use username to refer to user.
+    def __unicode__(self):
+        return self.user.username
