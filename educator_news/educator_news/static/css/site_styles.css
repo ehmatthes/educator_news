@@ -4,8 +4,12 @@
 }
 
 .points_line {
-	 margin-left: 15px;
+	 margin-left: 38px;
 	 margin-bottom: 10px;
 
 	 font-size: 90%;
+}
+
+.title_without_upvote {
+	 margin-left: 20px;
 }

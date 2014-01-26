@@ -10,4 +10,5 @@ urlpatterns = patterns('',
 
     url(r'^new/', views.new, name='new'),
     url(r'^submit/', views.submit, name='submit'),
+    url(r'^upvote_article/(?P<article_id>\d+)/$', views.upvote_article, name='upvote_article'),
 )

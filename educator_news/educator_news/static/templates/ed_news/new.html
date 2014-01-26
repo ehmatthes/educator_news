@@ -5,7 +5,14 @@
     <h2>New Submissions</h2>
 	 {% for article_age in articles_ages %}
 
-	     <div class='title_line'>{{ forloop.counter }}. <a href="{{ article_age.article.url }}">{{ article_age.article.title }}</a></div>
+	     <div class='title_line'>
+			 {{ forloop.counter }}. 
+			 {% if article_age.article in user_articles %}
+				  <a class='title_without_upvote' href="{{ article_age.article.url }}">{{ article_age.article.title }}</a></div>
+		    {% else %}
+			     <a href="{% url 'ed_news:upvote_article' article_age.article.id %}">&#9650</a>
+				  <a href="{{ article_age.article.url }}">{{ article_age.article.title }}</a></div>
+		    {% endif %}
 		  <div class='points_line'>
 			 {{ article_age.article.points }}{% if article_age.article.points != 1 %} points{% else %} point{% endif %}
 			 by <a href="{% url 'profile' article_age.article.author.id %}">{{ article_age.article.author }}</a>
