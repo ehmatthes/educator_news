@@ -258,7 +258,7 @@ def update_ranking_points():
     articles = Article.objects.all()
     for article in articles:
         newness_points = get_newness_points(article)
-        article.ranking_points = article.upvotes + newness_points
+        article.ranking_points = 10*article.upvotes + newness_points
         article.save()
         
 def get_newness_points(article):
