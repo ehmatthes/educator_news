@@ -191,17 +191,18 @@ def upvote_article(request, article_id):
     # Check if user has upvoted this article.
     #  If not, increment article points.
     #  Save article for this user.
+    next_page = request.META.get('HTTP_REFERER', None) or '/'
     article = Article.objects.get(id=article_id)
     # Add this to user's articles, if not already there.
     user_articles = request.user.userprofile.articles.all()
     if article in user_articles:
-        return redirect('ed_news:new')
+        return redirect(next_page)
     else:
         request.user.userprofile.articles.add(article)
-        article.points += 1
+        article.upvotes += 1
         article.save()
         update_ranking_points()
-        return redirect('ed_news:new')
+        return redirect(next_page)
 
 # --- Utility functions ---
 def get_submission_age(submission):

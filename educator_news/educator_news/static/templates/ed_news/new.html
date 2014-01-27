@@ -14,7 +14,7 @@
 				  <a href="{{ article_age.article.url }}">{{ article_age.article.title }}</a></div>
 		    {% endif %}
 		  <div class='points_line'>
-			 {{ article_age.article.points }}{% if article_age.article.points != 1 %} points{% else %} point{% endif %}
+			 {{ article_age.article.upvotes }}{% if article_age.article.upvotes != 1 %} points{% else %} point{% endif %}
 			 by <a href="{% url 'profile' article_age.article.author.id %}">{{ article_age.article.author }}</a>
 			 {{ article_age.age }} ago
 		  </div>
