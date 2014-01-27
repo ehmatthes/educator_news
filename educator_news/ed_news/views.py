@@ -200,10 +200,13 @@ def upvote_article(request, article_id):
         request.user.userprofile.articles.add(article)
         article.points += 1
         article.save()
+        update_ranking_points()
         return redirect('ed_news:new')
 
 # --- Utility functions ---
 def get_submission_age(submission):
+    """Returns a formatted string stating how old the article is.
+    """
     age = datetime.utcnow().replace(tzinfo=utc) - submission.submission_time
     if age.days == 1:
         return "1 day"
@@ -219,3 +222,18 @@ def get_submission_age(submission):
         return "%d seconds" % age.seconds
     else:
         return "1 second"
+
+def update_ranking_points():
+    # How many articles really need this?
+    #  Only articles submitted over last x days?
+    articles = Article.objects.all()
+    for article in articles:
+        newness_points = get_newness_points(article)
+        article.ranking_points = article.upvotes + newness_points
+        article.save()
+        
+def get_newness_points(article):
+        # From 0 to 100 points, depending on newness. Linear function.
+        age = (datetime.utcnow().replace(tzinfo=utc) - article.submission_time).seconds
+        newness_points = int(max((((86400.0-age)/86400)*30),0))
+        return newness_points

@@ -14,8 +14,7 @@ class Submission(models.Model):
     title = models.CharField(max_length=80)
     author = models.ForeignKey(User)
     upvotes = models.IntegerField(default=0)
-    downvotes = models.IntegerField(default=0)
-    points = models.IntegerField(default=0)
+    ranking_points = models.IntegerField(default=0)
     submission_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
