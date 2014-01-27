@@ -136,11 +136,19 @@ def submit(request):
         article_form = ArticleForm(data=request.POST)
 
         if article_form.is_valid():
+            print 'url', article_form.cleaned_data['url']
+            # Check that this article has not already been submitted.
+            articles = Article.objects.all()
+            for article in articles:
+                if article_form.cleaned_data['url'] == article.url:
+                    # This should return the discussion page for this article.
+                    return redirect('ed_news:submit')
             article = article_form.save(commit=False)
             article.author = request.user
             article.save()
             submission_accepted = True
-
+            # Upvote this article.
+            upvote_article(request, article.id)
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
