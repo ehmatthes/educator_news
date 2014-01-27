@@ -16,11 +16,31 @@ from ed_news.models import Article
 
 
 def index(request):
-    # Static index page for now.
-    return render_to_response('ed_news/index.html',
-                              {},
-                              context_instance = RequestContext(request))
+    # Should this be in a settings/config file? Best practice says...
+    #  Continue to follow HN example, which is 30 articles per screen.
+    MAX_SUBMISSIONS = 30
+    
+    # Get a list of submissions, sorted by date.
+    #  This is where MTI inheritance might be better; query all submissions,
+    #  rather than building a list of submissions from separate articles
+    #  and posts.
+    articles = Article.objects.all().order_by('ranking_points').reverse()[:MAX_SUBMISSIONS]
+    
+    # Note which articles should not get upvotes.
+    # Build a list of articles, and their ages.
+    articles_ages = []
+    user_articles = []
+    for article in articles:
+        article_age = get_submission_age(article)
+        articles_ages.append({'article': article, 'age': article_age})
+        if request.user.is_authenticated() and article in request.user.userprofile.articles.all():
+            user_articles.append(article)
 
+    return render_to_response('ed_news/index.html',
+                              {'articles_ages': articles_ages,
+                               'user_articles': user_articles,
+                               },
+                              context_instance = RequestContext(request))
 
 # --- Authentication views ---
 def logout_view(request):

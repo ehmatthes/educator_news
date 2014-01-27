@@ -1,1 +1,23 @@
 {% extends 'base.html' %}
+
+{% block content %}
+
+	 {% for article_age in articles_ages %}
+
+	     <div class='title_line'>
+			 {{ forloop.counter }}. 
+			 {% if article_age.article in user_articles or not user.is_authenticated %}
+				  <a class='title_without_upvote' href="{{ article_age.article.url }}">{{ article_age.article.title }}</a></div>
+		    {% else %}
+			     <a href="{% url 'ed_news:upvote_article' article_age.article.id %}">&#9650</a>
+				  <a href="{{ article_age.article.url }}">{{ article_age.article.title }}</a></div>
+		    {% endif %}
+		  <div class='points_line'>
+			 {{ article_age.article.upvotes }}{% if article_age.article.upvotes != 1 %} points{% else %} point{% endif %}
+			 by <a href="{% url 'profile' article_age.article.author.id %}">{{ article_age.article.author }}</a>
+			 {{ article_age.age }} ago
+		  </div>
+
+	 {% endfor %}
+
+{% endblock %}
