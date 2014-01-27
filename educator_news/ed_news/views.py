@@ -186,7 +186,7 @@ def new(request):
     for article in articles:
         article_age = get_submission_age(article)
         articles_ages.append({'article': article, 'age': article_age})
-        if article in request.user.userprofile.articles.all():
+        if request.user.is_authenticated() and article in request.user.userprofile.articles.all():
             user_articles.append(article)
 
     return render_to_response('ed_news/new.html',
