@@ -24,7 +24,7 @@ def index(request):
     #  This is where MTI inheritance might be better; query all submissions,
     #  rather than building a list of submissions from separate articles
     #  and posts.
-    articles = Article.objects.all().order_by('ranking_points').reverse()[:MAX_SUBMISSIONS]
+    articles = Article.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
     
     # Note which articles should not get upvotes.
     # Build a list of articles, and their ages.
