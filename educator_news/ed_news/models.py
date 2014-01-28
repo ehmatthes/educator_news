@@ -37,3 +37,22 @@ class UserProfile(models.Model):
     # Use username to refer to user.
     def __unicode__(self):
         return self.user.username
+
+class Comment(models.Model):
+    # Allow essay-length comments.
+    comment_text = models.CharField(max_length=10000)
+    author = models.ForeignKey(User, related_name='comments')
+    # For these fields, need to track who's given the up/downvote, 
+    #  flag. Accountability, and prevent double-voting/ flagging.
+    upvotes = models.ManyToManyField(User, blank=True, null=True, related_name='upvoted_comments')
+    downvotes = models.ManyToManyField(User, blank=True, null=True, related_name='downvoted_comments')
+    flags = models.ManyToManyField(User, blank=True, null=True, related_name='flagged_comments')
+
+    # Will need to kill some comments.
+    alive = models.BooleanField(default=True)
+
+    # If it's a reply, there is a parent comment.
+    parent_comment = models.ForeignKey('self')
+
+    # If it's a first-level reply, there is a parent article.
+    parent_article = models.ForeignKey(Article, blank=True, null=True)
