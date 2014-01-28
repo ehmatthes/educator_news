@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+	     <div class='title_line'>
+			 {% if article in user_articles or not user.is_authenticated %}
+				  <a class='title_without_upvote' href="{{ article.url }}">{{ article.title }}</a></div>
+		    {% else %}
+			     <a href="{% url 'ed_news:upvote_article' article.id %}">&#9650</a>
+				  <a href="{{ article.url }}">{{ article.title }}</a></div>
+		    {% endif %}
+		  <div class='points_line points_line_discuss'>
+			 {{ article.upvotes }}{% if article.upvotes != 1 %} points{% else %} point{% endif %}
+			 by <a href="{% url 'profile' article.author.id %}">{{ article.author }}</a>
+			 {{ age }} ago |
+			 <a href="{% url 'ed_news:discuss' article.id %}">
+				{% if comment_count == 0 %}discuss{% elif comment_count == 1 %}1 comment{% else %}{{ comment_count }} comments{% endif %}
+		    </a>
+		  </div>
+
+
+{% endblock %}

@@ -217,6 +217,18 @@ def new(request):
                                },
                               context_instance = RequestContext(request))
 
+def discuss(request, article_id):
+    article = Article.objects.get(id=article_id)
+    age = get_submission_age(article)
+    comment_count = article.comment_set.count()
+    user_articles = request.user.userprofile.articles.all()
+    return render_to_response('ed_news/discuss.html',
+                              {'article': article, 'age': age,
+                               'comment_count': comment_count,
+                               'user_articles': user_articles,
+                               },
+                              context_instance = RequestContext(request))
+
 def upvote_article(request, article_id):
     # Check if user has upvoted this article.
     #  If not, increment article points.
