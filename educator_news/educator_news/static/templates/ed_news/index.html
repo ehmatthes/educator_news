@@ -16,6 +16,7 @@
 			 {{ article_age.article.upvotes }}{% if article_age.article.upvotes != 1 %} points{% else %} point{% endif %}
 			 by <a href="{% url 'profile' article_age.article.author.id %}">{{ article_age.article.author }}</a>
 			 {{ article_age.age }} ago
+			 {% if article_age.comment_count == 0 %}discuss{% elif article_age.comment_count == 1 %}1 comment{% else %}{{ article_age.comment_count }} comments{% endif %}
 		  </div>
 
 	 {% endfor %}
