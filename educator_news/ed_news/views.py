@@ -32,7 +32,8 @@ def index(request):
     user_articles = []
     for article in articles:
         article_age = get_submission_age(article)
-        articles_ages.append({'article': article, 'age': article_age})
+        comment_count = article.comment_set.count()
+        articles_ages.append({'article': article, 'age': article_age, 'comment_count': comment_count})
         if request.user.is_authenticated() and article in request.user.userprofile.articles.all():
             user_articles.append(article)
 
@@ -205,7 +206,8 @@ def new(request):
     user_articles = []
     for article in articles:
         article_age = get_submission_age(article)
-        articles_ages.append({'article': article, 'age': article_age})
+        comment_count = article.comment_set.count()
+        articles_ages.append({'article': article, 'age': article_age, 'comment_count': comment_count})
         if request.user.is_authenticated() and article in request.user.userprofile.articles.all():
             user_articles.append(article)
 
