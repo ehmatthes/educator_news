@@ -37,6 +37,44 @@ class Migration(SchemaMigration):
         ))
         db.create_unique(m2m_table_name, ['userprofile_id', 'article_id'])
 
+        # Adding model 'Comment'
+        db.create_table(u'ed_news_comment', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('comment_text', self.gf('django.db.models.fields.CharField')(max_length=10000)),
+            ('author', self.gf('django.db.models.fields.related.ForeignKey')(related_name='comments', to=orm['auth.User'])),
+            ('alive', self.gf('django.db.models.fields.BooleanField')(default=True)),
+            ('parent_comment', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ed_news.Comment'])),
+            ('parent_article', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ed_news.Article'], null=True, blank=True)),
+        ))
+        db.send_create_signal(u'ed_news', ['Comment'])
+
+        # Adding M2M table for field upvotes on 'Comment'
+        m2m_table_name = db.shorten_name(u'ed_news_comment_upvotes')
+        db.create_table(m2m_table_name, (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('comment', models.ForeignKey(orm[u'ed_news.comment'], null=False)),
+            ('user', models.ForeignKey(orm[u'auth.user'], null=False))
+        ))
+        db.create_unique(m2m_table_name, ['comment_id', 'user_id'])
+
+        # Adding M2M table for field downvotes on 'Comment'
+        m2m_table_name = db.shorten_name(u'ed_news_comment_downvotes')
+        db.create_table(m2m_table_name, (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('comment', models.ForeignKey(orm[u'ed_news.comment'], null=False)),
+            ('user', models.ForeignKey(orm[u'auth.user'], null=False))
+        ))
+        db.create_unique(m2m_table_name, ['comment_id', 'user_id'])
+
+        # Adding M2M table for field flags on 'Comment'
+        m2m_table_name = db.shorten_name(u'ed_news_comment_flags')
+        db.create_table(m2m_table_name, (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('comment', models.ForeignKey(orm[u'ed_news.comment'], null=False)),
+            ('user', models.ForeignKey(orm[u'auth.user'], null=False))
+        ))
+        db.create_unique(m2m_table_name, ['comment_id', 'user_id'])
+
 
     def backwards(self, orm):
         # Deleting model 'Article'
@@ -47,6 +85,18 @@ class Migration(SchemaMigration):
 
         # Removing M2M table for field articles on 'UserProfile'
         db.delete_table(db.shorten_name(u'ed_news_userprofile_articles'))
+
+        # Deleting model 'Comment'
+        db.delete_table(u'ed_news_comment')
+
+        # Removing M2M table for field upvotes on 'Comment'
+        db.delete_table(db.shorten_name(u'ed_news_comment_upvotes'))
+
+        # Removing M2M table for field downvotes on 'Comment'
+        db.delete_table(db.shorten_name(u'ed_news_comment_downvotes'))
+
+        # Removing M2M table for field flags on 'Comment'
+        db.delete_table(db.shorten_name(u'ed_news_comment_flags'))
 
 
     models = {
@@ -95,6 +145,18 @@ class Migration(SchemaMigration):
             'title': ('django.db.models.fields.CharField', [], {'max_length': '80'}),
             'upvotes': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'url': ('django.db.models.fields.URLField', [], {'max_length': '200'})
+        },
+        u'ed_news.comment': {
+            'Meta': {'object_name': 'Comment'},
+            'alive': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'author': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'comments'", 'to': u"orm['auth.User']"}),
+            'comment_text': ('django.db.models.fields.CharField', [], {'max_length': '10000'}),
+            'downvotes': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'downvoted_comments'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm['auth.User']"}),
+            'flags': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'flagged_comments'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm['auth.User']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'parent_article': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['ed_news.Article']", 'null': 'True', 'blank': 'True'}),
+            'parent_comment': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['ed_news.Comment']"}),
+            'upvotes': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'upvoted_comments'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm['auth.User']"})
         },
         u'ed_news.userprofile': {
             'Meta': {'object_name': 'UserProfile'},
