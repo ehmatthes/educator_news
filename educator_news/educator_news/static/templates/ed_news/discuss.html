@@ -23,9 +23,11 @@
 		  <form id='comment_form' method="post" action="{% url 'ed_news:discuss' article.id %}" enctype='multipart/form-data'>
 			 {% csrf_token %}
 
-			 {{ comment_entry_form.as_p }}
-
-			 <p><input type="submit" name='submit' value="Add comment" />
+			 <div class='comment_entry_form'>
+				{{ comment_entry_form.as_p }}
+				<p><input type="submit" name='submit' value="Add comment" />
+			 </div>
+				  
 		  </form>
 
 	 {% else %}
