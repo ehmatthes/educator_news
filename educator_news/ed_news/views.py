@@ -226,7 +226,11 @@ def discuss(request, article_id):
         comment_entry_form = CommentEntryForm(data=request.POST)
 
         if comment_entry_form.is_valid():
-            pass
+            comment = comment_entry_form.save(commit=False)
+            comment.author = request.user
+            comment.parent_article = article
+            comment.save()
+            update_ranking_points()
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
