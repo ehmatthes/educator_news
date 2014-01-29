@@ -19,4 +19,19 @@
 		  </div>
 
 
+	 {% if user.is_authenticated %}
+		  <form id='comment_form' method="post" action="{% url 'ed_news:discuss' article.id %}" enctype='multipart/form-data'>
+			 {% csrf_token %}
+
+			 {{ comment_entry_form.as_p }}
+
+			 <p><input type="submit" name='submit' value="Add comment" />
+		  </form>
+
+	 {% else %}
+		  <p>You have to <a href="{% url 'login' %}">log in</a> or <a href="{% url 'register' %}">register</a> if you would like to make a comment.</p>
+
+	 {% endif %}
+		  
+
 {% endblock %}
