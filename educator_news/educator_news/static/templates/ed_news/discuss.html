@@ -36,4 +36,9 @@
 	 {% endif %}
 		  
 
+    {% for comment in comment_set %}
+		  <div class='comment'><a href="{% url 'profile' comment.author.id %}">{{ comment.author }}</a> {{ comment.comment_text }}</div>
+	 {% endfor %}
+
+
 {% endblock %}

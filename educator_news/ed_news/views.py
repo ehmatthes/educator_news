@@ -221,6 +221,7 @@ def discuss(request, article_id):
     age = get_submission_age(article)
     comment_count = article.comment_set.count()
     user_articles = request.user.userprofile.articles.all()
+    comment_set = article.comment_set.all()
 
     if request.method == 'POST':
         comment_entry_form = CommentEntryForm(data=request.POST)
@@ -245,6 +246,7 @@ def discuss(request, article_id):
                                'comment_count': comment_count,
                                'user_articles': user_articles,
                                'comment_entry_form': comment_entry_form,
+                               'comment_set': comment_set,
                                },
                               context_instance = RequestContext(request))
 
