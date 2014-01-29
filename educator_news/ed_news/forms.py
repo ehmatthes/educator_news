@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from ed_news.models import UserProfile
-from ed_news.models import Article
+from ed_news.models import Article, Comment
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
@@ -29,3 +29,14 @@ class EditUserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ('email_public',)
+
+class CommentEntryForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ('comment_text',)
+        widgets = {
+            'comment_text': forms.Textarea(attrs={'cols': 80, 'rows': 6}),
+            }
+        labels = {
+            'comment_text': '',
+            }

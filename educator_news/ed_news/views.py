@@ -10,7 +10,7 @@ from django.utils.timezone import utc
 
 from ed_news.forms import UserForm, UserProfileForm
 from ed_news.forms import EditUserForm, EditUserProfileForm
-from ed_news.forms import ArticleForm
+from ed_news.forms import ArticleForm, CommentEntryForm
 
 from ed_news.models import Article
 
@@ -157,7 +157,6 @@ def submit(request):
         article_form = ArticleForm(data=request.POST)
 
         if article_form.is_valid():
-            print 'url', article_form.cleaned_data['url']
             # Check that this article has not already been submitted.
             articles = Article.objects.all()
             for article in articles:
@@ -214,6 +213,40 @@ def new(request):
     return render_to_response('ed_news/new.html',
                               {'articles_ages': articles_ages,
                                'user_articles': user_articles,
+                               },
+                              context_instance = RequestContext(request))
+
+def discuss(request, article_id):
+    article = Article.objects.get(id=article_id)
+    age = get_submission_age(article)
+    comment_count = article.comment_set.count()
+    user_articles = request.user.userprofile.articles.all()
+    comment_set = article.comment_set.all()
+
+    if request.method == 'POST':
+        comment_entry_form = CommentEntryForm(data=request.POST)
+
+        if comment_entry_form.is_valid():
+            comment = comment_entry_form.save(commit=False)
+            comment.author = request.user
+            comment.parent_article = article
+            comment.save()
+            update_ranking_points()
+        else:
+            # Invalid form/s.
+            #  Print errors to console; should log these?
+            print 'ce', comment_entry_form.errors
+
+    else:
+        # Send blank forms.
+        comment_entry_form = CommentEntryForm()
+
+    return render_to_response('ed_news/discuss.html',
+                              {'article': article, 'age': age,
+                               'comment_count': comment_count,
+                               'user_articles': user_articles,
+                               'comment_entry_form': comment_entry_form,
+                               'comment_set': comment_set,
                                },
                               context_instance = RequestContext(request))
 

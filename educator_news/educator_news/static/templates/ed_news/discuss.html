@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+	     <div class='title_line'>
+			 {% if article in user_articles or not user.is_authenticated %}
+				  <a class='title_without_upvote' href="{{ article.url }}">{{ article.title }}</a></div>
+		    {% else %}
+			     <a href="{% url 'ed_news:upvote_article' article.id %}">&#9650</a>
+				  <a href="{{ article.url }}">{{ article.title }}</a></div>
+		    {% endif %}
+		  <div class='points_line points_line_discuss'>
+			 {{ article.upvotes }}{% if article.upvotes != 1 %} points{% else %} point{% endif %}
+			 by <a href="{% url 'profile' article.author.id %}">{{ article.author }}</a>
+			 {{ age }} ago |
+			 <a href="{% url 'ed_news:discuss' article.id %}">
+				{% if comment_count == 0 %}discuss{% elif comment_count == 1 %}1 comment{% else %}{{ comment_count }} comments{% endif %}
+		    </a>
+		  </div>
+
+
+	 {% if user.is_authenticated %}
+		  <form id='comment_form' method="post" action="{% url 'ed_news:discuss' article.id %}" enctype='multipart/form-data'>
+			 {% csrf_token %}
+
+			 <div class='comment_entry_form'>
+				{{ comment_entry_form.as_p }}
+				<p><input type="submit" name='submit' value="Add comment" />
+			 </div>
+				  
+		  </form>
+
+	 {% else %}
+		  <p>You have to <a href="{% url 'login' %}">log in</a> or <a href="{% url 'register' %}">register</a> if you would like to make a comment.</p>
+
+	 {% endif %}
+		  
+
+    {% for comment in comment_set %}
+		  <div class='comment'><a href="{% url 'profile' comment.author.id %}">{{ comment.author }}</a> {{ comment.comment_text }}</div>
+	 {% endfor %}
+
+
+{% endblock %}

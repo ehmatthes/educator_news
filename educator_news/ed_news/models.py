@@ -40,7 +40,7 @@ class UserProfile(models.Model):
 
 class Comment(models.Model):
     # Allow essay-length comments.
-    comment_text = models.CharField(max_length=10000)
+    comment_text = models.TextField()
     author = models.ForeignKey(User, related_name='comments')
     # For these fields, need to track who's given the up/downvote, 
     #  flag. Accountability, and prevent double-voting/ flagging.
@@ -52,7 +52,10 @@ class Comment(models.Model):
     alive = models.BooleanField(default=True)
 
     # If it's a reply, there is a parent comment.
-    parent_comment = models.ForeignKey('self')
+    parent_comment = models.ForeignKey('self', blank=True, null=True)
 
     # If it's a first-level reply, there is a parent article.
     parent_article = models.ForeignKey(Article, blank=True, null=True)
+
+    def __unicode__(self):
+        return self.comment_text[:50] + '...'
