@@ -25,4 +25,10 @@
 
 .comment {
 	 margin-left: 20px;
+	 margin-bottom: 10px;
+}
+
+.reply_link {
+	 margin-top: 5px;
+	 margin-bottom: 15px;
 }
