@@ -47,6 +47,9 @@ class Comment(models.Model):
     upvotes = models.ManyToManyField(User, blank=True, null=True, related_name='upvoted_comments')
     downvotes = models.ManyToManyField(User, blank=True, null=True, related_name='downvoted_comments')
     flags = models.ManyToManyField(User, blank=True, null=True, related_name='flagged_comments')
+    ranking_points = models.IntegerField(default=0)
+
+    submission_time = models.DateTimeField(auto_now_add=True)
 
     # Will need to kill some comments.
     alive = models.BooleanField(default=True)

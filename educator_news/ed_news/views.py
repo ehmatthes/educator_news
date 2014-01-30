@@ -221,7 +221,13 @@ def discuss(request, article_id):
     age = get_submission_age(article)
     comment_count = article.comment_set.count()
     user_articles = request.user.userprofile.articles.all()
-    comment_set = article.comment_set.all()
+    # These are just the first-order comments?
+    #  No, not at this point.
+    comments = article.comment_set.all()
+    comment_set = []
+    for comment in comments:
+        age = get_submission_age(comment)
+        comment_set.append({'comment': comment, 'age': age})
 
     if request.method == 'POST':
         comment_entry_form = CommentEntryForm(data=request.POST)
