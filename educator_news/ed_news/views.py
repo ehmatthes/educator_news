@@ -219,16 +219,7 @@ def new(request):
 def discuss(request, article_id):
     article = Article.objects.get(id=article_id)
     age = get_submission_age(article)
-    comment_count = article.comment_set.count()
-    user_articles = request.user.userprofile.articles.all()
-    # These are just the first-order comments?
-    #  No, not at this point.
-    comments = article.comment_set.all()
-    comment_set = []
-    for comment in comments:
-        age = get_submission_age(comment)
-        comment_set.append({'comment': comment, 'age': age})
-
+    
     if request.method == 'POST':
         comment_entry_form = CommentEntryForm(data=request.POST)
 
@@ -243,9 +234,20 @@ def discuss(request, article_id):
             #  Print errors to console; should log these?
             print 'ce', comment_entry_form.errors
 
-    else:
-        # Send blank forms.
-        comment_entry_form = CommentEntryForm()
+    # Prepare a blank entry form.
+    comment_entry_form = CommentEntryForm()
+
+    # Get comment information after processing form, to include comment
+    #  that was just saved.
+    comment_count = article.comment_set.count()
+    user_articles = request.user.userprofile.articles.all()
+    # These are just the first-order comments?
+    #  No, not at this point.
+    comments = article.comment_set.all()
+    comment_set = []
+    for comment in comments:
+        age = get_submission_age(comment)
+        comment_set.append({'comment': comment, 'age': age})
 
     return render_to_response('ed_news/discuss.html',
                               {'article': article, 'age': age,
