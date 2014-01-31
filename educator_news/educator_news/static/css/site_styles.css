@@ -23,12 +23,25 @@
 	 margin-bottom: 30px;
 }
 
+.comment_submit_button {
+	 margin-top: 15px;
+}
+
+#submit_comment_button {
+	 margin-right: 10px;
+}
+
 .comment {
 	 margin-left: 20px;
 	 margin-bottom: 10px;
 }
 
+.comment_text {
+	 margin-left: 20px;
+}
+
 .reply_link {
 	 margin-top: 5px;
 	 margin-bottom: 15px;
+	 margin-left: 20px;
 }
