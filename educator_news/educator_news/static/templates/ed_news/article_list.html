@@ -10,7 +10,7 @@
 		    {% endif %}
 		  <div class='points_line'>
 			 {{ article_age.article.upvotes }}{% if article_age.article.upvotes != 1 %} points{% else %} point{% endif %}
-			 by <a href="{% url 'profile' article_age.article.author.id %}">{{ article_age.article.author }}</a>
+			 by <a href="{% url 'profile' article_age.article.submitter.id %}">{{ article_age.article.submitter }}</a>
 			 {{ article_age.age }} ago |
 			 <a href="{% url 'ed_news:discuss' article_age.article.id %}">
 				{% if article_age.comment_count == 0 %}discuss{% elif article_age.comment_count == 1 %}1 comment{% else %}{{ article_age.comment_count }} comments{% endif %}

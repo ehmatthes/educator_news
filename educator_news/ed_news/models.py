@@ -12,7 +12,7 @@ class Submission(models.Model):
     # Stick with programming 80-char limit for now.
     #  It's what HN uses, which fits nicely on mobile.
     title = models.CharField(max_length=80)
-    author = models.ForeignKey(User)
+    submitter = models.ForeignKey(User)
     upvotes = models.IntegerField(default=0)
     ranking_points = models.IntegerField(default=0)
     submission_time = models.DateTimeField(auto_now_add=True)
