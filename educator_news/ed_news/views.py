@@ -221,6 +221,10 @@ def discuss(request, article_id):
     age = get_submission_age(article)
     
     if request.method == 'POST':
+        # Redirect unauthenticated users to register/ login.
+        if not request.user.is_authenticated():
+            return redirect('login')
+
         comment_entry_form = CommentEntryForm(data=request.POST)
 
         if comment_entry_form.is_valid():
@@ -240,7 +244,10 @@ def discuss(request, article_id):
     # Get comment information after processing form, to include comment
     #  that was just saved.
     comment_count = article.comment_set.count()
-    user_articles = request.user.userprofile.articles.all()
+    # If user logged in, get article set.
+    user_articles = []
+    if request.user.is_authenticated():
+        user_articles = request.user.userprofile.articles.all()
     # These are just the first-order comments?
     #  No, not at this point.
     comments = article.comment_set.all()
