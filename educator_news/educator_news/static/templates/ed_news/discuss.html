@@ -29,9 +29,10 @@
 				{{ comment_entry_form.as_p }}
 
 				<div class='comment_submit_button'>
-				  <input id='submit_comment_button' type="submit" name='submit' value="Add comment" />
-
-				  {% if not user.is_authenticated %}
+				  {% if user.is_authenticated %}
+				    <input id='submit_comment_button' type="submit" name='submit' value="Add comment" />
+				  {% else %}
+				    <input id='submit_comment_button' type="submit" name='submit' value="Add comment" disabled />
 				    You will have to <a href="{% url 'login' %}">log in</a> or <a href="{% url 'register' %}">register</a> to make a comment.</p>
 				  {% endif %}
             </div>
