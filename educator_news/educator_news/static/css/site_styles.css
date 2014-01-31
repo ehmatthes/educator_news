@@ -28,7 +28,12 @@
 	 margin-bottom: 10px;
 }
 
+.comment_text {
+	 margin-left: 20px;
+}
+
 .reply_link {
 	 margin-top: 5px;
 	 margin-bottom: 15px;
+	 margin-left: 20px;
 }
