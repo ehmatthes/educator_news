@@ -164,7 +164,7 @@ def submit(request):
                     # This should return the discussion page for this article.
                     return redirect('ed_news:submit')
             article = article_form.save(commit=False)
-            article.author = request.user
+            article.submitter = request.user
             article.save()
             submission_accepted = True
             # Upvote this article.
