@@ -288,9 +288,7 @@ def upvote_article(request, article_id):
         # Increment karma of user who submitted article,
         #  unless this is the user who submitted.
         if request.user != article.submitter:
-            new_karma = article.submitter.userprofile.karma + 1
-            article.submitter.userprofile.karma = new_karma
-            article.submitter.userprofile.save()
+            increment_karma(article.submitter)
 
         # Update article ranking points, and redirect back to page.
         update_ranking_points()
@@ -313,7 +311,6 @@ def upvote_comment(request, comment_id):
 # --- Utility functions ---
 def increment_karma(user):
     new_karma = user.userprofile.karma + 1
-    print new_karma
     user.userprofile.karma = new_karma
     user.userprofile.save()
 
