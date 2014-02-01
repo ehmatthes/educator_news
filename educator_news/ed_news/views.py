@@ -274,11 +274,19 @@ def upvote_article(request, article_id):
     # Add this to user's articles, if not already there.
     user_articles = request.user.userprofile.articles.all()
     if article in user_articles:
+        # This user already upvoted the article.
         return redirect(next_page)
     else:
         request.user.userprofile.articles.add(article)
         article.upvotes += 1
         article.save()
+
+        # Increment karma of user who submitted article.
+        new_karma = article.submitter.userprofile.karma + 1
+        article.submitter.userprofile.karma = new_karma
+        article.submitter.userprofile.save()
+
+        # Update article ranking points, and redirect back to page.
         update_ranking_points()
         return redirect(next_page)
 

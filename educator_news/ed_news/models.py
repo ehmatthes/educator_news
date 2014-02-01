@@ -31,6 +31,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User)
     email_public = models.BooleanField(default=False)
     articles = models.ManyToManyField(Article, blank=True, null=True)
+    karma = models.IntegerField(default=0)
 
     # Custom user fields, not in User model.
 
