@@ -254,7 +254,11 @@ def discuss(request, article_id):
     comment_set = []
     for comment in comments:
         age = get_submission_age(comment)
-        comment_set.append({'comment': comment, 'age': age})
+        # Report whether this user has already upvoted the comment.
+        upvoted = False
+        if request.user in comment.upvotes.all():
+            upvoted = True
+        comment_set.append({'comment': comment, 'age': age, 'upvoted': upvoted})
 
     return render_to_response('ed_news/discuss.html',
                               {'article': article, 'age': age,
@@ -297,18 +301,20 @@ def upvote_comment(request, comment_id):
     comment = Comment.objects.get(id=comment_id)
     # Add this to user's upvoted comments, if not already there.
     upvoters = comment.upvotes.all()
-    if request.user in upvoters:
+    if request.user in upvoters or request.user == comment.author:
         return redirect(next_page)
     else:
         comment.upvotes.add(request.user)
         comment.save()
-        increment_karma(request.user)
+        increment_karma(comment.author)
 
     return redirect(next_page)
 
 # --- Utility functions ---
 def increment_karma(user):
     new_karma = user.userprofile.karma + 1
+    print new_karma
+    user.userprofile.karma = new_karma
     user.userprofile.save()
 
 def get_submission_age(submission):
