@@ -12,7 +12,7 @@ from ed_news.forms import UserForm, UserProfileForm
 from ed_news.forms import EditUserForm, EditUserProfileForm
 from ed_news.forms import ArticleForm, CommentEntryForm
 
-from ed_news.models import Article
+from ed_news.models import Article, Comment
 
 
 def index(request):
@@ -254,7 +254,11 @@ def discuss(request, article_id):
     comment_set = []
     for comment in comments:
         age = get_submission_age(comment)
-        comment_set.append({'comment': comment, 'age': age})
+        # Report whether this user has already upvoted the comment.
+        upvoted = False
+        if request.user in comment.upvotes.all():
+            upvoted = True
+        comment_set.append({'comment': comment, 'age': age, 'upvoted': upvoted})
 
     return render_to_response('ed_news/discuss.html',
                               {'article': article, 'age': age,
@@ -274,15 +278,42 @@ def upvote_article(request, article_id):
     # Add this to user's articles, if not already there.
     user_articles = request.user.userprofile.articles.all()
     if article in user_articles:
+        # This user already upvoted the article.
         return redirect(next_page)
     else:
         request.user.userprofile.articles.add(article)
         article.upvotes += 1
         article.save()
+
+        # Increment karma of user who submitted article,
+        #  unless this is the user who submitted.
+        if request.user != article.submitter:
+            increment_karma(article.submitter)
+
+        # Update article ranking points, and redirect back to page.
         update_ranking_points()
         return redirect(next_page)
 
+def upvote_comment(request, comment_id):
+    next_page = request.META.get('HTTP_REFERER', None) or '/'
+    comment = Comment.objects.get(id=comment_id)
+    # Add this to user's upvoted comments, if not already there.
+    upvoters = comment.upvotes.all()
+    if request.user in upvoters or request.user == comment.author:
+        return redirect(next_page)
+    else:
+        comment.upvotes.add(request.user)
+        comment.save()
+        increment_karma(comment.author)
+
+    return redirect(next_page)
+
 # --- Utility functions ---
+def increment_karma(user):
+    new_karma = user.userprofile.karma + 1
+    user.userprofile.karma = new_karma
+    user.userprofile.save()
+
 def get_submission_age(submission):
     """Returns a formatted string stating how old the article is.
     """

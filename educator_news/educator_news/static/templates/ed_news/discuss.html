@@ -51,8 +51,12 @@
 				  {% if comment_dict.comment in user_comments or not user.is_authenticated %}
 			       <a class='title_without_upvote' href="{% url 'profile' comment_dict.comment.author.id %}">{{ comment_dict.comment.author }}</a>
 				  {% else %}
-					 <a href="">&#9650</a>
-					 <a href="{% url 'profile' comment_dict.comment.author.id %}">{{ comment_dict.comment.author }}</a>
+					 {% if user.is_authenticated and not comment_dict.upvoted and user != comment_dict.comment.author %}
+					   <a href="{% url 'ed_news:upvote_comment' comment_dict.comment.id %}">&#9650</a>
+						<a href="{% url 'profile' comment_dict.comment.author.id %}">{{ comment_dict.comment.author }}</a>
+					 {% else %}
+						<a class='title_without_upvote' href="{% url 'profile' comment_dict.comment.author.id %}">{{ comment_dict.comment.author }}</a>
+					 {% endif %}
 				  {% endif %}
 				  {{ comment_dict.age }} ago
 			   </div>
