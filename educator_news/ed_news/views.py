@@ -12,7 +12,7 @@ from ed_news.forms import UserForm, UserProfileForm
 from ed_news.forms import EditUserForm, EditUserProfileForm
 from ed_news.forms import ArticleForm, CommentEntryForm
 
-from ed_news.models import Article
+from ed_news.models import Article, Comment
 
 
 def index(request):
@@ -292,7 +292,25 @@ def upvote_article(request, article_id):
         update_ranking_points()
         return redirect(next_page)
 
+def upvote_comment(request, comment_id):
+    next_page = request.META.get('HTTP_REFERER', None) or '/'
+    comment = Comment.objects.get(id=comment_id)
+    # Add this to user's upvoted comments, if not already there.
+    upvoters = comment.upvotes.all()
+    if request.user in upvoters:
+        return redirect(next_page)
+    else:
+        comment.upvotes.add(request.user)
+        comment.save()
+        increment_karma(request.user)
+
+    return redirect(next_page)
+
 # --- Utility functions ---
+def increment_karma(user):
+    new_karma = user.userprofile.karma + 1
+    user.userprofile.save()
+
 def get_submission_age(submission):
     """Returns a formatted string stating how old the article is.
     """
