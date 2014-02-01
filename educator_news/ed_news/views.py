@@ -216,7 +216,7 @@ def new(request):
                                },
                               context_instance = RequestContext(request))
 
-def discuss(request, article_id):
+def discuss(request, article_id, admin=False):
     article = Article.objects.get(id=article_id)
     age = get_submission_age(article)
     
@@ -261,7 +261,12 @@ def discuss(request, article_id):
             upvoted = True
         comment_set.append({'comment': comment, 'age': age, 'upvoted': upvoted})
 
-    return render_to_response('ed_news/discuss.html',
+    if admin:
+        template = 'ed_news/discuss_admin.html'
+    else:
+        template = 'ed_news/discuss.html'
+
+    return render_to_response(template,
                               {'article': article, 'age': age,
                                'comment_count': comment_count,
                                'user_articles': user_articles,
@@ -269,6 +274,13 @@ def discuss(request, article_id):
                                'comment_set': comment_set,
                                },
                               context_instance = RequestContext(request))
+
+def discuss_admin(request, article_id):
+    if request.user == User.objects.get(username='ehmatthes'):
+        response = discuss(request, article_id, True)
+        return response
+    else:
+        return redirect('/discuss/%s/' % article_id)
 
 def upvote_article(request, article_id):
     # Check if user has upvoted this article.
