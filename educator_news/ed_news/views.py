@@ -216,7 +216,7 @@ def new(request):
                                },
                               context_instance = RequestContext(request))
 
-def discuss(request, article_id):
+def discuss(request, article_id, admin=False):
     article = Article.objects.get(id=article_id)
     age = get_submission_age(article)
     
@@ -232,6 +232,7 @@ def discuss(request, article_id):
             comment.author = request.user
             comment.parent_article = article
             comment.save()
+            update_comment_ranking_points(article)
             update_ranking_points()
         else:
             # Invalid form/s.
@@ -250,7 +251,7 @@ def discuss(request, article_id):
         user_articles = request.user.userprofile.articles.all()
     # These are just the first-order comments?
     #  No, not at this point.
-    comments = article.comment_set.all()
+    comments = article.comment_set.all().order_by('ranking_points', 'submission_time').reverse()
     comment_set = []
     for comment in comments:
         age = get_submission_age(comment)
@@ -260,7 +261,12 @@ def discuss(request, article_id):
             upvoted = True
         comment_set.append({'comment': comment, 'age': age, 'upvoted': upvoted})
 
-    return render_to_response('ed_news/discuss.html',
+    if admin:
+        template = 'ed_news/discuss_admin.html'
+    else:
+        template = 'ed_news/discuss.html'
+
+    return render_to_response(template,
                               {'article': article, 'age': age,
                                'comment_count': comment_count,
                                'user_articles': user_articles,
@@ -268,6 +274,13 @@ def discuss(request, article_id):
                                'comment_set': comment_set,
                                },
                               context_instance = RequestContext(request))
+
+def discuss_admin(request, article_id):
+    if request.user == User.objects.get(username='ehmatthes'):
+        response = discuss(request, article_id, True)
+        return response
+    else:
+        return redirect('/discuss/%s/' % article_id)
 
 def upvote_article(request, article_id):
     # Check if user has upvoted this article.
@@ -343,8 +356,21 @@ def update_ranking_points():
         article.ranking_points = 10*article.upvotes + comment_points + newness_points
         article.save()
         
-def get_newness_points(article):
-        # From 0 to 100 points, depending on newness. Linear function.
-        age = (datetime.utcnow().replace(tzinfo=utc) - article.submission_time).seconds
-        newness_points = int(max((((86400.0-age)/86400)*30),0))
-        return newness_points
+def update_comment_ranking_points(article):
+    # Update the ranking points for an article's comments.
+    comments = article.comment_set.all()
+    for comment in comments:
+        newness_points = get_newness_points(comment)
+        voting_points = comment.upvotes.count() - comment.downvotes.count()
+        # For now, 5*voting_points.
+        comment.ranking_points = 5*voting_points + newness_points
+        comment.save()
+    
+
+def get_newness_points(submission):
+    # From 0 to 30 points, depending on newness. Linear function.
+    #  This should probably be a rapidly-decaying function,
+    #  rather than a linear function.
+    age = (datetime.utcnow().replace(tzinfo=utc) - submission.submission_time).seconds
+    newness_points = int(max((((86400.0-age)/86400)*30),0))
+    return newness_points

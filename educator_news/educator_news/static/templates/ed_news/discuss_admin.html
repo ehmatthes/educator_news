@@ -1,0 +1,9 @@
+{% extends 'ed_news/discuss.html' %}
+
+{% block admin_comment_info %}
+
+| {{ comment_dict.comment.upvotes.count }} up,
+  {{ comment_dict.comment.downvotes.count }} down,
+  {{ comment_dict.comment.ranking_points }} ranking_points
+
+{% endblock %}

@@ -59,6 +59,7 @@
 					 {% endif %}
 				  {% endif %}
 				  {{ comment_dict.age }} ago
+				  {% block admin_comment_info %}{% endblock %}
 			   </div>
 				<div class='comment_text'>{{ comment_dict.comment.comment_text }}</div>
 				<div class='reply_link'>reply</div>
