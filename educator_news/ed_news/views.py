@@ -360,7 +360,7 @@ def update_comment_ranking_points(article):
     # Update the ranking points for an article's comments.
     comments = article.comment_set.all()
     for comment in comments:
-        newness_points = get_newness_points(article)
+        newness_points = get_newness_points(comment)
         voting_points = comment.upvotes.count() - comment.downvotes.count()
         # For now, 5*voting_points.
         comment.ranking_points = 5*voting_points + newness_points
@@ -368,7 +368,7 @@ def update_comment_ranking_points(article):
     
 
 def get_newness_points(submission):
-    # From 0 to 100 points, depending on newness. Linear function.
+    # From 0 to 30 points, depending on newness. Linear function.
     #  This should probably be a rapidly-decaying function,
     #  rather than a linear function.
     age = (datetime.utcnow().replace(tzinfo=utc) - submission.submission_time).seconds

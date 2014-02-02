@@ -17,6 +17,7 @@ urlpatterns = patterns('',
     # --- My admin pages ---
     #  All of these check for my username.
     #  Could this be faked?
+    #   I don't think so; checks against user object, not just username.
     #   None should offer any actions, or private info, without verifying this.
     url(r'^discuss_admin/(?P<article_id>\d+)/$', views.discuss_admin, name='discuss_admin'),
 )
