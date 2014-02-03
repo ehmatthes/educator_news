@@ -54,7 +54,7 @@
 					 {% if user.is_authenticated and not comment_dict.upvoted and user != comment_dict.comment.author %}
 					   <a href="{% url 'ed_news:upvote_comment' comment_dict.comment.id %}">&#9650</a>
 					 {% endif %}
-					 {% if user.is_authenticated and not comment_dict.downvoted and user != comment_dict.comment.author %}
+					 {% if user.is_authenticated and not comment_dict.downvoted and user != comment_dict.comment.author and perms.ed_news.can_downvote_comment %}
 					   <a href="{% url 'ed_news:downvote_comment' comment_dict.comment.id %}">&#9660</a>
 					 {% endif %}
 					 {% if user.is_authenticated and user != comment_dict.comment.author %}
