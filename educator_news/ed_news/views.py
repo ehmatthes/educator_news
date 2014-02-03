@@ -259,7 +259,10 @@ def discuss(request, article_id, admin=False):
         upvoted = False
         if request.user in comment.upvotes.all():
             upvoted = True
-        comment_set.append({'comment': comment, 'age': age, 'upvoted': upvoted})
+        downvoted = False
+        if request.user in comment.downvotes.all():
+            downvoted = True
+        comment_set.append({'comment': comment, 'age': age, 'upvoted': upvoted, 'downvoted': downvoted,})
 
     if admin:
         template = 'ed_news/discuss_admin.html'
@@ -318,12 +321,42 @@ def upvote_comment(request, comment_id):
         comment.upvotes.add(request.user)
         comment.save()
         increment_karma(comment.author)
+        # If user had downvoted this comment, remove that downvote.
+        if request.user in comment.downvotes.all():
+            comment.downvotes.remove(request.user)
+            # Also, add the karma that was subtracted from the original upvote.
+            increment_karma(comment.author)
+        
+
+    return redirect(next_page)
+
+def downvote_comment(request, comment_id):
+    next_page = request.META.get('HTTP_REFERER', None) or '/'
+    comment = Comment.objects.get(id=comment_id)
+    # Add this to user's downvoted comments, if not already there.
+    downvoters = comment.downvotes.all()
+    if request.user in downvoters or request.user == comment.author:
+        return redirect(next_page)
+    else:
+        comment.downvotes.add(request.user)
+        comment.save()
+        decrement_karma(comment.author)
+        # If user had upvoted this comment, remove that upvote.
+        if request.user in comment.upvotes.all():
+            comment.upvotes.remove(request.user)
+            # Also, remove the karma that was added from the original upvote.
+            decrement_karma(comment.author)
 
     return redirect(next_page)
 
 # --- Utility functions ---
 def increment_karma(user):
     new_karma = user.userprofile.karma + 1
+    user.userprofile.karma = new_karma
+    user.userprofile.save()
+
+def decrement_karma(user):
+    new_karma = user.userprofile.karma - 1
     user.userprofile.karma = new_karma
     user.userprofile.save()
 

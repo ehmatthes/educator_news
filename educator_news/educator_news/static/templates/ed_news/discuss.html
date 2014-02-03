@@ -53,6 +53,11 @@
 				  {% else %}
 					 {% if user.is_authenticated and not comment_dict.upvoted and user != comment_dict.comment.author %}
 					   <a href="{% url 'ed_news:upvote_comment' comment_dict.comment.id %}">&#9650</a>
+					 {% endif %}
+					 {% if user.is_authenticated and not comment_dict.downvoted and user != comment_dict.comment.author %}
+					   <a href="{% url 'ed_news:downvote_comment' comment_dict.comment.id %}">&#9660</a>
+					 {% endif %}
+					 {% if user.is_authenticated and user != comment_dict.comment.author %}
 						<a href="{% url 'profile' comment_dict.comment.author.id %}">{{ comment_dict.comment.author }}</a>
 					 {% else %}
 						<a class='title_without_upvote' href="{% url 'profile' comment_dict.comment.author.id %}">{{ comment_dict.comment.author }}</a>
