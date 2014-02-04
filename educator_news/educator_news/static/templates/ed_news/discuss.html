@@ -88,8 +88,8 @@
 				  {% block admin_comment_info %}{% endblock %}
 			   </div>
 				{% if not user.is_authenticated %}
-				  <div class='comment_text'>{{ comment_dict.comment.comment_text }}</div>
-				  <div class='reply_link'><a href="{% url 'login' %}">reply</a></div>
+				  <div class='comment_text comment_text_no_downvote'>{{ comment_dict.comment.comment_text }}</div>
+				  <div class='reply_link reply_link_no_downvote'><a href="{% url 'login' %}">reply</a></div>
 				{% elif user.is_authenticated and perms.ed_news.can_downvote_comment %}
 				  <div class='comment_text'>{{ comment_dict.comment.comment_text }}</div>
 				  <div class='reply_link'><a href="{% url 'ed_news:reply' article.id comment_dict.comment.id %}">reply</a></div>
