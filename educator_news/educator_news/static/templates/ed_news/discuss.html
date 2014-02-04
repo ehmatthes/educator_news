@@ -72,7 +72,11 @@
 
 					 {% comment %}Display title line, with voting arrows. {% endcomment %}
 					 {% if user == comment_dict.comment.author %}
-						<a class='comment_author_title_line' href="{% url 'profile' comment_dict.comment.author.id %}">{{ comment_dict.comment.author }}</a>
+						{% if perms.ed_news.can_downvote_comment %}
+						  <a class='comment_author_title_line' href="{% url 'profile' comment_dict.comment.author.id %}">{{ comment_dict.comment.author }}</a>
+						{% else %}
+						  <a class='comment_author_title_line comment_author_title_line_cant_downvote' href="{% url 'profile' comment_dict.comment.author.id %}">{{ comment_dict.comment.author }}</a>
+						{% endif %}
 					 {% else %}
 						<a class='' href="{% url 'profile' comment_dict.comment.author.id %}">{{ comment_dict.comment.author }}</a>
 					 {% endif %}

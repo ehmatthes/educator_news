@@ -58,6 +58,10 @@ a.upvoted_link, a.downvoted_link {
 	 margin-left: 35px;
 }
 
+.comment_author_title_line_cant_downvote {
+	 margin-left: 20px;
+}
+
 .title_cant_downvote {
 	 margin-left: 35px;
 }
