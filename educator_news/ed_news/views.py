@@ -322,22 +322,36 @@ def upvote_article(request, article_id):
         return redirect(next_page)
 
 def upvote_comment(request, comment_id):
+    # If not upvoted, upvote and increment author's karma.
+    # If upvoted, undo upvote and decrement author's karma.
+    # If downvoted, undo downvote and increment author's karma.
+
     next_page = request.META.get('HTTP_REFERER', None) or '/'
     comment = Comment.objects.get(id=comment_id)
+
     # Add this to user's upvoted comments, if not already there.
     upvoters = comment.upvotes.all()
-    if request.user in upvoters or request.user == comment.author:
+
+    if request.user == comment.author:
         return redirect(next_page)
-    else:
+
+    if request.user not in upvoters:
+        # Upvote article, and increment author's karma.
         comment.upvotes.add(request.user)
         comment.save()
         increment_karma(comment.author)
-        # If user had downvoted this comment, remove that downvote.
-        if request.user in comment.downvotes.all():
-            comment.downvotes.remove(request.user)
-            # Also, add the karma that was subtracted from the original upvote.
-            increment_karma(comment.author)
-        
+
+    if request.user in upvoters:
+        # Undo the upvote, and decrement author's karma.
+        comment.upvotes.remove(request.user)
+        comment.save()
+        decrement_karma(comment.author)
+
+    if request.user in comment.downvotes.all():
+        # Undo the downvote, and increment author's karma.
+        comment.downvotes.remove(request.user)
+        comment.save()
+        increment_karma(comment.author)
 
     return redirect(next_page)
 
