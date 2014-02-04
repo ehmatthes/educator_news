@@ -289,6 +289,23 @@ def discuss(request, article_id, admin=False):
                                },
                               context_instance = RequestContext(request))
 
+
+
+
+def reply2(request):
+    return render_to_response('ed_news/reply.html',
+                              {},
+                              context_instance = RequestContext(request))
+
+
+def reply(request, article_id, comment_id):
+    return render_to_response('ed_news/reply.html',
+                              {},
+                              context_instance = RequestContext(request))
+
+
+
+
 def discuss_admin(request, article_id):
     if request.user == User.objects.get(username='ehmatthes'):
         response = discuss(request, article_id, True)
