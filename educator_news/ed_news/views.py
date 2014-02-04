@@ -256,13 +256,24 @@ def discuss(request, article_id, admin=False):
     for comment in comments:
         age = get_submission_age(comment)
         # Report whether this user has already upvoted the comment.
-        upvoted = False
-        if request.user in comment.upvotes.all():
-            upvoted = True
-        downvoted = False
-        if request.user in comment.downvotes.all():
-            downvoted = True
-        comment_set.append({'comment': comment, 'age': age, 'upvoted': upvoted, 'downvoted': downvoted,})
+        # Determine whether user can upvote or has upvoted,
+        #  can downvote or has downvoted.
+        upvoted, can_upvote = False, False
+        downvoted, can_downvote = False, False
+        if request.user.is_authenticated() and request.user != comment.author:
+            if request.user in comment.upvotes.all():
+                upvoted = True
+            else:
+                can_upvote = True
+            if request.user in comment.downvotes.all():
+                downvoted = True
+            elif request.user.has_perm('ed_news.can_downvote_comment'):
+                can_downvote = True
+                
+        comment_set.append({'comment': comment, 'age': age,
+                            'upvoted': upvoted, 'can_upvote': can_upvote,
+                            'downvoted': downvoted, 'can_downvote': can_downvote,
+                            })
 
     if admin:
         template = 'ed_news/discuss_admin.html'
@@ -311,41 +322,68 @@ def upvote_article(request, article_id):
         return redirect(next_page)
 
 def upvote_comment(request, comment_id):
+    # If not upvoted, upvote and increment author's karma.
+    # If upvoted, undo upvote and decrement author's karma.
+    # If downvoted, undo downvote and increment author's karma.
+
     next_page = request.META.get('HTTP_REFERER', None) or '/'
     comment = Comment.objects.get(id=comment_id)
-    # Add this to user's upvoted comments, if not already there.
+
     upvoters = comment.upvotes.all()
-    if request.user in upvoters or request.user == comment.author:
+
+    if request.user == comment.author:
         return redirect(next_page)
-    else:
+
+    if request.user not in upvoters:
+        # Upvote article, and increment author's karma.
         comment.upvotes.add(request.user)
         comment.save()
         increment_karma(comment.author)
-        # If user had downvoted this comment, remove that downvote.
-        if request.user in comment.downvotes.all():
-            comment.downvotes.remove(request.user)
-            # Also, add the karma that was subtracted from the original upvote.
-            increment_karma(comment.author)
-        
+
+    if request.user in upvoters:
+        # Undo the upvote, and decrement author's karma.
+        comment.upvotes.remove(request.user)
+        comment.save()
+        decrement_karma(comment.author)
+
+    if request.user in comment.downvotes.all():
+        # Undo the downvote, and increment author's karma.
+        comment.downvotes.remove(request.user)
+        comment.save()
+        increment_karma(comment.author)
 
     return redirect(next_page)
 
 def downvote_comment(request, comment_id):
+    # If not downvoted, downvote and decrement author's karma.
+    # If downvoted, undo downvote and increment author's karma.
+    # If upvoted, undo upvote and decrement author's karma.
+
     next_page = request.META.get('HTTP_REFERER', None) or '/'
     comment = Comment.objects.get(id=comment_id)
-    # Add this to user's downvoted comments, if not already there.
+
     downvoters = comment.downvotes.all()
-    if request.user in downvoters or request.user == comment.author:
+
+    if request.user == comment.author:
         return redirect(next_page)
-    else:
+
+    if request.user not in downvoters:
+        # Downvote article, and decrement author's karma.
         comment.downvotes.add(request.user)
         comment.save()
         decrement_karma(comment.author)
-        # If user had upvoted this comment, remove that upvote.
-        if request.user in comment.upvotes.all():
-            comment.upvotes.remove(request.user)
-            # Also, remove the karma that was added from the original upvote.
-            decrement_karma(comment.author)
+
+    if request.user in downvoters:
+        # Undo the downvote, and increment author's karma.
+        comment.downvotes.remove(request.user)
+        comment.save()
+        increment_karma(comment.author)
+
+    if request.user in comment.upvotes.all():
+        # Undo the upvote, and decrement author's karma.
+        comment.upvotes.remove(request.user)
+        comment.save()
+        decrement_karma(comment.author)
 
     return redirect(next_page)
 

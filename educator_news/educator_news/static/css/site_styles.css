@@ -37,11 +37,35 @@
 }
 
 .comment_text {
-	 margin-left: 20px;
+	 margin-left: 35px;
 }
 
 .reply_link {
 	 margin-top: 5px;
 	 margin-bottom: 15px;
+	 margin-left: 35px;
+}
+
+a.upvote_link, a.downvote_link {
+	 color: blue
+}
+
+a.upvoted_link, a.downvoted_link {
+	 margin-right: 3px;
+}
+
+.comment_author_title_line {
+	 margin-left: 35px;
+}
+
+.title_cant_downvote {
+	 margin-left: 35px;
+}
+
+.comment_text_no_downvote {
+	 margin-left: 20px;
+}
+
+.reply_link_no_downvote {
 	 margin-left: 20px;
 }
