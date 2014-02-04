@@ -46,12 +46,12 @@
 	 margin-left: 35px;
 }
 
-a.upvote_link {
-
+a.upvote_link, a.downvote_link {
+	 color: blue
 }
 
-a.downvote_link {
-
+a.upvoted_link, a.downvoted_link {
+	 margin-right: 3px;
 }
 
 .comment_author_title_line {

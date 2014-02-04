@@ -60,14 +60,14 @@
 					 {% if comment_dict.can_upvote %}
 					   <a class='upvote_link' href="{% url 'ed_news:upvote_comment' comment_dict.comment.id %}">&#9650</a>
 					 {% elif comment_dict.upvoted %}
-					   <a class='upvoted_link' href="{% url 'ed_news:upvote_comment' comment_dict.comment.id %}">&#9650</a>
+					   <a class='upvoted_link' href="{% url 'ed_news:upvote_comment' comment_dict.comment.id %}">&#9651</a>
 					 {% endif %}
 						
 					 {% comment %}Downvote situations: {% endcomment %}
 					 {% if comment_dict.can_downvote %}
 					   <a class='downvote_link' href="{% url 'ed_news:downvote_comment' comment_dict.comment.id %}">&#9660</a>
 					 {% elif comment_dict.downvoted %}
-					   <a class='downvoted_link' href="{% url 'ed_news:downvote_comment' comment_dict.comment.id %}">&#9660</a>
+					   <a class='downvoted_link' href="{% url 'ed_news:downvote_comment' comment_dict.comment.id %}">&#9661</a>
 					 {% endif %}
 
 					 {% comment %}Display title line, with voting arrows. {% endcomment %}
