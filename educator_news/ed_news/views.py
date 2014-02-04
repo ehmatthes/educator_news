@@ -256,13 +256,24 @@ def discuss(request, article_id, admin=False):
     for comment in comments:
         age = get_submission_age(comment)
         # Report whether this user has already upvoted the comment.
-        upvoted = False
-        if request.user in comment.upvotes.all():
-            upvoted = True
-        downvoted = False
-        if request.user in comment.downvotes.all():
-            downvoted = True
-        comment_set.append({'comment': comment, 'age': age, 'upvoted': upvoted, 'downvoted': downvoted,})
+        # Determine whether user can upvote or has upvoted,
+        #  can downvote or has downvoted.
+        upvoted, can_upvote = False, False
+        downvoted, can_downvote = False, False
+        if request.user.is_authenticated() and request.user != comment.author:
+            if request.user in comment.upvotes.all():
+                upvoted = True
+            else:
+                can_upvote = True
+            if request.user in comment.downvotes.all():
+                downvoted = True
+            elif request.user.has_perm('ed_news.can_downvote_comment'):
+                can_downvote = True
+                
+        comment_set.append({'comment': comment, 'age': age,
+                            'upvoted': upvoted, 'can_upvote': can_upvote,
+                            'downvoted': downvoted, 'can_downvote': can_downvote,
+                            })
 
     if admin:
         template = 'ed_news/discuss_admin.html'
