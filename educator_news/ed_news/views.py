@@ -295,10 +295,11 @@ def reply(request, article_id, comment_id):
     comment = Comment.objects.get(id=comment_id)
     comment_age = get_submission_age(comment)
     
+    # Redirect unauthenticated users to register/ login.
+    if not request.user.is_authenticated():
+        return redirect('login')
+
     if request.method == 'POST':
-        # Redirect unauthenticated users to register/ login.
-        if not request.user.is_authenticated():
-            return redirect('login')
 
         reply_entry_form = CommentEntryForm(data=request.POST)
 
