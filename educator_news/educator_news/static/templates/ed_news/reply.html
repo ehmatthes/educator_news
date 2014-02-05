@@ -66,6 +66,26 @@
 		  </div>
 
 
+		  {% comment %} --- Reply entry form --- {% endcomment%}
+		  <form id='reply_form' method="post" action="{% url 'ed_news:reply' article.id comment.id %}" enctype='multipart/form-data'>
+			 {% csrf_token %}
+
+			 <div class='reply_entry_form'>
+
+				{{ reply_entry_form.as_p }}
+
+				<div class='comment_submit_button'>
+				  {% if user.is_authenticated %}
+				    <input id='submit_comment_button' type="submit" name='submit' value="Add reply" />
+				  {% else %}
+				    <input id='submit_comment_button' type="submit" name='submit' value="Add reply" disabled />
+				    You will have to <a href="{% url 'login' %}">log in</a> or <a href="{% url 'register' %}">register</a> to make a reply.</p>
+				  {% endif %}
+            </div>
+
+			 </div>
+				  
+		  </form>
 
 
 

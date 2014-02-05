@@ -295,6 +295,33 @@ def reply(request, article_id, comment_id):
     comment = Comment.objects.get(id=comment_id)
     comment_age = get_submission_age(comment)
     
+
+
+    if request.method == 'POST':
+        # Redirect unauthenticated users to register/ login.
+        if not request.user.is_authenticated():
+            return redirect('login')
+
+        reply_entry_form = CommentEntryForm(data=request.POST)
+
+        if reply_entry_form.is_valid():
+            reply = reply_entry_form.save(commit=False)
+            reply.author = request.user
+            reply.parent_article = article
+            reply.parent_comment = comment
+            reply.save()
+            update_comment_ranking_points(article)
+            update_ranking_points()
+        else:
+            # Invalid form/s.
+            #  Print errors to console; should log these?
+            print 'ce', reply_entry_form.errors
+
+    # Prepare a blank entry form.
+    reply_entry_form = CommentEntryForm()
+
+
+
     # Get comment information after processing form, to include comment
     #  that was just saved.
     comment_count = article.comment_set.count()
@@ -322,6 +349,7 @@ def reply(request, article_id, comment_id):
                                'user_articles': user_articles,
                                'can_upvote': can_upvote, 'upvoted': upvoted,
                                'can_downvote': can_downvote, 'downvoted': downvoted,
+                               'reply_entry_form': reply_entry_form,
                                },
                               context_instance = RequestContext(request))
 
