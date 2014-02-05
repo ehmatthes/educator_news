@@ -289,22 +289,41 @@ def discuss(request, article_id, admin=False):
                                },
                               context_instance = RequestContext(request))
 
-
-
-
-def reply2(request):
-    return render_to_response('ed_news/reply.html',
-                              {},
-                              context_instance = RequestContext(request))
-
-
 def reply(request, article_id, comment_id):
+    article = Article.objects.get(id=article_id)
+    article_age = get_submission_age(article)
+    comment = Comment.objects.get(id=comment_id)
+    comment_age = get_submission_age(comment)
+    
+    # Get comment information after processing form, to include comment
+    #  that was just saved.
+    comment_count = article.comment_set.count()
+    # If user logged in, get article set.
+    user_articles = []
+    if request.user.is_authenticated():
+        user_articles = request.user.userprofile.articles.all()
+
+    upvoted, can_upvote = False, False
+    downvoted, can_downvote = False, False
+    if request.user.is_authenticated() and request.user != comment.author:
+        if request.user in comment.upvotes.all():
+            upvoted = True
+        else:
+            can_upvote = True
+        if request.user in comment.downvotes.all():
+            downvoted = True
+        elif request.user.has_perm('ed_news.can_downvote_comment'):
+            can_downvote = True
+
     return render_to_response('ed_news/reply.html',
-                              {},
+                              {'article': article, 'article_age': article_age,
+                               'comment': comment, 'comment_age': comment_age,
+                               'comment_count': comment_count,
+                               'user_articles': user_articles,
+                               'can_upvote': can_upvote, 'upvoted': upvoted,
+                               'can_downvote': can_downvote, 'downvoted': downvoted,
+                               },
                               context_instance = RequestContext(request))
-
-
-
 
 def discuss_admin(request, article_id):
     if request.user == User.objects.get(username='ehmatthes'):
