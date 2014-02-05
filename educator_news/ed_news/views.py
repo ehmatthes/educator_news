@@ -244,7 +244,7 @@ def discuss(request, article_id, admin=False):
 
     # Get comment information after processing form, to include comment
     #  that was just saved.
-    comment_count = article.comment_set.count()
+    comment_count = get_comment_count(article)
     # If user logged in, get article set.
     user_articles = []
     if request.user.is_authenticated():
@@ -286,6 +286,71 @@ def discuss(request, article_id, admin=False):
                                'user_articles': user_articles,
                                'comment_entry_form': comment_entry_form,
                                'comment_set': comment_set,
+                               },
+                              context_instance = RequestContext(request))
+
+def reply(request, article_id, comment_id):
+    article = Article.objects.get(id=article_id)
+    article_age = get_submission_age(article)
+    comment = Comment.objects.get(id=comment_id)
+    comment_age = get_submission_age(comment)
+    
+    # Redirect unauthenticated users to register/ login.
+    if not request.user.is_authenticated():
+        return redirect('login')
+
+    if request.method == 'POST':
+
+        reply_entry_form = CommentEntryForm(data=request.POST)
+
+        if reply_entry_form.is_valid():
+            reply = reply_entry_form.save(commit=False)
+            reply.author = request.user
+            reply.parent_comment = comment
+            reply.save()
+            # Update the ranking points for all comments on 
+            #  an article at the same time, to be fair.
+            update_comment_ranking_points(article)
+            update_ranking_points()
+        else:
+            # Invalid form/s.
+            #  Print errors to console; should log these?
+            print 'ce', reply_entry_form.errors
+
+    # Prepare a blank entry form.
+    reply_entry_form = CommentEntryForm()
+
+
+
+    # Get comment information after processing form, to include comment
+    #  that was just saved.
+    comment_count = article.comment_set.count()
+    comment_count = get_comment_count(article)
+    # If user logged in, get article set.
+    user_articles = []
+    if request.user.is_authenticated():
+        user_articles = request.user.userprofile.articles.all()
+
+    upvoted, can_upvote = False, False
+    downvoted, can_downvote = False, False
+    if request.user.is_authenticated() and request.user != comment.author:
+        if request.user in comment.upvotes.all():
+            upvoted = True
+        else:
+            can_upvote = True
+        if request.user in comment.downvotes.all():
+            downvoted = True
+        elif request.user.has_perm('ed_news.can_downvote_comment'):
+            can_downvote = True
+
+    return render_to_response('ed_news/reply.html',
+                              {'article': article, 'article_age': article_age,
+                               'comment': comment, 'comment_age': comment_age,
+                               'comment_count': comment_count,
+                               'user_articles': user_articles,
+                               'can_upvote': can_upvote, 'upvoted': upvoted,
+                               'can_downvote': can_downvote, 'downvoted': downvoted,
+                               'reply_entry_form': reply_entry_form,
                                },
                               context_instance = RequestContext(request))
 
@@ -445,3 +510,14 @@ def get_newness_points(submission):
     age = (datetime.utcnow().replace(tzinfo=utc) - submission.submission_time).seconds
     newness_points = int(max((((86400.0-age)/86400)*30),0))
     return newness_points
+
+
+def get_comment_count(submission):
+    # Trace comment threads, and report the number of overall comments.
+    total_comments = 0
+    total_comments += submission.comment_set.count()
+    for comment in submission.comment_set.all():
+        total_comments += get_comment_count(comment)
+        
+    return total_comments
+        

@@ -55,11 +55,11 @@ class Comment(models.Model):
     # Will need to kill some comments.
     alive = models.BooleanField(default=True)
 
-    # If it's a reply, there is a parent comment.
-    parent_comment = models.ForeignKey('self', blank=True, null=True)
-
     # If it's a first-level reply, there is a parent article.
     parent_article = models.ForeignKey(Article, blank=True, null=True)
+
+    # If it's a reply, there is a parent comment.
+    parent_comment = models.ForeignKey('self', blank=True, null=True)
 
     def __unicode__(self):
         return self.comment_text[:50] + '...'

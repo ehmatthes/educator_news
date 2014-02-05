@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+        {% comment %} --- Article information --- {% endcomment%}
+	     <div class='title_line'>
+			 {% if article in user_articles or not user.is_authenticated %}
+				  <a class='title_without_upvote' href="{{ article.url }}">{{ article.title }}</a></div>
+		    {% else %}
+			     <a href="{% url 'ed_news:upvote_article' article.id %}">&#9650</a>
+				  <a href="{{ article.url }}">{{ article.title }}</a></div>
+		    {% endif %}
+		  <div class='points_line points_line_discuss'>
+			 {{ article.upvotes }}{% if article.upvotes != 1 %} points{% else %} point{% endif %}
+			 by <a href="{% url 'profile' article.submitter.id %}">{{ article.submitter }}</a>
+			 {{ article_age }} ago |
+			 <a href="{% url 'ed_news:discuss' article.id %}">
+				{% if comment_count == 0 %}discuss{% elif comment_count == 1 %}1 comment{% else %}{{ comment_count }} comments{% endif %}
+		    </a>
+		  </div>
+    
+
+
+		  <div class='comment'>
+			   <div>
+
+				    {% comment %}Everyone who makes it to this page is authenticated. {% endcomment %}
+					 {% comment %}Work through variations of voting situations for authenticated users.{% endcomment %}
+
+					 {% comment %}Upvote situations: {% endcomment %}
+					 {% if can_upvote %}
+					   <a class='upvote_link' href="{% url 'ed_news:upvote_comment' comment.id %}">&#9650</a>
+					 {% elif upvoted %}
+					   <a class='upvoted_link' href="{% url 'ed_news:upvote_comment' comment.id %}">&#9651</a>
+					 {% endif %}
+						
+					 {% comment %}Downvote situations: {% endcomment %}
+					 {% if can_downvote %}
+					   <a class='downvote_link' href="{% url 'ed_news:downvote_comment' comment.id %}">&#9660</a>
+					 {% elif downvoted %}
+					   <a class='downvoted_link' href="{% url 'ed_news:downvote_comment' comment.id %}">&#9661</a>
+					 {% endif %}
+
+					 {% comment %}Display title line, with voting arrows. {% endcomment %}
+					 {% if user == comment.author %}
+						{% if perms.ed_news.can_downvote_comment %}
+						  {% comment %}User can normally downvote, but not in this situation.{% endcomment %}
+						  <a class='comment_author_title_line' href="{% url 'profile' comment.author.id %}">{{ comment.author }}</a>
+						{% else %}
+						  <a class='comment_author_title_line comment_author_title_line_cant_downvote' href="{% url 'profile' comment.author.id %}">{{ comment.author }}</a>
+						{% endif %}
+					 {% else %}
+						<a class='' href="{% url 'profile' comment.author.id %}">{{ comment.author }}</a>
+					 {% endif %}
+
+				  {{ comment_age }} ago
+				  {% block admin_comment_info %}{% endblock %}
+			   </div>
+				{% if not user.is_authenticated %}
+				  <div class='comment_text comment_text_no_downvote'>{{ comment.comment_text }}</div>
+				{% elif user.is_authenticated and perms.ed_news.can_downvote_comment %}
+				  <div class='comment_text'>{{ comment.comment_text }}</div>
+				{% else %}
+				  <div class='comment_text comment_text_no_downvote'>{{ comment.comment_text }}</div>
+				{% endif %}
+		  </div>
+
+
+		  {% comment %} --- Reply entry form --- {% endcomment%}
+		  <form id='reply_form' method="post" action="{% url 'ed_news:reply' article.id comment.id %}" enctype='multipart/form-data'>
+			 {% csrf_token %}
+
+			 <div class='comment_entry_form reply_entry_form'>
+
+				{{ reply_entry_form.as_p }}
+
+				<div class='comment_submit_button'>
+				  <input id='submit_comment_button' type="submit" name='submit' value="Add reply" />
+            </div>
+
+			 </div>
+				  
+		  </form>
+
+
+
+
+{% endblock %}
