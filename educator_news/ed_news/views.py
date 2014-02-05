@@ -244,7 +244,7 @@ def discuss(request, article_id, admin=False):
 
     # Get comment information after processing form, to include comment
     #  that was just saved.
-    comment_count = article.comment_set.count()
+    comment_count = get_comment_count(article)
     # If user logged in, get article set.
     user_articles = []
     if request.user.is_authenticated():
@@ -325,6 +325,7 @@ def reply(request, article_id, comment_id):
     # Get comment information after processing form, to include comment
     #  that was just saved.
     comment_count = article.comment_set.count()
+    comment_count = get_comment_count(article)
     # If user logged in, get article set.
     user_articles = []
     if request.user.is_authenticated():
@@ -509,3 +510,14 @@ def get_newness_points(submission):
     age = (datetime.utcnow().replace(tzinfo=utc) - submission.submission_time).seconds
     newness_points = int(max((((86400.0-age)/86400)*30),0))
     return newness_points
+
+
+def get_comment_count(submission):
+    # Trace comment threads, and report the number of overall comments.
+    total_comments = 0
+    total_comments += submission.comment_set.count()
+    for comment in submission.comment_set.all():
+        total_comments += get_comment_count(comment)
+        
+    return total_comments
+        
