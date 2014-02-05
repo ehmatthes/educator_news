@@ -295,8 +295,6 @@ def reply(request, article_id, comment_id):
     comment = Comment.objects.get(id=comment_id)
     comment_age = get_submission_age(comment)
     
-
-
     if request.method == 'POST':
         # Redirect unauthenticated users to register/ login.
         if not request.user.is_authenticated():
@@ -307,9 +305,10 @@ def reply(request, article_id, comment_id):
         if reply_entry_form.is_valid():
             reply = reply_entry_form.save(commit=False)
             reply.author = request.user
-            reply.parent_article = article
             reply.parent_comment = comment
             reply.save()
+            # Update the ranking points for all comments on 
+            #  an article at the same time, to be fair.
             update_comment_ranking_points(article)
             update_ranking_points()
         else:
