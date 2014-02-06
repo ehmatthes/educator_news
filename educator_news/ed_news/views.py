@@ -534,11 +534,15 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
             elif request.user.has_perm('ed_news.can_downvote_comment'):
                 can_downvote = True
 
+        # Calculate margin-left, based on nesting level.
+        margin_left = nesting_level * 30
+
         # Append current comment information to comment_set.
         comment_set.append({'comment': comment, 'age': age,
                             'upvoted': upvoted, 'can_upvote': can_upvote,
                             'downvoted': downvoted, 'can_downvote': can_downvote,
                             'nesting_level': nesting_level,
+                            'margin_left': margin_left,
                             })
 
         # Append nested comments, if there are any.
