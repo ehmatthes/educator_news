@@ -46,7 +46,7 @@
 	 {% comment %} --- All comments --- {% endcomment%}
     {% for comment_dict in comment_set %}
 
-		  <div class='comment' style='margin-left: {{ comment_dict.margin_left }}px'>
+		  <div class='comment' style='margin-left: {{ comment_dict.margin_left }}px; color: {{ comment_dict.text_color }}'>
 			   <div>
 
 				  {% comment %}User cannot upvote or downvote.{% endcomment %}

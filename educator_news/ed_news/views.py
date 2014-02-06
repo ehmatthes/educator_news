@@ -252,14 +252,6 @@ def discuss(request, article_id, admin=False):
 
     comment_set = []
     get_comment_set(article, request, comment_set)
-    print "Comment set: \n"
-    print comment_set
-    print "\n\nComment dicts: \n"
-    for comment_dict in comment_set: print comment_dict, "\n"
-    #for comment_dict in comment_set:
-        #print comment_dict
-        #print comment_dict['comment'].id, comment_dict['nesting_level']
-    print "\n\n\n", len(comment_set), "comments"
 
     if admin:
         template = 'ed_news/discuss_admin.html'
@@ -539,12 +531,19 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
         # Calculate margin-left, based on nesting level.
         margin_left = nesting_level * 30
 
+        # Comments with net downvotes fade to background color.
+        steps_to_disappear = 10
+        # step_value * net downvotes, but not negative and not more than 255.
+        text_color_value = min(255, (255/steps_to_disappear)*max(0,(comment.downvotes.count()-comment.upvotes.count())))
+        text_color = "rgb(%d, %d, %d)" % (text_color_value, text_color_value, text_color_value)
+
         # Append current comment information to comment_set.
         comment_set.append({'comment': comment, 'age': age,
                             'upvoted': upvoted, 'can_upvote': can_upvote,
                             'downvoted': downvoted, 'can_downvote': can_downvote,
                             'nesting_level': nesting_level,
                             'margin_left': margin_left,
+                            'text_color': text_color,
                             })
 
         # Append nested comments, if there are any.
