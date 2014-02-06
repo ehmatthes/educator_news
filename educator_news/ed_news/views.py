@@ -32,7 +32,7 @@ def index(request):
     user_articles = []
     for article in articles:
         article_age = get_submission_age(article)
-        comment_count = article.comment_set.count()
+        comment_count = get_comment_count(article)
         articles_ages.append({'article': article, 'age': article_age, 'comment_count': comment_count})
         if request.user.is_authenticated() and article in request.user.userprofile.articles.all():
             user_articles.append(article)
@@ -205,7 +205,7 @@ def new(request):
     user_articles = []
     for article in articles:
         article_age = get_submission_age(article)
-        comment_count = article.comment_set.count()
+        comment_count = get_comment_count(article)
         articles_ages.append({'article': article, 'age': article_age, 'comment_count': comment_count})
         if request.user.is_authenticated() and article in request.user.userprofile.articles.all():
             user_articles.append(article)
@@ -249,31 +249,17 @@ def discuss(request, article_id, admin=False):
     user_articles = []
     if request.user.is_authenticated():
         user_articles = request.user.userprofile.articles.all()
-    # These are just the first-order comments?
-    #  No, not at this point.
-    comments = article.comment_set.all().order_by('ranking_points', 'submission_time').reverse()
+
     comment_set = []
-    for comment in comments:
-        age = get_submission_age(comment)
-        # Report whether this user has already upvoted the comment.
-        # Determine whether user can upvote or has upvoted,
-        #  can downvote or has downvoted.
-        upvoted, can_upvote = False, False
-        downvoted, can_downvote = False, False
-        if request.user.is_authenticated() and request.user != comment.author:
-            if request.user in comment.upvotes.all():
-                upvoted = True
-            else:
-                can_upvote = True
-            if request.user in comment.downvotes.all():
-                downvoted = True
-            elif request.user.has_perm('ed_news.can_downvote_comment'):
-                can_downvote = True
-                
-        comment_set.append({'comment': comment, 'age': age,
-                            'upvoted': upvoted, 'can_upvote': can_upvote,
-                            'downvoted': downvoted, 'can_downvote': can_downvote,
-                            })
+    get_comment_set(article, request, comment_set)
+    print "Comment set: \n"
+    print comment_set
+    print "\n\nComment dicts: \n"
+    for comment_dict in comment_set: print comment_dict, "\n"
+    #for comment_dict in comment_set:
+        #print comment_dict
+        #print comment_dict['comment'].id, comment_dict['nesting_level']
+    print "\n\n\n", len(comment_set), "comments"
 
     if admin:
         template = 'ed_news/discuss_admin.html'
@@ -312,6 +298,8 @@ def reply(request, article_id, comment_id):
             #  an article at the same time, to be fair.
             update_comment_ranking_points(article)
             update_ranking_points()
+            # Redirect to discussion page.
+            return redirect('/discuss/%s/' % article.id)
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -521,3 +509,48 @@ def get_comment_count(submission):
         
     return total_comments
         
+def get_comment_set(submission, request, comment_set, nesting_level=0):
+    # Get all comments for a submission, in a format that can be
+    #  used to render all comments on a page.
+
+    # Get first-order comments, then recursively pull all nested comments.
+    comments = submission.comment_set.all().order_by('ranking_points', 'submission_time').reverse()
+
+    for comment in comments:
+
+        age = get_submission_age(comment)
+
+        # Report whether this user has already upvoted the comment.
+        # Determine whether user can upvote or has upvoted,
+        #  can downvote or has downvoted.
+        # DEV: This should be factored out, and stored as a dict.
+        upvoted, can_upvote = False, False
+        downvoted, can_downvote = False, False
+        if request.user.is_authenticated() and request.user != comment.author:
+            if request.user in comment.upvotes.all():
+                upvoted = True
+            else:
+                can_upvote = True
+            if request.user in comment.downvotes.all():
+                downvoted = True
+            elif request.user.has_perm('ed_news.can_downvote_comment'):
+                can_downvote = True
+
+        # Calculate margin-left, based on nesting level.
+        margin_left = nesting_level * 30
+
+        # Append current comment information to comment_set.
+        comment_set.append({'comment': comment, 'age': age,
+                            'upvoted': upvoted, 'can_upvote': can_upvote,
+                            'downvoted': downvoted, 'can_downvote': can_downvote,
+                            'nesting_level': nesting_level,
+                            'margin_left': margin_left,
+                            })
+
+        # Append nested comments, if there are any.
+        #  Send nesting_level + 1, but when recursion finishes, 
+        #  nesting level in top-level for loop should still be 0.
+        if comment.comment_set.count() > 0:
+            get_comment_set(comment, request, comment_set, nesting_level + 1)
+
+    #return comment_set

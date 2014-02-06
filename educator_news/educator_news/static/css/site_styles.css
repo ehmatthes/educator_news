@@ -36,6 +36,7 @@
 }
 
 .comment {
+	 border: 0px solid blue;
 	 margin-left: 20px;
 	 margin-bottom: 10px;
 }

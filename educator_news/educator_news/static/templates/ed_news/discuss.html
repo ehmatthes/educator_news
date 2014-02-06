@@ -46,7 +46,7 @@
 	 {% comment %} --- All comments --- {% endcomment%}
     {% for comment_dict in comment_set %}
 
-		  <div class='comment'>
+		  <div class='comment' style='margin-left: {{ comment_dict.margin_left }}px'>
 			   <div>
 
 				  {% comment %}User cannot upvote or downvote.{% endcomment %}
@@ -100,6 +100,5 @@
 		  </div>
 
 	 {% endfor %}
-
 
 {% endblock %}
