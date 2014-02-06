@@ -298,6 +298,8 @@ def reply(request, article_id, comment_id):
             #  an article at the same time, to be fair.
             update_comment_ranking_points(article)
             update_ranking_points()
+            # Redirect to discussion page.
+            return redirect('/discuss/%s/' % article.id)
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
