@@ -46,7 +46,7 @@
 	 {% comment %} --- All comments --- {% endcomment%}
     {% for comment_dict in comment_set %}
 
-		  <div class='comment' style='margin-left: {{ comment_dict.margin_left }}px'>
+		  <div class='comment' style='margin-left: {{ comment_dict.margin_left }}px; color: {{ comment_dict.text_color }}'>
 			   <div>
 
 				  {% comment %}User cannot upvote or downvote.{% endcomment %}
@@ -85,16 +85,23 @@
 
 
 				  {{ comment_dict.age }} ago
+
+				  {% if comment_dict.flagged and comment_dict.can_flag %}
+						| <a href="{% url 'ed_news:flag_comment' article.id comment_dict.comment.id %}">unflag</a>
+				  {% elif comment_dict.can_flag %}
+						| <a href="{% url 'ed_news:flag_comment' article.id comment_dict.comment.id %}">flag</a>
+				  {% endif %}
+
 				  {% block admin_comment_info %}{% endblock %}
 			   </div>
 				{% if not user.is_authenticated %}
-				  <div class='comment_text comment_text_no_downvote'>{{ comment_dict.comment.comment_text }}</div>
+				  <div class='comment_text comment_text_no_downvote'>{{ comment_dict.comment.comment_text|linebreaks }}</div>
 				  <div class='reply_link reply_link_no_downvote'><a href="{% url 'login' %}">reply</a></div>
 				{% elif user.is_authenticated and perms.ed_news.can_downvote_comment %}
-				  <div class='comment_text'>{{ comment_dict.comment.comment_text }}</div>
+				  <div class='comment_text'>{{ comment_dict.comment.comment_text|linebreaks }}</div>
 				  <div class='reply_link'><a href="{% url 'ed_news:reply' article.id comment_dict.comment.id %}">reply</a></div>
 				{% else %}
-				  <div class='comment_text comment_text_no_downvote'>{{ comment_dict.comment.comment_text }}</div>
+				  <div class='comment_text comment_text_no_downvote'>{{ comment_dict.comment.comment_text|linebreaks }}</div>
 				  <div class='reply_link reply_link_no_downvote'><a href="{% url 'ed_news:reply' article.id comment_dict.comment.id %}">reply</a></div>
 				{% endif %}
 		  </div>

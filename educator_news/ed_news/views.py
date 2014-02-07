@@ -252,14 +252,6 @@ def discuss(request, article_id, admin=False):
 
     comment_set = []
     get_comment_set(article, request, comment_set)
-    print "Comment set: \n"
-    print comment_set
-    print "\n\nComment dicts: \n"
-    for comment_dict in comment_set: print comment_dict, "\n"
-    #for comment_dict in comment_set:
-        #print comment_dict
-        #print comment_dict['comment'].id, comment_dict['nesting_level']
-    print "\n\n\n", len(comment_set), "comments"
 
     if admin:
         template = 'ed_news/discuss_admin.html'
@@ -374,6 +366,7 @@ def upvote_article(request, article_id):
         update_ranking_points()
         return redirect(next_page)
 
+
 def upvote_comment(request, comment_id):
     # If not upvoted, upvote and increment author's karma.
     # If upvoted, undo upvote and decrement author's karma.
@@ -405,7 +398,12 @@ def upvote_comment(request, comment_id):
         comment.save()
         increment_karma(comment.author)
 
+    # Recalculate comment order.
+    article = get_parent_article(comment)
+    update_comment_ranking_points(article)
+
     return redirect(next_page)
+
 
 def downvote_comment(request, comment_id):
     # If not downvoted, downvote and decrement author's karma.
@@ -438,7 +436,54 @@ def downvote_comment(request, comment_id):
         comment.save()
         decrement_karma(comment.author)
 
+    # Recalculate comment order.
+    article = get_parent_article(comment)
+    update_comment_ranking_points(article)
+
     return redirect(next_page)
+
+
+def flag_comment(request, article_id, comment_id):
+    """Flagging a comment drops its visibility more quickly.
+    Can also trigger moderators to look at the user, and consider
+      taking overall action against the user.
+    """
+    # If not flagged, flag and decrement author's karma.
+    # If flagged, undo flag and increment author's karma.
+    # If upvoted, undo upvote and decrement author's karma.
+    #   (Can't flag something you've upvoted.)
+
+    next_page = request.META.get('HTTP_REFERER', None) or '/'
+    comment = Comment.objects.get(id=comment_id)
+
+    flaggers = comment.flags.all()
+
+    if request.user == comment.author:
+        return redirect(next_page)
+
+    if request.user not in flaggers:
+        # Flag article, and decrement author's karma.
+        comment.flags.add(request.user)
+        comment.save()
+        decrement_karma(comment.author)
+
+    if request.user in flaggers:
+        # Undo the flag, and increment author's karma.
+        comment.flags.remove(request.user)
+        comment.save()
+        increment_karma(comment.author)
+
+    if request.user in comment.upvotes.all():
+        # Undo the upvote, and decrement author's karma.
+        comment.upvotes.remove(request.user)
+        comment.save()
+        decrement_karma(comment.author)
+
+    # Recalculate comment order.
+    update_comment_ranking_points(Article.objects.get(id=article_id))
+
+    return redirect(next_page)
+
 
 # --- Utility functions ---
 def increment_karma(user):
@@ -536,15 +581,32 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
             elif request.user.has_perm('ed_news.can_downvote_comment'):
                 can_downvote = True
 
+        # Note whether user has flagged this comment.
+        flagged = False
+        if request.user in comment.flags.all():
+            flagged = True
+        can_flag = False
+        if request.user.is_authenticated() and request.user != comment.author:
+            can_flag = True
+
+
         # Calculate margin-left, based on nesting level.
         margin_left = nesting_level * 30
+
+        # Comments with net downvotes fade to background color.
+        steps_to_disappear = 10
+        # step_value * net downvotes, but not negative and not more than 255.
+        text_color_value = min(255, (255/steps_to_disappear)*max(0,(comment.downvotes.count()-comment.upvotes.count())))
+        text_color = "rgb(%d, %d, %d)" % (text_color_value, text_color_value, text_color_value)
 
         # Append current comment information to comment_set.
         comment_set.append({'comment': comment, 'age': age,
                             'upvoted': upvoted, 'can_upvote': can_upvote,
                             'downvoted': downvoted, 'can_downvote': can_downvote,
+                            'flagged': flagged, 'can_flag': can_flag,
                             'nesting_level': nesting_level,
                             'margin_left': margin_left,
+                            'text_color': text_color,
                             })
 
         # Append nested comments, if there are any.
@@ -554,3 +616,15 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
             get_comment_set(comment, request, comment_set, nesting_level + 1)
 
     #return comment_set
+
+def get_parent_article(comment):
+    """Takes in a comment, and searches up the comment chain to find
+    the parent article.
+    """
+
+    if comment.parent_article:
+        parent_object = comment.parent_article
+    else:
+        parent_object = get_parent_article(comment.parent_comment)
+
+    return parent_object

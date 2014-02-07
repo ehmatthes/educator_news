@@ -52,8 +52,9 @@ class Comment(models.Model):
 
     submission_time = models.DateTimeField(auto_now_add=True)
 
-    # Will need to kill some comments.
-    alive = models.BooleanField(default=True)
+    # Will need to ignore some comments, by making them invisible.
+    #  But assume visible.
+    visible = models.BooleanField(default=True)
 
     # If it's a first-level reply, there is a parent article.
     parent_article = models.ForeignKey(Article, blank=True, null=True)
