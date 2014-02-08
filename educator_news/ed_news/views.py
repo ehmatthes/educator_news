@@ -261,12 +261,17 @@ def discuss(request, article_id, admin=False):
     #  that was just saved.
     comment_count = get_comment_count(article)
     # If user logged in, get article set.
+    #  Also check if article is flagged by this user.
     user_articles = []
+    flagged = False
     if request.user.is_authenticated():
         user_articles = request.user.userprofile.articles.all()
+        if request.user in article.flags.all():
+            flagged = True
 
     comment_set = []
     get_comment_set(article, request, comment_set)
+
 
     if admin:
         template = 'ed_news/discuss_admin.html'
@@ -277,6 +282,7 @@ def discuss(request, article_id, admin=False):
                               {'article': article, 'age': age,
                                'comment_count': comment_count,
                                'user_articles': user_articles,
+                               'flagged': flagged,
                                'comment_entry_form': comment_entry_form,
                                'comment_set': comment_set,
                                },

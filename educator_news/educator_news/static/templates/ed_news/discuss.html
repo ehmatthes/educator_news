@@ -10,10 +10,16 @@
 			     <a href="{% url 'ed_news:upvote_article' article.id %}">&#9650</a>
 				  <a href="{{ article.url }}">{{ article.title }}</a></div>
 		    {% endif %}
+
 		  <div class='points_line points_line_discuss'>
 			 {{ article.upvotes }}{% if article.upvotes != 1 %} points{% else %} point{% endif %}
 			 by <a href="{% url 'profile' article.submitter.id %}">{{ article.submitter }}</a>
 			 {{ age }} ago |
+
+			 <a href="{% url 'ed_news:flag_article' article.id %}">
+				{% if flagged %}unflag{% else %}flag{% endif %}
+			 </a> |
+
 			 <a href="{% url 'ed_news:discuss' article.id %}">
 				{% if comment_count == 0 %}discuss{% elif comment_count == 1 %}1 comment{% else %}{{ comment_count }} comments{% endif %}
 		    </a>
