@@ -595,9 +595,17 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
         margin_left = nesting_level * 30
 
         # Comments with net downvotes fade to background color.
-        steps_to_disappear = 10
+        # Steps to fade completely.
+        downvote_steps = 10
         # step_value * net downvotes, but not negative and not more than 255.
-        text_color_value = min(255, (255/steps_to_disappear)*max(0,(comment.downvotes.count()-comment.upvotes.count())))
+        text_color_value = min(255, (255/downvote_steps)*max(0,(comment.downvotes.count()-comment.upvotes.count())))
+        text_color = "rgb(%d, %d, %d)" % (text_color_value, text_color_value, text_color_value)
+
+        # Comments with net flags fade to background color.
+        # Steps to fade completely.
+        flag_steps = 3
+        # step_value * flags, but not negative and not more than 255.
+        text_color_value = min(255, (255/flag_steps)*max(0,(comment.flags.count()-comment.upvotes.count())))
         text_color = "rgb(%d, %d, %d)" % (text_color_value, text_color_value, text_color_value)
 
         # Append current comment information to comment_set.
