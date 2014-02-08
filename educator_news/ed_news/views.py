@@ -33,7 +33,14 @@ def index(request):
     for article in articles:
         article_age = get_submission_age(article)
         comment_count = get_comment_count(article)
-        articles_ages.append({'article': article, 'age': article_age, 'comment_count': comment_count})
+
+        flagged = False
+        if request.user in article.flags.all():
+            flagged = True
+
+        articles_ages.append({'article': article, 'age': article_age,
+                              'comment_count': comment_count, 'flagged': flagged})
+
         if request.user.is_authenticated() and article in request.user.userprofile.articles.all():
             user_articles.append(article)
 
@@ -206,7 +213,15 @@ def new(request):
     for article in articles:
         article_age = get_submission_age(article)
         comment_count = get_comment_count(article)
-        articles_ages.append({'article': article, 'age': article_age, 'comment_count': comment_count})
+
+        flagged = False
+        if request.user in article.flags.all():
+            flagged = True
+
+        articles_ages.append({'article': article, 'age': article_age,
+                              'comment_count': comment_count, 'flagged': flagged})
+        
+        # DEV: this should be an attribute of each article, rather than a separate list.
         if request.user.is_authenticated() and article in request.user.userprofile.articles.all():
             user_articles.append(article)
 
@@ -485,6 +500,50 @@ def flag_comment(request, article_id, comment_id):
     return redirect(next_page)
 
 
+def flag_article(request, article_id):
+    """Flagging an article drops its quickly.
+    Can also trigger moderators to look at the submitter and the domain.
+    Moderators may consider taking overall action against the user.
+    Moderators may consider ignoring the domain.
+    """
+    # If not flagged, flag and decrement submitter's karma.
+    # If flagged, undo flag and increment submitter's karma.
+    # If upvoted, undo upvote and decrement submitter's karma.
+    #   (Can't flag something you've upvoted.)
+
+    next_page = request.META.get('HTTP_REFERER', None) or '/'
+    article = Article.objects.get(id=article_id)
+
+    flaggers = article.flags.all()
+
+    if request.user == article.submitter:
+        return redirect(next_page)
+
+    if request.user not in flaggers:
+        # Flag article, and decrement submitter's karma.
+        article.flags.add(request.user)
+        article.save()
+        decrement_karma(article.submitter)
+
+    if request.user in flaggers:
+        # Undo the flag, and increment submitter's karma.
+        article.flags.remove(request.user)
+        article.save()
+        increment_karma(article.submitter)
+
+    if article in request.user.userprofile.articles.all():
+        # Undo the upvote, and decrement submitter's karma.
+        article.upvotes -= 1
+        article.save()
+        request.user.userprofile.articles.remove(article)
+        decrement_karma(article.submitter)
+
+    # Recalculate article ranking points.
+    update_ranking_points()
+
+    return redirect(next_page)
+
+
 # --- Utility functions ---
 def increment_karma(user):
     new_karma = user.userprofile.karma + 1
@@ -522,8 +581,11 @@ def update_ranking_points():
     for article in articles:
         newness_points = get_newness_points(article)
         comment_points = 5*article.comment_set.count()
-        article.ranking_points = 10*article.upvotes + comment_points + newness_points
+        # Flags affect articles proportionally.
+        flag_factor = 0.8**article.flags.count()
+        article.ranking_points = flag_factor*(10*article.upvotes + comment_points + newness_points)
         article.save()
+        #print 'rp', article, article.ranking_points
         
 def update_comment_ranking_points(article):
     # Update the ranking points for an article's comments.
