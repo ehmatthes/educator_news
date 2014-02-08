@@ -611,7 +611,7 @@ def update_ranking_points():
     articles = Article.objects.all()
     for article in articles:
         newness_points = get_newness_points(article)
-        comment_points = 5*article.comment_set.count()
+        comment_points = 5*get_comment_count(article)
         # Flags affect articles proportionally.
         flag_factor = 0.8**article.flags.count()
         article.ranking_points = flag_factor*(10*article.upvotes + comment_points + newness_points)
