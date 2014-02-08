@@ -38,8 +38,13 @@ def index(request):
         if request.user in article.flags.all():
             flagged = True
 
+        can_flag = False
+        if request.user.is_authenticated() and request.user != article.submitter:
+            can_flag = True
+
         articles_ages.append({'article': article, 'age': article_age,
-                              'comment_count': comment_count, 'flagged': flagged})
+                              'comment_count': comment_count,
+                              'flagged': flagged, 'can_flag': can_flag,})
 
         if request.user.is_authenticated() and article in request.user.userprofile.articles.all():
             user_articles.append(article)
@@ -218,8 +223,14 @@ def new(request):
         if request.user in article.flags.all():
             flagged = True
 
+        can_flag = False
+        if request.user.is_authenticated() and request.user != article.submitter:
+            can_flag = True
+
         articles_ages.append({'article': article, 'age': article_age,
-                              'comment_count': comment_count, 'flagged': flagged})
+                              'comment_count': comment_count,
+                              'flagged': flagged, 'can_flag': can_flag,
+                              })
         
         # DEV: this should be an attribute of each article, rather than a separate list.
         if request.user.is_authenticated() and article in request.user.userprofile.articles.all():
@@ -265,10 +276,14 @@ def discuss(request, article_id, admin=False):
     #  Also check if article is flagged by this user.
     user_articles = []
     flagged = False
+    can_flag = False
     if request.user.is_authenticated():
         user_articles = request.user.userprofile.articles.all()
         if request.user in article.flags.all() and request.user != article.submitter:
             flagged = True
+
+        if request.user != article.submitter:
+            can_flag = True
 
     comment_set = []
     get_comment_set(article, request, comment_set)
@@ -283,7 +298,7 @@ def discuss(request, article_id, admin=False):
                               {'article': article, 'age': age,
                                'comment_count': comment_count,
                                'user_articles': user_articles,
-                               'flagged': flagged,
+                               'flagged': flagged, 'can_flag': can_flag,
                                'comment_entry_form': comment_entry_form,
                                'comment_set': comment_set,
                                },
@@ -333,11 +348,13 @@ def reply(request, article_id, comment_id):
     #  Also check if article is flagged by this user.
     user_articles = []
     flagged = False
+    can_flag = False
     if request.user.is_authenticated():
         user_articles = request.user.userprofile.articles.all()
         if request.user in article.flags.all() and request.user != article.submitter:
             flagged = True
-
+        if request.user != article.submitter:
+            can_flag = True
 
     upvoted, can_upvote = False, False
     downvoted, can_downvote = False, False
@@ -356,7 +373,7 @@ def reply(request, article_id, comment_id):
                                'comment': comment, 'comment_age': comment_age,
                                'comment_count': comment_count,
                                'user_articles': user_articles,
-                               'flagged': flagged,
+                               'flagged': flagged, 'can_flag': can_flag,
                                'can_upvote': can_upvote, 'upvoted': upvoted,
                                'can_downvote': can_downvote, 'downvoted': downvoted,
                                'reply_entry_form': reply_entry_form,

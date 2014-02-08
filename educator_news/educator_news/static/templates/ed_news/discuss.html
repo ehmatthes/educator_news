@@ -16,9 +16,11 @@
 			 by <a href="{% url 'profile' article.submitter.id %}">{{ article.submitter }}</a>
 			 {{ age }} ago |
 
-			 <a href="{% url 'ed_news:flag_article' article.id %}">
-				{% if flagged %}unflag{% else %}flag{% endif %}
-			 </a> |
+			 {% if can_flag %}
+			   <a href="{% url 'ed_news:flag_article' article.id %}">
+				  {% if flagged %}unflag{% else %}flag{% endif %}
+				</a> |
+			 {% endif %}
 
 			 <a href="{% url 'ed_news:discuss' article.id %}">
 				{% if comment_count == 0 %}discuss{% elif comment_count == 1 %}1 comment{% else %}{{ comment_count }} comments{% endif %}
