@@ -14,6 +14,7 @@ class Submission(models.Model):
     title = models.CharField(max_length=80)
     submitter = models.ForeignKey(User)
     upvotes = models.IntegerField(default=0)
+    flags = models.ManyToManyField(User, blank=True, null=True, related_name='flagged_articles')
     ranking_points = models.IntegerField(default=0)
     submission_time = models.DateTimeField(auto_now_add=True)
 
