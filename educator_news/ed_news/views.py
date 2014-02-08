@@ -260,13 +260,14 @@ def discuss(request, article_id, admin=False):
     # Get comment information after processing form, to include comment
     #  that was just saved.
     comment_count = get_comment_count(article)
+
     # If user logged in, get article set.
     #  Also check if article is flagged by this user.
     user_articles = []
     flagged = False
     if request.user.is_authenticated():
         user_articles = request.user.userprofile.articles.all()
-        if request.user in article.flags.all():
+        if request.user in article.flags.all() and request.user != article.submitter:
             flagged = True
 
     comment_set = []
@@ -327,10 +328,16 @@ def reply(request, article_id, comment_id):
     #  that was just saved.
     comment_count = article.comment_set.count()
     comment_count = get_comment_count(article)
+
     # If user logged in, get article set.
+    #  Also check if article is flagged by this user.
     user_articles = []
+    flagged = False
     if request.user.is_authenticated():
         user_articles = request.user.userprofile.articles.all()
+        if request.user in article.flags.all() and request.user != article.submitter:
+            flagged = True
+
 
     upvoted, can_upvote = False, False
     downvoted, can_downvote = False, False
@@ -349,6 +356,7 @@ def reply(request, article_id, comment_id):
                                'comment': comment, 'comment_age': comment_age,
                                'comment_count': comment_count,
                                'user_articles': user_articles,
+                               'flagged': flagged,
                                'can_upvote': can_upvote, 'upvoted': upvoted,
                                'can_downvote': can_downvote, 'downvoted': downvoted,
                                'reply_entry_form': reply_entry_form,
