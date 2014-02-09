@@ -18,6 +18,10 @@ class Submission(models.Model):
     ranking_points = models.IntegerField(default=0)
     submission_time = models.DateTimeField(auto_now_add=True)
 
+    # Will need to ignore some comments, by making them invisible.
+    #  But assume visible.
+    visible = models.BooleanField(default=True)
+
     class Meta:
         abstract = True
 

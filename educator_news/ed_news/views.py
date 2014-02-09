@@ -20,6 +20,9 @@ from ed_news.models import Article, Comment
 KARMA_LEVEL_MODERATORS = 2
 #  Continue to follow HN example, which is 30 articles per screen.
 MAX_SUBMISSIONS = 30
+# Number of flags it takes to make an article disappear.
+#  Or maybe one flag from a super-mod?
+FLAGS_TO_DISAPPEAR = 1
 
 def index(request):
     # Get a list of submissions, sorted by date.
@@ -563,13 +566,23 @@ def flag_article(request, article_id):
     if request.user not in flaggers:
         # Flag article, and decrement submitter's karma.
         article.flags.add(request.user)
+
+        # If enough flags, article disappears.
+        if article.flags.count() >= FLAGS_TO_DISAPPEAR:
+            article.visible = False
         article.save()
+
         decrement_karma(article.submitter)
 
     if request.user in flaggers:
         # Undo the flag, and increment submitter's karma.
         article.flags.remove(request.user)
+
+        # If enough flags, article disappears.
+        if article.flags.count() > FLAGS_TO_DISAPPEAR:
+            article.visible = False
         article.save()
+
         increment_karma(article.submitter)
 
     if article in request.user.userprofile.articles.all():
