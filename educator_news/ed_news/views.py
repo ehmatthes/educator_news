@@ -5,7 +5,7 @@ from django.template import RequestContext
 from django.contrib.auth import logout
 from django.core.urlresolvers import reverse
 from django.contrib.auth.views import password_change
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.utils.timezone import utc
 
 from ed_news.forms import UserForm, UserProfileForm
@@ -14,6 +14,8 @@ from ed_news.forms import ArticleForm, CommentEntryForm
 
 from ed_news.models import Article, Comment
 
+# These should be moved to a settings, config, or .env file.
+KARMA_LEVEL_MODERATORS = 2
 
 def index(request):
     # Should this be in a settings/config file? Best practice says...
@@ -589,10 +591,20 @@ def increment_karma(user):
     user.userprofile.karma = new_karma
     user.userprofile.save()
 
+    # Add user to moderators group if passed karma level.
+    if new_karma > KARMA_LEVEL_MODERATORS:
+        moderators = Group.objects.get(name='Moderators')
+        user.groups.add(moderators)
+
 def decrement_karma(user):
     new_karma = user.userprofile.karma - 1
     user.userprofile.karma = new_karma
     user.userprofile.save()
+
+    # Remove user from moderators group if below karma level.
+    if new_karma < KARMA_LEVEL_MODERATORS:
+        moderators = Group.objects.get(name='Moderators')
+        user.groups.remove(moderators)
 
 def get_submission_age(submission):
     """Returns a formatted string stating how old the article is.
