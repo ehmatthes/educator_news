@@ -78,3 +78,7 @@ a.upvoted_link, a.downvoted_link {
 .reply_link_no_downvote {
 	 margin-left: 20px;
 }
+
+span.beta_notice {
+	 font-size: 14px;
+}
