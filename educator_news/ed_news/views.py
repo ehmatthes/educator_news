@@ -23,7 +23,7 @@ def index(request):
     # Get a list of submissions, sorted by date.
     #  This is where MTI inheritance might be better; query all submissions,
     #  rather than building a list of submissions from separate articles
-    #  and posts.
+    #  and posts. and request.user.has_perms(can_flag_article):
     articles = Article.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
     
     # Note which articles should not get upvotes.
@@ -39,7 +39,7 @@ def index(request):
             flagged = True
 
         can_flag = False
-        if request.user.is_authenticated() and request.user != article.submitter:
+        if request.user.is_authenticated() and request.user != article.submitter and request.user.has_perm('ed_news.can_flag_article'):
             can_flag = True
 
         articles_ages.append({'article': article, 'age': article_age,
@@ -224,7 +224,7 @@ def new(request):
             flagged = True
 
         can_flag = False
-        if request.user.is_authenticated() and request.user != article.submitter:
+        if request.user.is_authenticated() and request.user != article.submitter and request.user.has_perm('ed_news.can_flag_article'):
             can_flag = True
 
         articles_ages.append({'article': article, 'age': article_age,
@@ -282,7 +282,7 @@ def discuss(request, article_id, admin=False):
         if request.user in article.flags.all() and request.user != article.submitter:
             flagged = True
 
-        if request.user != article.submitter:
+        if request.user != article.submitter and request.user.has_perm('ed_news.can_flag_article'):
             can_flag = True
 
     comment_set = []
@@ -353,11 +353,13 @@ def reply(request, article_id, comment_id):
         user_articles = request.user.userprofile.articles.all()
         if request.user in article.flags.all() and request.user != article.submitter:
             flagged = True
-        if request.user != article.submitter:
+        if request.user != article.submitter and request.user.has_perm('ed_news.can_flag_article'):
             can_flag = True
 
     upvoted, can_upvote = False, False
     downvoted, can_downvote = False, False
+    can_flag_comment = False
+    comment_flagged = False
     if request.user.is_authenticated() and request.user != comment.author:
         if request.user in comment.upvotes.all():
             upvoted = True
@@ -367,6 +369,10 @@ def reply(request, article_id, comment_id):
             downvoted = True
         elif request.user.has_perm('ed_news.can_downvote_comment'):
             can_downvote = True
+        if request.user in comment.flags.all():
+            comment_flagged = True
+        if request.user.has_perm('ed_news.can_flag_comment'):
+            can_flag_comment = True
 
     return render_to_response('ed_news/reply.html',
                               {'article': article, 'article_age': article_age,
@@ -376,6 +382,8 @@ def reply(request, article_id, comment_id):
                                'flagged': flagged, 'can_flag': can_flag,
                                'can_upvote': can_upvote, 'upvoted': upvoted,
                                'can_downvote': can_downvote, 'downvoted': downvoted,
+                               'can_flag_comment': can_flag_comment,
+                               'comment_flagged': comment_flagged,
                                'reply_entry_form': reply_entry_form,
                                },
                               context_instance = RequestContext(request))
@@ -504,7 +512,7 @@ def flag_comment(request, article_id, comment_id):
 
     flaggers = comment.flags.all()
 
-    if request.user == comment.author:
+    if request.user == comment.author or not request.user.has_perm('ed_news.can_flag_comment'):
         return redirect(next_page)
 
     if request.user not in flaggers:
@@ -547,7 +555,7 @@ def flag_article(request, article_id):
 
     flaggers = article.flags.all()
 
-    if request.user == article.submitter:
+    if request.user == article.submitter or not request.user.has_perm('ed_news.can_flag_article'):
         return redirect(next_page)
 
     if request.user not in flaggers:
@@ -679,7 +687,7 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
         if request.user in comment.flags.all():
             flagged = True
         can_flag = False
-        if request.user.is_authenticated() and request.user != comment.author:
+        if request.user.is_authenticated() and request.user != comment.author and request.user.has_perm('ed_news.can_flag_comment'):
             can_flag = True
 
 
