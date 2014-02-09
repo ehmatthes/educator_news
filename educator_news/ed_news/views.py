@@ -29,7 +29,7 @@ def index(request):
     #  This is where MTI inheritance might be better; query all submissions,
     #  rather than building a list of submissions from separate articles
     #  and posts. and request.user.has_perms(can_flag_article):
-    articles = Article.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
+    articles = Article.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
     
     # Note which articles should not get upvotes.
     # Build a list of articles, and their ages.
@@ -206,15 +206,11 @@ def new(request):
     """Page to show the newest submissions.
     """
 
-    # Should this be in a settings/config file? Best practice says...
-    #  Continue to follow HN example, which is 30 articles per screen.
-    MAX_SUBMISSIONS = 30
-    
     # Get a list of submissions, sorted by date.
     #  This is where MTI inheritance might be better; query all submissions,
     #  rather than building a list of submissions from separate articles
     #  and posts.
-    articles = Article.objects.all().order_by('submission_time').reverse()[:MAX_SUBMISSIONS]
+    articles = Article.objects.filter(visible=True).order_by('submission_time').reverse()[:MAX_SUBMISSIONS]
     
     # Note which articles should not get upvotes.
     # Build a list of articles, and their ages.
