@@ -579,8 +579,8 @@ def flag_article(request, article_id):
         article.flags.remove(request.user)
 
         # If enough flags, article disappears.
-        if article.flags.count() > FLAGS_TO_DISAPPEAR:
-            article.visible = False
+        if article.flags.count() < FLAGS_TO_DISAPPEAR:
+            article.visible = True
         article.save()
 
         increment_karma(article.submitter)
