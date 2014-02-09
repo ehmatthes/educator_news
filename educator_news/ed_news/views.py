@@ -85,8 +85,15 @@ def profile(request, profile_id):
 
 def edit_profile(request):
     user = request.user
+
+    # If user is moderator, they can choose to set show_invisible = True.
+    allow_show_invisible = False
+    if is_moderator(user):
+        allow_show_invisible = True
+
     if request.method == 'POST':
         edit_user_form = EditUserForm(data=request.POST, instance=request.user)
+        # if user is moderator, let them set show_invisible
         edit_user_profile_form = EditUserProfileForm(data=request.POST, instance=request.user.userprofile)
 
         if edit_user_form.is_valid():
@@ -106,6 +113,7 @@ def edit_profile(request):
     return render_to_response('registration/edit_profile.html',
                               {'edit_user_form': edit_user_form,
                                'edit_user_profile_form': edit_user_profile_form,
+                               'allow_show_invisible': allow_show_invisible,
                                },
                               context_instance = RequestContext(request))
 
@@ -758,3 +766,6 @@ def get_parent_article(comment):
         parent_object = get_parent_article(comment.parent_comment)
 
     return parent_object
+
+def is_moderator(user):
+    return user.groups.filter(name='Moderators')

@@ -28,7 +28,7 @@ class EditUserForm(forms.ModelForm):
 class EditUserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ('email_public',)
+        fields = ('email_public', 'show_invisible')
 
 class CommentEntryForm(forms.ModelForm):
     class Meta:

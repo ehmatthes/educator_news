@@ -32,13 +32,16 @@ class Article(Submission):
     url = models.URLField()
 
 class UserProfile(models.Model):
+    # Custom user fields, not in User model.
+
     # Link UserProfile to a User instance.
     user = models.OneToOneField(User)
     email_public = models.BooleanField(default=False)
     articles = models.ManyToManyField(Article, blank=True, null=True)
     karma = models.IntegerField(default=0)
 
-    # Custom user fields, not in User model.
+    # Only moderators can choose show_all.
+    show_invisible = models.BooleanField(default=False)
 
     # Use username to refer to user.
     def __unicode__(self):
