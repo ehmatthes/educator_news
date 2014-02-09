@@ -15,13 +15,13 @@ from ed_news.forms import ArticleForm, CommentEntryForm
 from ed_news.models import Article, Comment
 
 # These should be moved to a settings, config, or .env file.
+# Moderation level will start at 10, increase as site becomes more active.
+#  Should have low level if debug = True?
 KARMA_LEVEL_MODERATORS = 2
+#  Continue to follow HN example, which is 30 articles per screen.
+MAX_SUBMISSIONS = 30
 
 def index(request):
-    # Should this be in a settings/config file? Best practice says...
-    #  Continue to follow HN example, which is 30 articles per screen.
-    MAX_SUBMISSIONS = 30
-    
     # Get a list of submissions, sorted by date.
     #  This is where MTI inheritance might be better; query all submissions,
     #  rather than building a list of submissions from separate articles
