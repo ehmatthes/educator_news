@@ -2,7 +2,7 @@
 import sys
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from ed_news.models import Comment
+from ed_news.models import Comment, Article
 
 # Make group Moderators if it doesn't exist.
 try:
@@ -13,21 +13,57 @@ except Group.DoesNotExist:
     moderators.save()
     print "Created group Moderators."
 
+# Permission: can_downvote_comment
 try:
-    downvote_permission = Permission.objects.get(codename='can_downvote')
+    downvote_comment_permission = Permission.objects.get(codename='can_downvote_comment')
 except Permission.DoesNotExist:
     content_type = ContentType.objects.get_for_model(Comment)
-    downvote_permission = Permission.objects.create(codename='can_downvote_comment',
+    downvote_comment_permission = Permission.objects.create(codename='can_downvote_comment',
                                        name='Can downvote comments',
                                        content_type=content_type)
-    downvote_permission.save()
+    downvote_comment_permission.save()
 
 try:
-    moderators.permissions.add(downvote_permission)
+    moderators.permissions.add(downvote_comment_permission)
     print "Moderators can downvote comments."
 except:
     pass
     
+
+# Permission: can_flag_comment
+try:
+    flag_comment_permission = Permission.objects.get(codename='can_flag_comment')
+except Permission.DoesNotExist:
+    content_type = ContentType.objects.get_for_model(Comment)
+    flag_comment_permission = Permission.objects.create(codename='can_flag_comment',
+                                       name='Can flag comments',
+                                       content_type=content_type)
+    flag_comment_permission.save()
+
+try:
+    moderators.permissions.add(flag_comment_permission)
+    print "Moderators can flag comments."
+except:
+    pass
+
+
+# Permission: can_flag_article
+try:
+    flag_article_permission = Permission.objects.get(codename='can_flag_article')
+except Permission.DoesNotExist:
+    content_type = ContentType.objects.get_for_model(Article)
+    flag_article_permission = Permission.objects.create(codename='can_flag_article',
+                                       name='Can flag articles',
+                                       content_type=content_type)
+    flag_article_permission.save()
+
+try:
+    moderators.permissions.add(flag_article_permission)
+    print "Moderators can flag articles."
+except:
+    pass
+
+
 
 
 #print Comment.permissions.can_downvote in moderators.permissions

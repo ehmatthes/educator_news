@@ -23,7 +23,7 @@ def index(request):
     # Get a list of submissions, sorted by date.
     #  This is where MTI inheritance might be better; query all submissions,
     #  rather than building a list of submissions from separate articles
-    #  and posts.
+    #  and posts. and request.user.has_perms(can_flag_article):
     articles = Article.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
     
     # Note which articles should not get upvotes.
@@ -39,7 +39,7 @@ def index(request):
             flagged = True
 
         can_flag = False
-        if request.user.is_authenticated() and request.user != article.submitter:
+        if request.user.is_authenticated() and request.user != article.submitter and request.user.has_perm('ed_news.can_flag_article'):
             can_flag = True
 
         articles_ages.append({'article': article, 'age': article_age,
@@ -224,7 +224,7 @@ def new(request):
             flagged = True
 
         can_flag = False
-        if request.user.is_authenticated() and request.user != article.submitter:
+        if request.user.is_authenticated() and request.user != article.submitter and request.user.has_perm('ed_news.can_flag_article'):
             can_flag = True
 
         articles_ages.append({'article': article, 'age': article_age,
@@ -282,7 +282,7 @@ def discuss(request, article_id, admin=False):
         if request.user in article.flags.all() and request.user != article.submitter:
             flagged = True
 
-        if request.user != article.submitter:
+        if request.user != article.submitter and request.user.has_perm('ed_news.can_flag_article'):
             can_flag = True
 
     comment_set = []
@@ -353,7 +353,7 @@ def reply(request, article_id, comment_id):
         user_articles = request.user.userprofile.articles.all()
         if request.user in article.flags.all() and request.user != article.submitter:
             flagged = True
-        if request.user != article.submitter:
+        if request.user != article.submitter and request.user.has_perm('ed_news.can_flag_article'):
             can_flag = True
 
     upvoted, can_upvote = False, False
