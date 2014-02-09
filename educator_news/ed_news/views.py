@@ -20,13 +20,16 @@ from ed_news.models import Article, Comment
 KARMA_LEVEL_MODERATORS = 2
 #  Continue to follow HN example, which is 30 articles per screen.
 MAX_SUBMISSIONS = 30
+# Number of flags it takes to make an article disappear.
+#  Or maybe one flag from a super-mod?
+FLAGS_TO_DISAPPEAR = 1
 
 def index(request):
     # Get a list of submissions, sorted by date.
     #  This is where MTI inheritance might be better; query all submissions,
     #  rather than building a list of submissions from separate articles
     #  and posts. and request.user.has_perms(can_flag_article):
-    articles = Article.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
+    articles = Article.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
     
     # Note which articles should not get upvotes.
     # Build a list of articles, and their ages.
@@ -82,8 +85,15 @@ def profile(request, profile_id):
 
 def edit_profile(request):
     user = request.user
+
+    # If user is moderator, they can choose to set show_invisible = True.
+    allow_show_invisible = False
+    if is_moderator(user):
+        allow_show_invisible = True
+
     if request.method == 'POST':
         edit_user_form = EditUserForm(data=request.POST, instance=request.user)
+        # if user is moderator, let them set show_invisible
         edit_user_profile_form = EditUserProfileForm(data=request.POST, instance=request.user.userprofile)
 
         if edit_user_form.is_valid():
@@ -103,6 +113,7 @@ def edit_profile(request):
     return render_to_response('registration/edit_profile.html',
                               {'edit_user_form': edit_user_form,
                                'edit_user_profile_form': edit_user_profile_form,
+                               'allow_show_invisible': allow_show_invisible,
                                },
                               context_instance = RequestContext(request))
 
@@ -203,15 +214,11 @@ def new(request):
     """Page to show the newest submissions.
     """
 
-    # Should this be in a settings/config file? Best practice says...
-    #  Continue to follow HN example, which is 30 articles per screen.
-    MAX_SUBMISSIONS = 30
-    
     # Get a list of submissions, sorted by date.
     #  This is where MTI inheritance might be better; query all submissions,
     #  rather than building a list of submissions from separate articles
     #  and posts.
-    articles = Article.objects.all().order_by('submission_time').reverse()[:MAX_SUBMISSIONS]
+    articles = Article.objects.filter(visible=True).order_by('submission_time').reverse()[:MAX_SUBMISSIONS]
     
     # Note which articles should not get upvotes.
     # Build a list of articles, and their ages.
@@ -563,13 +570,23 @@ def flag_article(request, article_id):
     if request.user not in flaggers:
         # Flag article, and decrement submitter's karma.
         article.flags.add(request.user)
+
+        # If enough flags, article disappears.
+        if article.flags.count() >= FLAGS_TO_DISAPPEAR:
+            article.visible = False
         article.save()
+
         decrement_karma(article.submitter)
 
     if request.user in flaggers:
         # Undo the flag, and increment submitter's karma.
         article.flags.remove(request.user)
+
+        # If enough flags, article disappears.
+        if article.flags.count() < FLAGS_TO_DISAPPEAR:
+            article.visible = True
         article.save()
+
         increment_karma(article.submitter)
 
     if article in request.user.userprofile.articles.all():
@@ -749,3 +766,6 @@ def get_parent_article(comment):
         parent_object = get_parent_article(comment.parent_comment)
 
     return parent_object
+
+def is_moderator(user):
+    return user.groups.filter(name='Moderators')

@@ -8,7 +8,20 @@
 		{% csrf_token %}
 
 		{{ edit_user_form.as_p }}
-		{{ edit_user_profile_form.as_p }}
+
+		{% for field in edit_user_profile_form %}
+
+		  {% if field.id_for_label == 'id_show_invisible' %}
+
+		    {% if allow_show_invisible %}
+		      <p>{{ field.label_tag }} {{ field }}
+			 {% endif %}
+
+		  {% else %}
+			<p>{{ field.label_tag }} {{ field }}
+		  {% endif %}
+
+		{% endfor %}
 
 		<p><input type="submit" name='submit' value="Save Changes" /></p>
 	 </form>

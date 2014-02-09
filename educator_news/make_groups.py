@@ -75,4 +75,3 @@ except:
 #print 'matthese can downvote:', mhe.has_perm('ed_news.can_downvote')
 #mhe.groups.add(moderators)
 #print 'matthese can downvote:', mhe.has_perm('ed_news.can_downvote')
-

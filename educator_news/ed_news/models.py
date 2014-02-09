@@ -18,6 +18,10 @@ class Submission(models.Model):
     ranking_points = models.IntegerField(default=0)
     submission_time = models.DateTimeField(auto_now_add=True)
 
+    # Will need to ignore some comments, by making them invisible.
+    #  But assume visible.
+    visible = models.BooleanField(default=True)
+
     class Meta:
         abstract = True
 
@@ -28,13 +32,16 @@ class Article(Submission):
     url = models.URLField()
 
 class UserProfile(models.Model):
+    # Custom user fields, not in User model.
+
     # Link UserProfile to a User instance.
     user = models.OneToOneField(User)
     email_public = models.BooleanField(default=False)
     articles = models.ManyToManyField(Article, blank=True, null=True)
     karma = models.IntegerField(default=0)
 
-    # Custom user fields, not in User model.
+    # Only moderators can choose show_all.
+    show_invisible = models.BooleanField(default=False)
 
     # Use username to refer to user.
     def __unicode__(self):
