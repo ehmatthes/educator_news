@@ -62,6 +62,13 @@
 					 {% endif %}
 
 				  {{ comment_age }} ago
+
+				  {% if comment_flagged and can_flag_comment %}
+						| <a href="{% url 'ed_news:flag_comment' article.id comment.id %}">unflag</a>
+				  {% elif can_flag_comment %}
+						| <a href="{% url 'ed_news:flag_comment' article.id comment.id %}">flag</a>
+				  {% endif %}
+
 				  {% block admin_comment_info %}{% endblock %}
 			   </div>
 				{% if not user.is_authenticated %}
