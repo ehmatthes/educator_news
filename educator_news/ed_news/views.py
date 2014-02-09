@@ -29,8 +29,12 @@ def index(request):
     #  This is where MTI inheritance might be better; query all submissions,
     #  rather than building a list of submissions from separate articles
     #  and posts. and request.user.has_perms(can_flag_article):
-    articles = Article.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
-    
+
+    if request.user.userprofile.show_invisible:
+        articles = Article.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
+    else:
+        articles = Article.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
+        
     # Note which articles should not get upvotes.
     # Build a list of articles, and their ages.
     articles_ages = []
@@ -218,7 +222,11 @@ def new(request):
     #  This is where MTI inheritance might be better; query all submissions,
     #  rather than building a list of submissions from separate articles
     #  and posts.
-    articles = Article.objects.filter(visible=True).order_by('submission_time').reverse()[:MAX_SUBMISSIONS]
+
+    if request.user.userprofile.show_invisible:
+        articles = Article.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
+    else:
+        articles = Article.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
     
     # Note which articles should not get upvotes.
     # Build a list of articles, and their ages.

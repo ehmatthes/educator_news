@@ -52,7 +52,7 @@
 }
 
 a.upvote_link, a.downvote_link {
-	 color: blue
+	 color: blue;
 }
 
 a.upvoted_link, a.downvoted_link {
@@ -81,4 +81,9 @@ a.upvoted_link, a.downvoted_link {
 
 span.beta_notice {
 	 font-size: 14px;
+}
+
+.show_invisible {
+	 font-style: italic;
+	 color: red;
 }
