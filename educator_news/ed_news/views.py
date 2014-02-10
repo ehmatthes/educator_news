@@ -301,9 +301,9 @@ def discuss(request, submission_id, admin=False):
                                },
                               context_instance = RequestContext(request))
 
-def reply(request, article_id, comment_id):
-    article = Article.objects.get(id=article_id)
-    article_age = get_submission_age(article)
+def reply(request, submission_id, comment_id):
+    submission = Submission.objects.get(id=submission_id)
+    submission_age = get_submission_age(submission)
     comment = Comment.objects.get(id=comment_id)
     comment_age = get_submission_age(comment)
     
@@ -321,11 +321,11 @@ def reply(request, article_id, comment_id):
             reply.parent_comment = comment
             reply.save()
             # Update the ranking points for all comments on 
-            #  an article at the same time, to be fair.
-            update_comment_ranking_points(article)
+            #  a submission at the same time, to be fair.
+            update_comment_ranking_points(submission)
             update_submission_ranking_points()
             # Redirect to discussion page.
-            return redirect('/discuss/%s/' % article.id)
+            return redirect('/discuss/%s/' % submission.id)
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -334,23 +334,22 @@ def reply(request, article_id, comment_id):
     # Prepare a blank entry form.
     reply_entry_form = CommentEntryForm()
 
-
-
     # Get comment information after processing form, to include comment
     #  that was just saved.
-    comment_count = article.comment_set.count()
-    comment_count = get_comment_count(article)
+    comment_count = submission.comment_set.count()
+    comment_count = get_comment_count(submission)
 
-    # If user logged in, get article set.
-    #  Also check if article is flagged by this user.
-    user_articles = []
+    # Check if user has flagged or saved submission.
+    # Check if user can flag the submission.
     flagged = False
     can_flag = False
+    saved_submission = True
     if request.user.is_authenticated():
-        user_articles = request.user.userprofile.articles.all()
-        if request.user in article.flags.all() and request.user != article.submitter:
+        if request.user in submission.upvotes.all():
+            saved_submission = True
+        if request.user in submission.flags.all():
             flagged = True
-        if request.user != article.submitter and request.user.has_perm('ed_news.can_flag_article'):
+        if request.user != submission.submitter and request.user.has_perm('ed_news.can_flag_submission'):
             can_flag = True
 
     upvoted, can_upvote = False, False
@@ -372,10 +371,10 @@ def reply(request, article_id, comment_id):
             can_flag_comment = True
 
     return render_to_response('ed_news/reply.html',
-                              {'article': article, 'article_age': article_age,
+                              {'submission': submission, 'submission_age': submission_age,
                                'comment': comment, 'comment_age': comment_age,
                                'comment_count': comment_count,
-                               'user_articles': user_articles,
+                               'saved_submission': saved_submission,
                                'flagged': flagged, 'can_flag': can_flag,
                                'can_upvote': can_upvote, 'upvoted': upvoted,
                                'can_downvote': can_downvote, 'downvoted': downvoted,
