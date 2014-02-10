@@ -10,7 +10,7 @@ from django.utils.timezone import utc
 
 from ed_news.forms import UserForm, UserProfileForm
 from ed_news.forms import EditUserForm, EditUserProfileForm
-from ed_news.forms import ArticleForm, CommentEntryForm
+from ed_news.forms import ArticleForm, TextPostForm, CommentEntryForm
 
 from ed_news.models import Submission, Article, TextPost, Comment
 
@@ -222,6 +222,38 @@ def submit(request):
                               context_instance = RequestContext(request))
 
 
+def submit_textpost(request):
+    """Page to allow users to submit a new article.
+    """
+
+    submission_accepted = False
+    if request.method == 'POST':
+        textpost_form = TextPostForm(data=request.POST)
+
+        if textpost_form.is_valid():
+            textpost = textpost_form.save(commit=False)
+            textpost.submitter = request.user
+            textpost.url = "/discuss/%s/" % textpost.id
+            textpost.save()
+            submission_accepted = True
+            # Upvote this submission.
+            upvote_submission(request, textpost.id)
+        else:
+            # Invalid form/s.
+            #  Print errors to console; should log these?
+            print 'ae', textpost_form.errors
+
+    else:
+        # Send blank forms.
+        textpost_form = TextPostForm()
+
+    return render_to_response('ed_news/submit_textpost.html',
+                              {'textpost_form': textpost_form,
+                               'submission_accepted': submission_accepted,
+                               },
+                              context_instance = RequestContext(request))
+
+
 def new(request):
     """Page to show the newest submissions.
     """
@@ -244,9 +276,9 @@ def new(request):
                               context_instance = RequestContext(request))
 
 
-def discuss(request, article_id, admin=False):
-    article = Article.objects.get(id=article_id)
-    age = get_submission_age(article)
+def discuss(request, submission_id, admin=False):
+    submission = Submission.objects.get(id=submission_id)
+    age = get_submission_age(submission)
     
     if request.method == 'POST':
         # Redirect unauthenticated users to register/ login.
@@ -258,9 +290,9 @@ def discuss(request, article_id, admin=False):
         if comment_entry_form.is_valid():
             comment = comment_entry_form.save(commit=False)
             comment.author = request.user
-            comment.parent_article = article
+            comment.parent_submission = submission
             comment.save()
-            update_comment_ranking_points(article)
+            update_comment_ranking_points(submission)
             update_submission_ranking_points()
         else:
             # Invalid form/s.
@@ -272,43 +304,38 @@ def discuss(request, article_id, admin=False):
 
     # Get comment information after processing form, to include comment
     #  that was just saved.
-    comment_count = get_comment_count(article)
+    comment_count = get_comment_count(submission)
 
-    # If user logged in, get article set.
-    #  Also check if article is flagged by this user.
-    user_articles = []
+    #  Check if submission is flagged by this user.
     flagged = False
     can_flag = False
     if request.user.is_authenticated():
-        user_articles = request.user.userprofile.articles.all()
-        if request.user in article.flags.all() and request.user != article.submitter:
+        if request.user in submission.flags.all() and request.user != submission.submitter:
             flagged = True
 
-        if request.user != article.submitter and request.user.has_perm('ed_news.can_flag_article'):
+        if request.user != submission.submitter and request.user.has_perm('ed_news.can_flag_submission'):
             can_flag = True
 
     comment_set = []
-    get_comment_set(article, request, comment_set)
+    get_comment_set(submission, request, comment_set)
 
+    saved_submission = False
+    if request.user in submission.upvotes.all():
+        saved_submission = True
 
-    if admin:
-        template = 'ed_news/discuss_admin.html'
-    else:
-        template = 'ed_news/discuss.html'
-
-    return render_to_response(template,
-                              {'article': article, 'age': age,
+    return render_to_response('ed_news/discuss.html',
+                              {'submission': submission, 'age': age,
                                'comment_count': comment_count,
-                               'user_articles': user_articles,
+                               'saved_submission': saved_submission,
                                'flagged': flagged, 'can_flag': can_flag,
                                'comment_entry_form': comment_entry_form,
                                'comment_set': comment_set,
                                },
                               context_instance = RequestContext(request))
 
-def reply(request, article_id, comment_id):
-    article = Article.objects.get(id=article_id)
-    article_age = get_submission_age(article)
+def reply(request, submission_id, comment_id):
+    submission = Submission.objects.get(id=submission_id)
+    submission_age = get_submission_age(submission)
     comment = Comment.objects.get(id=comment_id)
     comment_age = get_submission_age(comment)
     
@@ -326,11 +353,11 @@ def reply(request, article_id, comment_id):
             reply.parent_comment = comment
             reply.save()
             # Update the ranking points for all comments on 
-            #  an article at the same time, to be fair.
-            update_comment_ranking_points(article)
+            #  a submission at the same time, to be fair.
+            update_comment_ranking_points(submission)
             update_submission_ranking_points()
             # Redirect to discussion page.
-            return redirect('/discuss/%s/' % article.id)
+            return redirect('/discuss/%s/' % submission.id)
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -339,23 +366,22 @@ def reply(request, article_id, comment_id):
     # Prepare a blank entry form.
     reply_entry_form = CommentEntryForm()
 
-
-
     # Get comment information after processing form, to include comment
     #  that was just saved.
-    comment_count = article.comment_set.count()
-    comment_count = get_comment_count(article)
+    comment_count = submission.comment_set.count()
+    comment_count = get_comment_count(submission)
 
-    # If user logged in, get article set.
-    #  Also check if article is flagged by this user.
-    user_articles = []
+    # Check if user has flagged or saved submission.
+    # Check if user can flag the submission.
     flagged = False
     can_flag = False
+    saved_submission = True
     if request.user.is_authenticated():
-        user_articles = request.user.userprofile.articles.all()
-        if request.user in article.flags.all() and request.user != article.submitter:
+        if request.user in submission.upvotes.all():
+            saved_submission = True
+        if request.user in submission.flags.all():
             flagged = True
-        if request.user != article.submitter and request.user.has_perm('ed_news.can_flag_article'):
+        if request.user != submission.submitter and request.user.has_perm('ed_news.can_flag_submission'):
             can_flag = True
 
     upvoted, can_upvote = False, False
@@ -377,10 +403,10 @@ def reply(request, article_id, comment_id):
             can_flag_comment = True
 
     return render_to_response('ed_news/reply.html',
-                              {'article': article, 'article_age': article_age,
+                              {'submission': submission, 'submission_age': submission_age,
                                'comment': comment, 'comment_age': comment_age,
                                'comment_count': comment_count,
-                               'user_articles': user_articles,
+                               'saved_submission': saved_submission,
                                'flagged': flagged, 'can_flag': can_flag,
                                'can_upvote': can_upvote, 'upvoted': upvoted,
                                'can_downvote': can_downvote, 'downvoted': downvoted,
@@ -397,40 +423,38 @@ def discuss_admin(request, article_id):
     else:
         return redirect('/discuss/%s/' % article_id)
 
-def upvote_submission(request, article_id):
-    # Check if user has upvoted this article.
-    #  If not, increment article points.
-    #  Save article for this user.
+def upvote_submission(request, submission_id):
+    # Check if user has upvoted this submission.
+    #  If not, increment submission points.
+    #  Save submission for this user.
     next_page = request.META.get('HTTP_REFERER', None) or '/'
-    article = Article.objects.get(id=article_id)
-    # Add this to user's articles, if not already there.
-    user_articles = get_user_articles(request.user)
-    if article in user_articles:
-        # This user already upvoted the article.
+    submission = Submission.objects.get(id=submission_id)
+    if request.user in submission.upvotes.all():
+        # This user already upvoted the submission.
         return redirect(next_page)
     else:
-        article.upvotes.add(request.user)
-        article.save()
+        submission.upvotes.add(request.user)
+        submission.save()
 
-        # Increment karma of user who submitted article,
+        # Increment karma of user who submitted submission,
         #  unless this is the user who submitted.
-        if request.user != article.submitter:
-            increment_karma(article.submitter)
+        if request.user != submission.submitter:
+            increment_karma(submission.submitter)
 
-        # Update article ranking points, and redirect back to page.
+        # Update submission ranking points, and redirect back to page.
         update_submission_ranking_points()
         return redirect(next_page)
 
 
-def get_user_articles(user):
-    """ Gets the articles that have been upvoted by this user."""
+def get_saved_submissions(user):
+    """ Gets the submissions that have been upvoted by this user."""
     # DEV: I'm sure there is an equivalent one-line filtered query for this.
-    articles = Article.objects.all()
-    user_articles = []
-    for article in articles:
-        if user in article.upvotes.all():
-            user_articles.append(article)
-    return user_articles
+    submissions = Submission.objects.all()
+    saved_submissions = []
+    for submission in submissions:
+        if user in submission.upvotes.all():
+            saved_submissions.append(submission)
+    return saved_submissions
 
 
 def upvote_comment(request, comment_id):
@@ -464,8 +488,14 @@ def upvote_comment(request, comment_id):
         comment.save()
         increment_karma(comment.author)
 
+    if request.user in comment.flags.all():
+        # Undo the flag, and increment author's karma.
+        comment.flags.remove(request.user)
+        comment.save()
+        increment_karma(comment.author)
+
     # Recalculate comment order.
-    article = get_parent_article(comment)
+    article = get_parent_submission(comment)
     update_comment_ranking_points(article)
 
     return redirect(next_page)
@@ -481,7 +511,8 @@ def downvote_comment(request, comment_id):
 
     downvoters = comment.downvotes.all()
 
-    if request.user == comment.author:
+    # Can't downvote and flag a comment.
+    if request.user == comment.author or request.user in comment.flags.all():
         return redirect(next_page)
 
     if request.user not in downvoters:
@@ -503,13 +534,13 @@ def downvote_comment(request, comment_id):
         decrement_karma(comment.author)
 
     # Recalculate comment order.
-    article = get_parent_article(comment)
+    article = get_parent_submission(comment)
     update_comment_ranking_points(article)
 
     return redirect(next_page)
 
 
-def flag_comment(request, article_id, comment_id):
+def flag_comment(request, submission_id, comment_id):
     """Flagging a comment drops its visibility more quickly.
     Can also trigger moderators to look at the user, and consider
       taking overall action against the user.
@@ -517,6 +548,8 @@ def flag_comment(request, article_id, comment_id):
     # If not flagged, flag and decrement author's karma.
     # If flagged, undo flag and increment author's karma.
     # If upvoted, undo upvote and decrement author's karma.
+    # If downvoted, undo upvote and increment author's karma.
+    #  No need to downvote and flag.
     #   (Can't flag something you've upvoted.)
 
     next_page = request.META.get('HTTP_REFERER', None) or '/'
@@ -528,7 +561,7 @@ def flag_comment(request, article_id, comment_id):
         return redirect(next_page)
 
     if request.user not in flaggers:
-        # Flag article, and decrement author's karma.
+        # Flag comment, and decrement author's karma.
         comment.flags.add(request.user)
         comment.save()
         decrement_karma(comment.author)
@@ -545,8 +578,14 @@ def flag_comment(request, article_id, comment_id):
         comment.save()
         decrement_karma(comment.author)
 
+    if request.user in comment.downvotes.all():
+        # Undo the downvote, and increment author's karma.
+        comment.downvotes.remove(request.user)
+        comment.save()
+        increment_karma(comment.author)
+
     # Recalculate comment order.
-    update_comment_ranking_points(Article.objects.get(id=article_id))
+    update_comment_ranking_points(Submission.objects.get(id=submission_id))
 
     return redirect(next_page)
 
@@ -755,17 +794,16 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
         if comment.comment_set.count() > 0:
             get_comment_set(comment, request, comment_set, nesting_level + 1)
 
-    #return comment_set
 
-def get_parent_article(comment):
+def get_parent_submission(comment):
     """Takes in a comment, and searches up the comment chain to find
-    the parent article.
+    the parent submission.
     """
 
-    if comment.parent_article:
-        parent_object = comment.parent_article
+    if comment.parent_submission:
+        parent_object = comment.parent_submission
     else:
-        parent_object = get_parent_article(comment.parent_comment)
+        parent_object = get_parent_submission(comment.parent_comment)
 
     return parent_object
 

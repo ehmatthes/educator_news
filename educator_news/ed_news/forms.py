@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from ed_news.models import UserProfile
-from ed_news.models import Article, Comment
+from ed_news.models import Article, TextPost, Comment
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
@@ -19,6 +19,11 @@ class ArticleForm(forms.ModelForm):
     class Meta:
         model = Article
         fields = ('title', 'url',)
+
+class TextPostForm(forms.ModelForm):
+    class Meta:
+        model = TextPost
+        fields = ('title', 'post_body',)
 
 class EditUserForm(forms.ModelForm):
     class Meta:

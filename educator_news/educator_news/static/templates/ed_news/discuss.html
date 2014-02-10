@@ -2,34 +2,34 @@
 
 {% block content %}
 
-        {% comment %} --- Article information --- {% endcomment%}
+        {% comment %} --- Submission information --- {% endcomment%}
 	     <div class='title_line'>
-			 {% if article in user_articles or not user.is_authenticated %}
-				  <a class='title_without_upvote' href="{{ article.url }}">{{ article.title }}</a></div>
+			 {% if saved_submission or not user.is_authenticated %}
+				  <a class='title_without_upvote' href="{{ submission.url }}">{{ submission.title }}</a></div>
 		    {% else %}
-			     <a href="{% url 'ed_news:upvote_article' article.id %}">&#9650</a>
-				  <a href="{{ article.url }}">{{ article.title }}</a></div>
+			     <a href="{% url 'ed_news:upvote_submission' submission.id %}">&#9650</a>
+				  <a href="{{ submission.url }}">{{ submission.title }}</a></div>
 		    {% endif %}
 
 		  <div class='points_line points_line_discuss'>
-			 {{ article.upvotes }}{% if article.upvotes != 1 %} points{% else %} point{% endif %}
-			 by <a href="{% url 'profile' article.submitter.id %}">{{ article.submitter }}</a>
+			 {{ submission.upvotes.count }}{% if submission.upvotes.count != 1 %} points{% else %} point{% endif %}
+			 by <a href="{% url 'profile' submission.submitter.id %}">{{ submission.submitter }}</a>
 			 {{ age }} ago |
 
 			 {% if can_flag %}
-			   <a href="{% url 'ed_news:flag_article' article.id %}">
+			   <a href="{% url 'ed_news:flag_submission' submission.id %}">
 				  {% if flagged %}unflag{% else %}flag{% endif %}
 				</a> |
 			 {% endif %}
 
-			 <a href="{% url 'ed_news:discuss' article.id %}">
+			 <a href="{% url 'ed_news:discuss' submission.id %}">
 				{% if comment_count == 0 %}discuss{% elif comment_count == 1 %}1 comment{% else %}{{ comment_count }} comments{% endif %}
 		    </a>
 		  </div>
 
 
 		  {% comment %} --- Comment entry form --- {% endcomment%}
-		  <form id='comment_form' method="post" action="{% url 'ed_news:discuss' article.id %}" enctype='multipart/form-data'>
+		  <form id='comment_form' method="post" action="{% url 'ed_news:discuss' submission.id %}" enctype='multipart/form-data'>
 			 {% csrf_token %}
 
 			 <div class='comment_entry_form'>
@@ -95,22 +95,21 @@
 				  {{ comment_dict.age }} ago
 
 				  {% if comment_dict.flagged and comment_dict.can_flag %}
-						| <a href="{% url 'ed_news:flag_comment' article.id comment_dict.comment.id %}">unflag</a>
+						| <a href="{% url 'ed_news:flag_comment' submission.id comment_dict.comment.id %}">unflag</a>
 				  {% elif comment_dict.can_flag %}
-						| <a href="{% url 'ed_news:flag_comment' article.id comment_dict.comment.id %}">flag</a>
+						| <a href="{% url 'ed_news:flag_comment' submission.id comment_dict.comment.id %}">flag</a>
 				  {% endif %}
 
-				  {% block admin_comment_info %}{% endblock %}
 			   </div>
 				{% if not user.is_authenticated %}
 				  <div class='comment_text comment_text_no_downvote'>{{ comment_dict.comment.comment_text|linebreaks }}</div>
 				  <div class='reply_link reply_link_no_downvote'><a href="{% url 'login' %}">reply</a></div>
 				{% elif user.is_authenticated and perms.ed_news.can_downvote_comment %}
 				  <div class='comment_text'>{{ comment_dict.comment.comment_text|linebreaks }}</div>
-				  <div class='reply_link'><a href="{% url 'ed_news:reply' article.id comment_dict.comment.id %}">reply</a></div>
+				  <div class='reply_link'><a href="{% url 'ed_news:reply' submission.id comment_dict.comment.id %}">reply</a></div>
 				{% else %}
 				  <div class='comment_text comment_text_no_downvote'>{{ comment_dict.comment.comment_text|linebreaks }}</div>
-				  <div class='reply_link reply_link_no_downvote'><a href="{% url 'ed_news:reply' article.id comment_dict.comment.id %}">reply</a></div>
+				  <div class='reply_link reply_link_no_downvote'><a href="{% url 'ed_news:reply' submission.id comment_dict.comment.id %}">reply</a></div>
 				{% endif %}
 		  </div>
 

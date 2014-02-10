@@ -12,6 +12,7 @@ class Submission(models.Model):
     # Stick with programming 80-char limit for now.
     #  It's what HN uses, which fits nicely on mobile.
     title = models.CharField(max_length=80)
+    url = models.URLField()
     submitter = models.ForeignKey(User)
     upvotes = models.ManyToManyField(User, blank=True, null=True, related_name='upvoted_submissions')
     flags = models.ManyToManyField(User, blank=True, null=True, related_name='flagged_submissions')
@@ -27,7 +28,8 @@ class Submission(models.Model):
 
 
 class Article(Submission):
-    url = models.URLField()
+    # Now that TextPosts have urls, not sure there is anything special about an article.
+    pass
 
 
 class TextPost(Submission):
