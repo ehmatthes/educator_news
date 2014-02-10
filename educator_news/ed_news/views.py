@@ -34,30 +34,31 @@ def index(request):
         
     # Note which submissions should not get upvotes.
     # Build a list of submissions, and their ages.
-    articles_ages = []
-    user_articles = []
-    for article in submissions:
-        article_age = get_submission_age(article)
-        comment_count = get_comment_count(article)
+    submission_set = []
+    for submission in submissions:
+        submission_age = get_submission_age(submission)
+        comment_count = get_comment_count(submission)
         
         flagged = False
-        if request.user in article.flags.all():
+        if request.user in submission.flags.all():
             flagged = True
 
         can_flag = False
-        if request.user.is_authenticated() and request.user != article.submitter and request.user.has_perm('ed_news.can_flag_submission'):
+        if request.user.is_authenticated() and request.user != submission.submitter and request.user.has_perm('ed_news.can_flag_submission'):
             can_flag = True
 
-        articles_ages.append({'article': article, 'age': article_age,
-                              'comment_count': comment_count,
-                              'flagged': flagged, 'can_flag': can_flag,})
+        upvoted = False
+        if request.user in submission.upvotes.all():
+            upvoted = True
 
-        if request.user.is_authenticated() and article in get_user_articles(request.user):
-            pass#user_articles.append(article)
+        submission_set.append({'submission': submission, 'age': submission_age,
+                                'comment_count': comment_count,
+                                'flagged': flagged, 'can_flag': can_flag,
+                                'upvoted': upvoted,
+                                })
 
     return render_to_response('ed_news/index.html',
-                              {'articles_ages': articles_ages,
-                               'user_articles': user_articles,
+                              {'submission_set': submission_set,
                                },
                               context_instance = RequestContext(request))
 

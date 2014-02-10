@@ -1,0 +1,42 @@
+	 {% for submission_dict in submission_set %}
+
+        {% if submission_dict.submission.visible %}
+          <div>
+		  {% else %}
+          <div class='show_invisible'>
+		  {% endif %}
+
+        <div class='title_line'>
+
+			 {{ forloop.counter }}. 
+
+			 {% if submission_dict.upvoted or not user.is_authenticated %}
+				  <a class='title_without_upvote' href="{{ submission_dict.submission.url }}">{{ submission_dict.submission.title }}</a>
+		    {% else %}
+			     <a href="{% url 'ed_news:upvote_submission' submission_dict.submission.id %}">&#9650</a>
+				  <a href="{{ submission_dict.submission.url }}">{{ submission_dict.submission.title }}</a>
+		    {% endif %}
+
+		  </div>
+
+		  <div class='points_line'>
+			 {{ submission_dict.submission.upvotes.count }}{% if submission_dict.submission.upvotes.count != 1 %} points{% else %} point{% endif %}
+			 by <a href="{% url 'profile' submission_dict.submission.submitter.id %}">{{ submission_dict.submission.submitter }}</a>
+			 {{ submission_dict.age }} ago |
+
+			 {% if submission_dict.can_flag %}
+			   <a href="{% url 'ed_news:flag_submission' submission_dict.submission.id %}">
+				  {% if submission_dict.flagged %}unflag{% else %}flag{% endif %}
+				</a> |
+			 {% endif %}
+
+			 <a href="{% url 'ed_news:discuss' submission_dict.submission.id %}">
+				{% if submission_dict.comment_count == 0 %}discuss{% elif submission_dict.comment_count == 1 %}1 comment{% else %}{{ submission_dict.comment_count }} comments{% endif %}
+		    </a>
+
+		  </div>
+
+
+	   </div>
+
+	 {% endfor %}
