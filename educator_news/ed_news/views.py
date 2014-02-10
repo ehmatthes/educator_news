@@ -27,7 +27,7 @@ FLAGS_TO_DISAPPEAR = 1
 def index(request):
     # Get a list of submissions, sorted by date.
 
-    if request.user.userprofile.show_invisible:
+    if request.user.is_authenticated() and request.user.userprofile.show_invisible:
         submissions = Submission.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
     else:
         submissions = Submission.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
@@ -195,7 +195,7 @@ def submit(request):
             article.save()
             submission_accepted = True
             # Upvote this article.
-            upvote_article(request, article.id)
+            upvote_submission(request, article.id)
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -410,7 +410,7 @@ def discuss_admin(request, article_id):
     else:
         return redirect('/discuss/%s/' % article_id)
 
-def upvote_article(request, article_id):
+def upvote_submission(request, article_id):
     # Check if user has upvoted this article.
     #  If not, increment article points.
     #  Save article for this user.
