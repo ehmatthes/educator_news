@@ -456,6 +456,12 @@ def upvote_comment(request, comment_id):
         comment.save()
         increment_karma(comment.author)
 
+    if request.user in comment.flags.all():
+        # Undo the flag, and increment author's karma.
+        comment.flags.remove(request.user)
+        comment.save()
+        increment_karma(comment.author)
+
     # Recalculate comment order.
     article = get_parent_submission(comment)
     update_comment_ranking_points(article)
@@ -473,7 +479,8 @@ def downvote_comment(request, comment_id):
 
     downvoters = comment.downvotes.all()
 
-    if request.user == comment.author:
+    # Can't downvote and flag a comment.
+    if request.user == comment.author or request.user in comment.flags.all():
         return redirect(next_page)
 
     if request.user not in downvoters:
@@ -501,7 +508,7 @@ def downvote_comment(request, comment_id):
     return redirect(next_page)
 
 
-def flag_comment(request, article_id, comment_id):
+def flag_comment(request, submission_id, comment_id):
     """Flagging a comment drops its visibility more quickly.
     Can also trigger moderators to look at the user, and consider
       taking overall action against the user.
@@ -509,6 +516,8 @@ def flag_comment(request, article_id, comment_id):
     # If not flagged, flag and decrement author's karma.
     # If flagged, undo flag and increment author's karma.
     # If upvoted, undo upvote and decrement author's karma.
+    # If downvoted, undo upvote and increment author's karma.
+    #  No need to downvote and flag.
     #   (Can't flag something you've upvoted.)
 
     next_page = request.META.get('HTTP_REFERER', None) or '/'
@@ -520,7 +529,7 @@ def flag_comment(request, article_id, comment_id):
         return redirect(next_page)
 
     if request.user not in flaggers:
-        # Flag article, and decrement author's karma.
+        # Flag comment, and decrement author's karma.
         comment.flags.add(request.user)
         comment.save()
         decrement_karma(comment.author)
@@ -537,8 +546,14 @@ def flag_comment(request, article_id, comment_id):
         comment.save()
         decrement_karma(comment.author)
 
+    if request.user in comment.downvotes.all():
+        # Undo the downvote, and increment author's karma.
+        comment.downvotes.remove(request.user)
+        comment.save()
+        increment_karma(comment.author)
+
     # Recalculate comment order.
-    update_comment_ranking_points(Article.objects.get(id=article_id))
+    update_comment_ranking_points(Submission.objects.get(id=submission_id))
 
     return redirect(next_page)
 
