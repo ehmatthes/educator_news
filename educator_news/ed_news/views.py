@@ -12,7 +12,8 @@ from ed_news.forms import UserForm, UserProfileForm
 from ed_news.forms import EditUserForm, EditUserProfileForm
 from ed_news.forms import ArticleForm, CommentEntryForm
 
-from ed_news.models import Article, Comment
+from ed_news.models import Submission, Article, TextPost, Comment
+
 
 # These should be moved to a settings, config, or .env file.
 # Moderation level will start at 10, increase as site becomes more active.
@@ -24,45 +25,52 @@ MAX_SUBMISSIONS = 30
 #  Or maybe one flag from a super-mod?
 FLAGS_TO_DISAPPEAR = 1
 
+
 def index(request):
     # Get a list of submissions, sorted by date.
-    #  This is where MTI inheritance might be better; query all submissions,
-    #  rather than building a list of submissions from separate articles
-    #  and posts. and request.user.has_perms(can_flag_article):
 
-    if request.user.userprofile.show_invisible:
-        articles = Article.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
+    if request.user.is_authenticated() and request.user.userprofile.show_invisible:
+        submissions = Submission.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
     else:
-        articles = Article.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
+        submissions = Submission.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
         
-    # Note which articles should not get upvotes.
-    # Build a list of articles, and their ages.
-    articles_ages = []
-    user_articles = []
-    for article in articles:
-        article_age = get_submission_age(article)
-        comment_count = get_comment_count(article)
+    submission_set = get_submission_set(submissions, request.user)
 
+    return render_to_response('ed_news/index.html',
+                              {'submission_set': submission_set,
+                               },
+                              context_instance = RequestContext(request))
+
+
+def get_submission_set(submissions, user):
+    """From a set of submissions, builds a list of submission_dicts for a template.
+    """
+    # Note which submissions should not get upvotes.
+    # Build a list of submissions, and their ages.
+    submission_set = []
+    for submission in submissions:
+        submission_age = get_submission_age(submission)
+        comment_count = get_comment_count(submission)
+        
         flagged = False
-        if request.user in article.flags.all():
+        if user in submission.flags.all():
             flagged = True
 
         can_flag = False
-        if request.user.is_authenticated() and request.user != article.submitter and request.user.has_perm('ed_news.can_flag_article'):
+        if user.is_authenticated() and user != submission.submitter and user.has_perm('ed_news.can_flag_submission'):
             can_flag = True
 
-        articles_ages.append({'article': article, 'age': article_age,
-                              'comment_count': comment_count,
-                              'flagged': flagged, 'can_flag': can_flag,})
+        upvoted = False
+        if user in submission.upvotes.all():
+            upvoted = True
 
-        if request.user.is_authenticated() and article in request.user.userprofile.articles.all():
-            user_articles.append(article)
+        submission_set.append({'submission': submission, 'age': submission_age,
+                                'comment_count': comment_count,
+                                'flagged': flagged, 'can_flag': can_flag,
+                                'upvoted': upvoted,
+                                })
 
-    return render_to_response('ed_news/index.html',
-                              {'articles_ages': articles_ages,
-                               'user_articles': user_articles,
-                               },
-                              context_instance = RequestContext(request))
+    return submission_set
 
 # --- Authentication views ---
 def logout_view(request):
@@ -175,10 +183,10 @@ def register(request):
                                    },
                                   context_instance = RequestContext(request))
 
+
 # --- Educator News views ---
 def submit(request):
     """Page to allow users to submit a new article.
-    Will also allow users to submit a text post later.
     """
 
     submission_accepted = False
@@ -197,7 +205,7 @@ def submit(request):
             article.save()
             submission_accepted = True
             # Upvote this article.
-            upvote_article(request, article.id)
+            upvote_submission(request, article.id)
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -223,41 +231,18 @@ def new(request):
     #  rather than building a list of submissions from separate articles
     #  and posts.
 
-    if request.user.userprofile.show_invisible:
-        articles = Article.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
+    if request.user.is_authenticated() and request.user.userprofile.show_invisible:
+        submissions = Submission.objects.all().order_by('submission_time').reverse()[:MAX_SUBMISSIONS]
     else:
-        articles = Article.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
-    
-    # Note which articles should not get upvotes.
-    # Build a list of articles, and their ages.
-    articles_ages = []
-    user_articles = []
-    for article in articles:
-        article_age = get_submission_age(article)
-        comment_count = get_comment_count(article)
+        submissions = Submission.objects.filter(visible=True).order_by('submission_time').reverse()[:MAX_SUBMISSIONS]
 
-        flagged = False
-        if request.user in article.flags.all():
-            flagged = True
-
-        can_flag = False
-        if request.user.is_authenticated() and request.user != article.submitter and request.user.has_perm('ed_news.can_flag_article'):
-            can_flag = True
-
-        articles_ages.append({'article': article, 'age': article_age,
-                              'comment_count': comment_count,
-                              'flagged': flagged, 'can_flag': can_flag,
-                              })
-        
-        # DEV: this should be an attribute of each article, rather than a separate list.
-        if request.user.is_authenticated() and article in request.user.userprofile.articles.all():
-            user_articles.append(article)
+    submission_set = get_submission_set(submissions, request.user)
 
     return render_to_response('ed_news/new.html',
-                              {'articles_ages': articles_ages,
-                               'user_articles': user_articles,
+                              {'submission_set': submission_set,
                                },
                               context_instance = RequestContext(request))
+
 
 def discuss(request, article_id, admin=False):
     article = Article.objects.get(id=article_id)
@@ -276,7 +261,7 @@ def discuss(request, article_id, admin=False):
             comment.parent_article = article
             comment.save()
             update_comment_ranking_points(article)
-            update_ranking_points()
+            update_submission_ranking_points()
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -343,7 +328,7 @@ def reply(request, article_id, comment_id):
             # Update the ranking points for all comments on 
             #  an article at the same time, to be fair.
             update_comment_ranking_points(article)
-            update_ranking_points()
+            update_submission_ranking_points()
             # Redirect to discussion page.
             return redirect('/discuss/%s/' % article.id)
         else:
@@ -412,20 +397,19 @@ def discuss_admin(request, article_id):
     else:
         return redirect('/discuss/%s/' % article_id)
 
-def upvote_article(request, article_id):
+def upvote_submission(request, article_id):
     # Check if user has upvoted this article.
     #  If not, increment article points.
     #  Save article for this user.
     next_page = request.META.get('HTTP_REFERER', None) or '/'
     article = Article.objects.get(id=article_id)
     # Add this to user's articles, if not already there.
-    user_articles = request.user.userprofile.articles.all()
+    user_articles = get_user_articles(request.user)
     if article in user_articles:
         # This user already upvoted the article.
         return redirect(next_page)
     else:
-        request.user.userprofile.articles.add(article)
-        article.upvotes += 1
+        article.upvotes.add(request.user)
         article.save()
 
         # Increment karma of user who submitted article,
@@ -434,8 +418,19 @@ def upvote_article(request, article_id):
             increment_karma(article.submitter)
 
         # Update article ranking points, and redirect back to page.
-        update_ranking_points()
+        update_submission_ranking_points()
         return redirect(next_page)
+
+
+def get_user_articles(user):
+    """ Gets the articles that have been upvoted by this user."""
+    # DEV: I'm sure there is an equivalent one-line filtered query for this.
+    articles = Article.objects.all()
+    user_articles = []
+    for article in articles:
+        if user in article.upvotes.all():
+            user_articles.append(article)
+    return user_articles
 
 
 def upvote_comment(request, comment_id):
@@ -556,8 +551,8 @@ def flag_comment(request, article_id, comment_id):
     return redirect(next_page)
 
 
-def flag_article(request, article_id):
-    """Flagging an article drops its quickly.
+def flag_submission(request, submission_id):
+    """Flagging a submission drops its quickly.
     Can also trigger moderators to look at the submitter and the domain.
     Moderators may consider taking overall action against the user.
     Moderators may consider ignoring the domain.
@@ -568,44 +563,43 @@ def flag_article(request, article_id):
     #   (Can't flag something you've upvoted.)
 
     next_page = request.META.get('HTTP_REFERER', None) or '/'
-    article = Article.objects.get(id=article_id)
+    submission = Submission.objects.get(id=submission_id)
 
-    flaggers = article.flags.all()
+    flaggers = submission.flags.all()
 
-    if request.user == article.submitter or not request.user.has_perm('ed_news.can_flag_article'):
+    if request.user == submission.submitter or not request.user.has_perm('ed_news.can_flag_submission'):
         return redirect(next_page)
 
     if request.user not in flaggers:
-        # Flag article, and decrement submitter's karma.
-        article.flags.add(request.user)
+        # Flag submission, and decrement submitter's karma.
+        submission.flags.add(request.user)
 
-        # If enough flags, article disappears.
-        if article.flags.count() >= FLAGS_TO_DISAPPEAR:
-            article.visible = False
-        article.save()
+        # If enough flags, submission disappears.
+        if submission.flags.count() >= FLAGS_TO_DISAPPEAR:
+            submission.visible = False
+        submission.save()
 
-        decrement_karma(article.submitter)
+        decrement_karma(submission.submitter)
 
     if request.user in flaggers:
         # Undo the flag, and increment submitter's karma.
-        article.flags.remove(request.user)
+        submission.flags.remove(request.user)
 
-        # If enough flags, article disappears.
-        if article.flags.count() < FLAGS_TO_DISAPPEAR:
-            article.visible = True
-        article.save()
+        # If enough flags, submission reappears.
+        if submission.flags.count() < FLAGS_TO_DISAPPEAR:
+            submission.visible = True
+        submission.save()
 
-        increment_karma(article.submitter)
+        increment_karma(submission.submitter)
 
-    if article in request.user.userprofile.articles.all():
+    if request.user in submission.upvotes.all():
         # Undo the upvote, and decrement submitter's karma.
-        article.upvotes -= 1
-        article.save()
-        request.user.userprofile.articles.remove(article)
-        decrement_karma(article.submitter)
+        submission.upvotes.remove(request.user)
+        submission.save()
+        decrement_karma(submission.submitter)
 
-    # Recalculate article ranking points.
-    update_ranking_points()
+    # Recalculate submission ranking points.
+    update_submission_ranking_points()
 
     return redirect(next_page)
 
@@ -650,18 +644,18 @@ def get_submission_age(submission):
     else:
         return "1 second"
 
-def update_ranking_points():
-    # How many articles really need this?
-    #  Only articles submitted over last x days?
-    articles = Article.objects.all()
-    for article in articles:
-        newness_points = get_newness_points(article)
-        comment_points = 5*get_comment_count(article)
-        # Flags affect articles proportionally.
-        flag_factor = 0.8**article.flags.count()
-        article.ranking_points = flag_factor*(10*article.upvotes + comment_points + newness_points)
-        article.save()
-        #print 'rp', article, article.ranking_points
+def update_submission_ranking_points():
+    # How many submissions really need this?
+    #  Only submissions submitted over last x days?
+    submissions = Submission.objects.all()
+    for submission in submissions:
+        newness_points = get_newness_points(submission)
+        comment_points = 5*get_comment_count(submission)
+        # Flags affect submissions proportionally.
+        flag_factor = 0.8**submission.flags.count()
+        submission.ranking_points = flag_factor*(10*submission.upvotes.count() + comment_points + newness_points)
+        submission.save()
+        #print 'rp', submission, submission.ranking_points
         
 def update_comment_ranking_points(article):
     # Update the ranking points for an article's comments.

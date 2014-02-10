@@ -2,7 +2,7 @@
 import sys
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from ed_news.models import Comment, Article
+from ed_news.models import Comment, Submission
 
 # Make group Moderators if it doesn't exist.
 try:
@@ -47,19 +47,19 @@ except:
     pass
 
 
-# Permission: can_flag_article
+# Permission: can_flag_submission
 try:
-    flag_article_permission = Permission.objects.get(codename='can_flag_article')
+    flag_submission_permission = Permission.objects.get(codename='can_flag_submission')
 except Permission.DoesNotExist:
-    content_type = ContentType.objects.get_for_model(Article)
-    flag_article_permission = Permission.objects.create(codename='can_flag_article',
-                                       name='Can flag articles',
+    content_type = ContentType.objects.get_for_model(Submission)
+    flag_submission_permission = Permission.objects.create(codename='can_flag_submission',
+                                       name='Can flag submissions',
                                        content_type=content_type)
-    flag_article_permission.save()
+    flag_submission_permission.save()
 
 try:
-    moderators.permissions.add(flag_article_permission)
-    print "Moderators can flag articles."
+    moderators.permissions.add(flag_submission_permission)
+    print "Moderators can flag submissions."
 except:
     pass
 

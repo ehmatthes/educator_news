@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 # --- Educator News models ---
 
 class Submission(models.Model):
-    """An abstract class for the two types of submission,
+    """A base class for the two types of submission,
     which are an article and a text submission. Text submissions
     can be questions, ie Ask EN, or posts such as Show EN.
     """
@@ -13,23 +13,26 @@ class Submission(models.Model):
     #  It's what HN uses, which fits nicely on mobile.
     title = models.CharField(max_length=80)
     submitter = models.ForeignKey(User)
-    upvotes = models.IntegerField(default=0)
-    flags = models.ManyToManyField(User, blank=True, null=True, related_name='flagged_articles')
+    upvotes = models.ManyToManyField(User, blank=True, null=True, related_name='upvoted_submissions')
+    flags = models.ManyToManyField(User, blank=True, null=True, related_name='flagged_submissions')
     ranking_points = models.IntegerField(default=0)
     submission_time = models.DateTimeField(auto_now_add=True)
 
-    # Will need to ignore some comments, by making them invisible.
+    # Will need to ignore some submissions, by making them invisible.
     #  But assume visible.
     visible = models.BooleanField(default=True)
-
-    class Meta:
-        abstract = True
 
     def __unicode__(self):
         return self.title
 
+
 class Article(Submission):
     url = models.URLField()
+
+
+class TextPost(Submission):
+    post_body = models.TextField()
+
 
 class UserProfile(models.Model):
     # Custom user fields, not in User model.
@@ -37,7 +40,6 @@ class UserProfile(models.Model):
     # Link UserProfile to a User instance.
     user = models.OneToOneField(User)
     email_public = models.BooleanField(default=False)
-    articles = models.ManyToManyField(Article, blank=True, null=True)
     karma = models.IntegerField(default=0)
 
     # Only moderators can choose show_all.
@@ -64,8 +66,8 @@ class Comment(models.Model):
     #  But assume visible.
     visible = models.BooleanField(default=True)
 
-    # If it's a first-level reply, there is a parent article.
-    parent_article = models.ForeignKey(Article, blank=True, null=True)
+    # If it's a first-level reply, there is a parent submission.
+    parent_submission = models.ForeignKey(Submission, blank=True, null=True)
 
     # If it's a reply, there is a parent comment.
     parent_comment = models.ForeignKey('self', blank=True, null=True)
