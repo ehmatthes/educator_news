@@ -234,36 +234,13 @@ def new(request):
     else:
         submissions = Submission.objects.filter(visible=True).order_by('submission_time').reverse()[:MAX_SUBMISSIONS]
 
-    # Note which articles should not get upvotes.
-    # Build a list of articles, and their ages.
-    articles_ages = []
-    user_articles = []
-    for article in articles:
-        article_age = get_submission_age(article)
-        comment_count = get_comment_count(article)
-
-        flagged = False
-        if request.user in article.flags.all():
-            flagged = True
-
-        can_flag = False
-        if request.user.is_authenticated() and request.user != article.submitter and request.user.has_perm('ed_news.can_flag_article'):
-            can_flag = True
-
-        articles_ages.append({'article': article, 'age': article_age,
-                              'comment_count': comment_count,
-                              'flagged': flagged, 'can_flag': can_flag,
-                              })
-        
-        # DEV: this should be an attribute of each article, rather than a separate list.
-        if request.user.is_authenticated() and article in request.user.userprofile.articles.all():
-            user_articles.append(article)
+    submission_set = get_submission_set(submissions, request.user)
 
     return render_to_response('ed_news/new.html',
-                              {'articles_ages': articles_ages,
-                               'user_articles': user_articles,
+                              {'submission_set': submission_set,
                                },
                               context_instance = RequestContext(request))
+
 
 def discuss(request, article_id, admin=False):
     article = Article.objects.get(id=article_id)
