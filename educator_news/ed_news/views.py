@@ -233,6 +233,7 @@ def submit_textpost(request):
         if textpost_form.is_valid():
             textpost = textpost_form.save(commit=False)
             textpost.submitter = request.user
+            textpost.url = "/discuss/%s/" % textpost.id
             textpost.save()
             submission_accepted = True
             # Upvote this submission.
