@@ -20,7 +20,7 @@
 		  </div>
 
 		  <div class='points_line'>
-			 {{ article_age.article.upvotes }}{% if article_age.article.upvotes != 1 %} points{% else %} point{% endif %}
+			 {{ article_age.article.upvotes.count }}{% if article_age.article.upvotes.count != 1 %} points{% else %} point{% endif %}
 			 by <a href="{% url 'profile' article_age.article.submitter.id %}">{{ article_age.article.submitter }}</a>
 			 {{ article_age.age }} ago |
 

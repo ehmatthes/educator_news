@@ -39,20 +39,20 @@ def index(request):
     for article in submissions:
         article_age = get_submission_age(article)
         comment_count = get_comment_count(article)
-
+        
         flagged = False
-        if request.user in submission.flags.all():
+        if request.user in article.flags.all():
             flagged = True
 
         can_flag = False
-        if request.user.is_authenticated() and request.user != submission.submitter and request.user.has_perm('ed_news.can_flag_submission'):
+        if request.user.is_authenticated() and request.user != article.submitter and request.user.has_perm('ed_news.can_flag_submission'):
             can_flag = True
 
         articles_ages.append({'article': article, 'age': article_age,
                               'comment_count': comment_count,
                               'flagged': flagged, 'can_flag': can_flag,})
 
-        if request.user.is_authenticated() and article in request.user.userprofile.articles.all():
+        if request.user.is_authenticated() and article in get_user_articles(request.user):
             pass#user_articles.append(article)
 
     return render_to_response('ed_news/index.html',
