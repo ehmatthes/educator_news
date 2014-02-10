@@ -12,7 +12,7 @@ from ed_news.forms import UserForm, UserProfileForm
 from ed_news.forms import EditUserForm, EditUserProfileForm
 from ed_news.forms import ArticleForm, CommentEntryForm
 
-from ed_news.models import Article, Comment
+from ed_news.models import Submission, Article, TextPost, Comment
 
 # These should be moved to a settings, config, or .env file.
 # Moderation level will start at 10, increase as site becomes more active.
@@ -26,29 +26,26 @@ FLAGS_TO_DISAPPEAR = 1
 
 def index(request):
     # Get a list of submissions, sorted by date.
-    #  This is where MTI inheritance might be better; query all submissions,
-    #  rather than building a list of submissions from separate articles
-    #  and posts. and request.user.has_perms(can_flag_article):
 
     if request.user.userprofile.show_invisible:
-        articles = Article.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
+        submissions = Submission.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
     else:
-        articles = Article.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
+        submissions = Submission.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
         
-    # Note which articles should not get upvotes.
-    # Build a list of articles, and their ages.
+    # Note which submissions should not get upvotes.
+    # Build a list of submissions, and their ages.
     articles_ages = []
     user_articles = []
-    for article in articles:
+    for article in submissions:
         article_age = get_submission_age(article)
         comment_count = get_comment_count(article)
 
         flagged = False
-        if request.user in article.flags.all():
+        if request.user in submission.flags.all():
             flagged = True
 
         can_flag = False
-        if request.user.is_authenticated() and request.user != article.submitter and request.user.has_perm('ed_news.can_flag_article'):
+        if request.user.is_authenticated() and request.user != submission.submitter and request.user.has_perm('ed_news.can_flag_submission'):
             can_flag = True
 
         articles_ages.append({'article': article, 'age': article_age,
@@ -56,7 +53,7 @@ def index(request):
                               'flagged': flagged, 'can_flag': can_flag,})
 
         if request.user.is_authenticated() and article in request.user.userprofile.articles.all():
-            user_articles.append(article)
+            pass#user_articles.append(article)
 
     return render_to_response('ed_news/index.html',
                               {'articles_ages': articles_ages,

@@ -8,43 +8,69 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'Article'
-        db.create_table(u'ed_news_article', (
+        # Adding model 'Submission'
+        db.create_table(u'ed_news_submission', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('title', self.gf('django.db.models.fields.CharField')(max_length=80)),
-            ('author', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-            ('upvotes', self.gf('django.db.models.fields.IntegerField')(default=0)),
+            ('submitter', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
             ('ranking_points', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('submission_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('visible', self.gf('django.db.models.fields.BooleanField')(default=True)),
+        ))
+        db.send_create_signal(u'ed_news', ['Submission'])
+
+        # Adding M2M table for field upvotes on 'Submission'
+        m2m_table_name = db.shorten_name(u'ed_news_submission_upvotes')
+        db.create_table(m2m_table_name, (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('submission', models.ForeignKey(orm[u'ed_news.submission'], null=False)),
+            ('user', models.ForeignKey(orm[u'auth.user'], null=False))
+        ))
+        db.create_unique(m2m_table_name, ['submission_id', 'user_id'])
+
+        # Adding M2M table for field flags on 'Submission'
+        m2m_table_name = db.shorten_name(u'ed_news_submission_flags')
+        db.create_table(m2m_table_name, (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('submission', models.ForeignKey(orm[u'ed_news.submission'], null=False)),
+            ('user', models.ForeignKey(orm[u'auth.user'], null=False))
+        ))
+        db.create_unique(m2m_table_name, ['submission_id', 'user_id'])
+
+        # Adding model 'Article'
+        db.create_table(u'ed_news_article', (
+            (u'submission_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['ed_news.Submission'], unique=True, primary_key=True)),
             ('url', self.gf('django.db.models.fields.URLField')(max_length=200)),
         ))
         db.send_create_signal(u'ed_news', ['Article'])
+
+        # Adding model 'TextPost'
+        db.create_table(u'ed_news_textpost', (
+            (u'submission_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['ed_news.Submission'], unique=True, primary_key=True)),
+            ('post_body', self.gf('django.db.models.fields.TextField')()),
+        ))
+        db.send_create_signal(u'ed_news', ['TextPost'])
 
         # Adding model 'UserProfile'
         db.create_table(u'ed_news_userprofile', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('user', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.User'], unique=True)),
             ('email_public', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('karma', self.gf('django.db.models.fields.IntegerField')(default=0)),
+            ('show_invisible', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
         db.send_create_signal(u'ed_news', ['UserProfile'])
-
-        # Adding M2M table for field articles on 'UserProfile'
-        m2m_table_name = db.shorten_name(u'ed_news_userprofile_articles')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('userprofile', models.ForeignKey(orm[u'ed_news.userprofile'], null=False)),
-            ('article', models.ForeignKey(orm[u'ed_news.article'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['userprofile_id', 'article_id'])
 
         # Adding model 'Comment'
         db.create_table(u'ed_news_comment', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('comment_text', self.gf('django.db.models.fields.CharField')(max_length=10000)),
+            ('comment_text', self.gf('django.db.models.fields.TextField')()),
             ('author', self.gf('django.db.models.fields.related.ForeignKey')(related_name='comments', to=orm['auth.User'])),
-            ('alive', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('parent_comment', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ed_news.Comment'])),
-            ('parent_article', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ed_news.Article'], null=True, blank=True)),
+            ('ranking_points', self.gf('django.db.models.fields.IntegerField')(default=0)),
+            ('submission_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+            ('visible', self.gf('django.db.models.fields.BooleanField')(default=True)),
+            ('parent_submission', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ed_news.Submission'], null=True, blank=True)),
+            ('parent_comment', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['ed_news.Comment'], null=True, blank=True)),
         ))
         db.send_create_signal(u'ed_news', ['Comment'])
 
@@ -77,14 +103,23 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
+        # Deleting model 'Submission'
+        db.delete_table(u'ed_news_submission')
+
+        # Removing M2M table for field upvotes on 'Submission'
+        db.delete_table(db.shorten_name(u'ed_news_submission_upvotes'))
+
+        # Removing M2M table for field flags on 'Submission'
+        db.delete_table(db.shorten_name(u'ed_news_submission_flags'))
+
         # Deleting model 'Article'
         db.delete_table(u'ed_news_article')
 
+        # Deleting model 'TextPost'
+        db.delete_table(u'ed_news_textpost')
+
         # Deleting model 'UserProfile'
         db.delete_table(u'ed_news_userprofile')
-
-        # Removing M2M table for field articles on 'UserProfile'
-        db.delete_table(db.shorten_name(u'ed_news_userprofile_articles'))
 
         # Deleting model 'Comment'
         db.delete_table(u'ed_news_comment')
@@ -137,32 +172,46 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
         u'ed_news.article': {
-            'Meta': {'object_name': 'Article'},
-            'author': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'ranking_points': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'submission_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '80'}),
-            'upvotes': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'Meta': {'object_name': 'Article', '_ormbases': [u'ed_news.Submission']},
+            u'submission_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['ed_news.Submission']", 'unique': 'True', 'primary_key': 'True'}),
             'url': ('django.db.models.fields.URLField', [], {'max_length': '200'})
         },
         u'ed_news.comment': {
             'Meta': {'object_name': 'Comment'},
-            'alive': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'author': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'comments'", 'to': u"orm['auth.User']"}),
-            'comment_text': ('django.db.models.fields.CharField', [], {'max_length': '10000'}),
+            'comment_text': ('django.db.models.fields.TextField', [], {}),
             'downvotes': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'downvoted_comments'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm['auth.User']"}),
             'flags': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'flagged_comments'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm['auth.User']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'parent_article': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['ed_news.Article']", 'null': 'True', 'blank': 'True'}),
-            'parent_comment': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['ed_news.Comment']"}),
-            'upvotes': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'upvoted_comments'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm['auth.User']"})
+            'parent_comment': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['ed_news.Comment']", 'null': 'True', 'blank': 'True'}),
+            'parent_submission': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['ed_news.Submission']", 'null': 'True', 'blank': 'True'}),
+            'ranking_points': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'submission_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'upvotes': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'upvoted_comments'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm['auth.User']"}),
+            'visible': ('django.db.models.fields.BooleanField', [], {'default': 'True'})
+        },
+        u'ed_news.submission': {
+            'Meta': {'object_name': 'Submission'},
+            'flags': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'flagged_submissions'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm['auth.User']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'ranking_points': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'submission_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'submitter': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"}),
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '80'}),
+            'upvotes': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'upvoted_submissions'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm['auth.User']"}),
+            'visible': ('django.db.models.fields.BooleanField', [], {'default': 'True'})
+        },
+        u'ed_news.textpost': {
+            'Meta': {'object_name': 'TextPost', '_ormbases': [u'ed_news.Submission']},
+            'post_body': ('django.db.models.fields.TextField', [], {}),
+            u'submission_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['ed_news.Submission']", 'unique': 'True', 'primary_key': 'True'})
         },
         u'ed_news.userprofile': {
             'Meta': {'object_name': 'UserProfile'},
-            'articles': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'to': u"orm['ed_news.Article']", 'null': 'True', 'blank': 'True'}),
             'email_public': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'karma': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'show_invisible': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['auth.User']", 'unique': 'True'})
         }
     }
