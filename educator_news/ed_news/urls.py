@@ -16,7 +16,7 @@ urlpatterns = patterns('',
     url(r'^downvote_comment/(?P<comment_id>\d+)/$', views.downvote_comment, name='downvote_comment'),
     url(r'^reply/(?P<article_id>\d+)/(?P<comment_id>\d+)/$', views.reply, name='reply'),
     url(r'^flag_comment/(?P<article_id>\d+)/(?P<comment_id>\d+)/$', views.flag_comment, name='flag_comment'),
-    url(r'^flag_article/(?P<article_id>\d+)/$', views.flag_article, name='flag_article'),
+    url(r'^flag_submission/(?P<submission_id>\d+)/$', views.flag_submission, name='flag_submission'),
 
     # --- My admin pages ---
     #  All of these check for my username.

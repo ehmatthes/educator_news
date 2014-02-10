@@ -14,6 +14,7 @@ from ed_news.forms import ArticleForm, CommentEntryForm
 
 from ed_news.models import Submission, Article, TextPost, Comment
 
+
 # These should be moved to a settings, config, or .env file.
 # Moderation level will start at 10, increase as site becomes more active.
 #  Should have low level if debug = True?
@@ -23,6 +24,7 @@ MAX_SUBMISSIONS = 30
 # Number of flags it takes to make an article disappear.
 #  Or maybe one flag from a super-mod?
 FLAGS_TO_DISAPPEAR = 1
+
 
 def index(request):
     # Get a list of submissions, sorted by date.
@@ -259,7 +261,7 @@ def discuss(request, article_id, admin=False):
             comment.parent_article = article
             comment.save()
             update_comment_ranking_points(article)
-            update_ranking_points()
+            update_submission_ranking_points()
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -326,7 +328,7 @@ def reply(request, article_id, comment_id):
             # Update the ranking points for all comments on 
             #  an article at the same time, to be fair.
             update_comment_ranking_points(article)
-            update_ranking_points()
+            update_submission_ranking_points()
             # Redirect to discussion page.
             return redirect('/discuss/%s/' % article.id)
         else:
@@ -416,7 +418,7 @@ def upvote_submission(request, article_id):
             increment_karma(article.submitter)
 
         # Update article ranking points, and redirect back to page.
-        update_ranking_points()
+        update_submission_ranking_points()
         return redirect(next_page)
 
 
@@ -549,8 +551,8 @@ def flag_comment(request, article_id, comment_id):
     return redirect(next_page)
 
 
-def flag_article(request, article_id):
-    """Flagging an article drops its quickly.
+def flag_submission(request, submission_id):
+    """Flagging a submission drops its quickly.
     Can also trigger moderators to look at the submitter and the domain.
     Moderators may consider taking overall action against the user.
     Moderators may consider ignoring the domain.
@@ -561,44 +563,43 @@ def flag_article(request, article_id):
     #   (Can't flag something you've upvoted.)
 
     next_page = request.META.get('HTTP_REFERER', None) or '/'
-    article = Article.objects.get(id=article_id)
+    submission = Submission.objects.get(id=submission_id)
 
-    flaggers = article.flags.all()
+    flaggers = submission.flags.all()
 
-    if request.user == article.submitter or not request.user.has_perm('ed_news.can_flag_article'):
+    if request.user == submission.submitter or not request.user.has_perm('ed_news.can_flag_submission'):
         return redirect(next_page)
 
     if request.user not in flaggers:
-        # Flag article, and decrement submitter's karma.
-        article.flags.add(request.user)
+        # Flag submission, and decrement submitter's karma.
+        submission.flags.add(request.user)
 
-        # If enough flags, article disappears.
-        if article.flags.count() >= FLAGS_TO_DISAPPEAR:
-            article.visible = False
-        article.save()
+        # If enough flags, submission disappears.
+        if submission.flags.count() >= FLAGS_TO_DISAPPEAR:
+            submission.visible = False
+        submission.save()
 
-        decrement_karma(article.submitter)
+        decrement_karma(submission.submitter)
 
     if request.user in flaggers:
         # Undo the flag, and increment submitter's karma.
-        article.flags.remove(request.user)
+        submission.flags.remove(request.user)
 
-        # If enough flags, article disappears.
-        if article.flags.count() < FLAGS_TO_DISAPPEAR:
-            article.visible = True
-        article.save()
+        # If enough flags, submission reappears.
+        if submission.flags.count() < FLAGS_TO_DISAPPEAR:
+            submission.visible = True
+        submission.save()
 
-        increment_karma(article.submitter)
+        increment_karma(submission.submitter)
 
-    if article in request.user.userprofile.articles.all():
+    if request.user in submission.upvotes.all():
         # Undo the upvote, and decrement submitter's karma.
-        article.upvotes -= 1
-        article.save()
-        request.user.userprofile.articles.remove(article)
-        decrement_karma(article.submitter)
+        submission.upvotes.remove(request.user)
+        submission.save()
+        decrement_karma(submission.submitter)
 
-    # Recalculate article ranking points.
-    update_ranking_points()
+    # Recalculate submission ranking points.
+    update_submission_ranking_points()
 
     return redirect(next_page)
 
@@ -643,18 +644,18 @@ def get_submission_age(submission):
     else:
         return "1 second"
 
-def update_ranking_points():
-    # How many articles really need this?
-    #  Only articles submitted over last x days?
-    articles = Article.objects.all()
-    for article in articles:
-        newness_points = get_newness_points(article)
-        comment_points = 5*get_comment_count(article)
-        # Flags affect articles proportionally.
-        flag_factor = 0.8**article.flags.count()
-        article.ranking_points = flag_factor*(10*article.upvotes.count() + comment_points + newness_points)
-        article.save()
-        #print 'rp', article, article.ranking_points
+def update_submission_ranking_points():
+    # How many submissions really need this?
+    #  Only submissions submitted over last x days?
+    submissions = Submission.objects.all()
+    for submission in submissions:
+        newness_points = get_newness_points(submission)
+        comment_points = 5*get_comment_count(submission)
+        # Flags affect submissions proportionally.
+        flag_factor = 0.8**submission.flags.count()
+        submission.ranking_points = flag_factor*(10*submission.upvotes.count() + comment_points + newness_points)
+        submission.save()
+        #print 'rp', submission, submission.ranking_points
         
 def update_comment_ranking_points(article):
     # Update the ranking points for an article's comments.
