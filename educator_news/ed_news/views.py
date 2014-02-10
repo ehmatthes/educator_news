@@ -32,6 +32,17 @@ def index(request):
     else:
         submissions = Submission.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
         
+    submission_set = get_submission_set(submissions, request.user)
+
+    return render_to_response('ed_news/index.html',
+                              {'submission_set': submission_set,
+                               },
+                              context_instance = RequestContext(request))
+
+
+def get_submission_set(submissions, user):
+    """From a set of submissions, builds a list of submission_dicts for a template.
+    """
     # Note which submissions should not get upvotes.
     # Build a list of submissions, and their ages.
     submission_set = []
@@ -40,15 +51,15 @@ def index(request):
         comment_count = get_comment_count(submission)
         
         flagged = False
-        if request.user in submission.flags.all():
+        if user in submission.flags.all():
             flagged = True
 
         can_flag = False
-        if request.user.is_authenticated() and request.user != submission.submitter and request.user.has_perm('ed_news.can_flag_submission'):
+        if user.is_authenticated() and user != submission.submitter and user.has_perm('ed_news.can_flag_submission'):
             can_flag = True
 
         upvoted = False
-        if request.user in submission.upvotes.all():
+        if user in submission.upvotes.all():
             upvoted = True
 
         submission_set.append({'submission': submission, 'age': submission_age,
@@ -57,10 +68,7 @@ def index(request):
                                 'upvoted': upvoted,
                                 })
 
-    return render_to_response('ed_news/index.html',
-                              {'submission_set': submission_set,
-                               },
-                              context_instance = RequestContext(request))
+    return submission_set
 
 # --- Authentication views ---
 def logout_view(request):
@@ -221,11 +229,11 @@ def new(request):
     #  rather than building a list of submissions from separate articles
     #  and posts.
 
-    if request.user.userprofile.show_invisible:
-        articles = Article.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
+    if request.user.is_authenticated() and request.user.userprofile.show_invisible:
+        submissions = Submission.objects.all().order_by('submission_time').reverse()[:MAX_SUBMISSIONS]
     else:
-        articles = Article.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
-    
+        submissions = Submission.objects.filter(visible=True).order_by('submission_time').reverse()[:MAX_SUBMISSIONS]
+
     # Note which articles should not get upvotes.
     # Build a list of articles, and their ages.
     articles_ages = []
