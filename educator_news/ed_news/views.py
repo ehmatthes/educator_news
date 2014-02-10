@@ -244,9 +244,9 @@ def new(request):
                               context_instance = RequestContext(request))
 
 
-def discuss(request, article_id, admin=False):
-    article = Article.objects.get(id=article_id)
-    age = get_submission_age(article)
+def discuss(request, submission_id, admin=False):
+    submission = Submission.objects.get(id=submission_id)
+    age = get_submission_age(submission)
     
     if request.method == 'POST':
         # Redirect unauthenticated users to register/ login.
@@ -258,9 +258,9 @@ def discuss(request, article_id, admin=False):
         if comment_entry_form.is_valid():
             comment = comment_entry_form.save(commit=False)
             comment.author = request.user
-            comment.parent_article = article
+            comment.parent_submission = submission
             comment.save()
-            update_comment_ranking_points(article)
+            update_comment_ranking_points(submission)
             update_submission_ranking_points()
         else:
             # Invalid form/s.
@@ -272,34 +272,29 @@ def discuss(request, article_id, admin=False):
 
     # Get comment information after processing form, to include comment
     #  that was just saved.
-    comment_count = get_comment_count(article)
+    comment_count = get_comment_count(submission)
 
-    # If user logged in, get article set.
-    #  Also check if article is flagged by this user.
-    user_articles = []
+    #  Check if submission is flagged by this user.
     flagged = False
     can_flag = False
     if request.user.is_authenticated():
-        user_articles = request.user.userprofile.articles.all()
-        if request.user in article.flags.all() and request.user != article.submitter:
+        if request.user in submission.flags.all() and request.user != submission.submitter:
             flagged = True
 
-        if request.user != article.submitter and request.user.has_perm('ed_news.can_flag_article'):
+        if request.user != submission.submitter and request.user.has_perm('ed_news.can_flag_submission'):
             can_flag = True
 
     comment_set = []
-    get_comment_set(article, request, comment_set)
+    get_comment_set(submission, request, comment_set)
 
+    saved_submission = False
+    if request.user in submission.upvotes.all():
+        saved_submission = True
 
-    if admin:
-        template = 'ed_news/discuss_admin.html'
-    else:
-        template = 'ed_news/discuss.html'
-
-    return render_to_response(template,
-                              {'article': article, 'age': age,
+    return render_to_response('ed_news/discuss.html',
+                              {'submission': submission, 'age': age,
                                'comment_count': comment_count,
-                               'user_articles': user_articles,
+                               'saved_submission': saved_submission,
                                'flagged': flagged, 'can_flag': can_flag,
                                'comment_entry_form': comment_entry_form,
                                'comment_set': comment_set,
@@ -753,7 +748,6 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
         if comment.comment_set.count() > 0:
             get_comment_set(comment, request, comment_set, nesting_level + 1)
 
-    #return comment_set
 
 def get_parent_article(comment):
     """Takes in a comment, and searches up the comment chain to find
