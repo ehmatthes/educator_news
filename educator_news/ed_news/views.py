@@ -458,7 +458,7 @@ def upvote_comment(request, comment_id):
         increment_karma(comment.author)
 
     # Recalculate comment order.
-    article = get_parent_article(comment)
+    article = get_parent_submission(comment)
     update_comment_ranking_points(article)
 
     return redirect(next_page)
@@ -496,7 +496,7 @@ def downvote_comment(request, comment_id):
         decrement_karma(comment.author)
 
     # Recalculate comment order.
-    article = get_parent_article(comment)
+    article = get_parent_submission(comment)
     update_comment_ranking_points(article)
 
     return redirect(next_page)
@@ -749,15 +749,15 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
             get_comment_set(comment, request, comment_set, nesting_level + 1)
 
 
-def get_parent_article(comment):
+def get_parent_submission(comment):
     """Takes in a comment, and searches up the comment chain to find
-    the parent article.
+    the parent submission.
     """
 
-    if comment.parent_article:
-        parent_object = comment.parent_article
+    if comment.parent_submission:
+        parent_object = comment.parent_submission
     else:
-        parent_object = get_parent_article(comment.parent_comment)
+        parent_object = get_parent_submission(comment.parent_comment)
 
     return parent_object
 

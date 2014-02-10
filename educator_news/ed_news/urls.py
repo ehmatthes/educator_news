@@ -19,8 +19,4 @@ urlpatterns = patterns('',
     url(r'^flag_submission/(?P<submission_id>\d+)/$', views.flag_submission, name='flag_submission'),
 
     # --- My admin pages ---
-    #  All of these check for my username.
-    #  Could this be faked?
-    #   I don't think so; checks against user object, not just username.
-    #   None should offer any actions, or private info, without verifying this.
 )
