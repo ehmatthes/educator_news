@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h2>Submit Text Post</h2>
+    <p>You can use this form to write a text post. This allows you to ask a question of the Educator News community, or write a brief message to the community.</p>
+
+	 {% if user.is_authenticated and submission_accepted %}
+	     <p>Thank you for your submission!</p>
+
+	 {% elif user.is_authenticated %}
+	     <p>Submit form</p>
+		  <form id='submission_form' method="post" action="{% url 'ed_news:submit_textpost' %}" enctype='multipart/form-data'>
+			 {% csrf_token %}
+
+			 {{ textpost_form.as_p }}
+
+			 <p><input type="submit" name='submit' value="Submit" />
+		  </form>
+
+	 {% else %}
+		  <p>You have to <a href="{% url 'login' %}">log in</a> or <a href="{% url 'register' %}">register</a> if you would like to make a submission.</p>
+
+	 {% endif %}
+
+{% endblock %}

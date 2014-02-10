@@ -10,7 +10,7 @@ from django.utils.timezone import utc
 
 from ed_news.forms import UserForm, UserProfileForm
 from ed_news.forms import EditUserForm, EditUserProfileForm
-from ed_news.forms import ArticleForm, CommentEntryForm
+from ed_news.forms import ArticleForm, TextPostForm, CommentEntryForm
 
 from ed_news.models import Submission, Article, TextPost, Comment
 
@@ -217,6 +217,37 @@ def submit(request):
 
     return render_to_response('ed_news/submit.html',
                               {'article_form': article_form,
+                               'submission_accepted': submission_accepted,
+                               },
+                              context_instance = RequestContext(request))
+
+
+def submit_textpost(request):
+    """Page to allow users to submit a new article.
+    """
+
+    submission_accepted = False
+    if request.method == 'POST':
+        textpost_form = TextPostForm(data=request.POST)
+
+        if textpost_form.is_valid():
+            textpost = textpost_form.save(commit=False)
+            textpost.submitter = request.user
+            textpost.save()
+            submission_accepted = True
+            # Upvote this submission.
+            upvote_submission(request, textpost.id)
+        else:
+            # Invalid form/s.
+            #  Print errors to console; should log these?
+            print 'ae', textpost_form.errors
+
+    else:
+        # Send blank forms.
+        textpost_form = TextPostForm()
+
+    return render_to_response('ed_news/submit_textpost.html',
+                              {'textpost_form': textpost_form,
                                'submission_accepted': submission_accepted,
                                },
                               context_instance = RequestContext(request))
