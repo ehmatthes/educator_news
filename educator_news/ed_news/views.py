@@ -172,10 +172,10 @@ def register(request):
                                    },
                                   context_instance = RequestContext(request))
 
+
 # --- Educator News views ---
 def submit(request):
     """Page to allow users to submit a new article.
-    Will also allow users to submit a text post later.
     """
 
     submission_accepted = False
@@ -416,13 +416,12 @@ def upvote_article(request, article_id):
     next_page = request.META.get('HTTP_REFERER', None) or '/'
     article = Article.objects.get(id=article_id)
     # Add this to user's articles, if not already there.
-    user_articles = request.user.userprofile.articles.all()
+    user_articles = get_user_articles(request.user)
     if article in user_articles:
         # This user already upvoted the article.
         return redirect(next_page)
     else:
-        request.user.userprofile.articles.add(article)
-        article.upvotes += 1
+        article.upvotes.add(request.user)
         article.save()
 
         # Increment karma of user who submitted article,
@@ -433,6 +432,17 @@ def upvote_article(request, article_id):
         # Update article ranking points, and redirect back to page.
         update_ranking_points()
         return redirect(next_page)
+
+
+def get_user_articles(user):
+    """ Gets the articles that have been upvoted by this user."""
+    # DEV: I'm sure there is an equivalent one-line filtered query for this.
+    articles = Article.objects.all()
+    user_articles = []
+    for article in articles:
+        if user in article.upvotes.all():
+            user_articles.append(article)
+    return user_articles
 
 
 def upvote_comment(request, comment_id):
@@ -656,7 +666,7 @@ def update_ranking_points():
         comment_points = 5*get_comment_count(article)
         # Flags affect articles proportionally.
         flag_factor = 0.8**article.flags.count()
-        article.ranking_points = flag_factor*(10*article.upvotes + comment_points + newness_points)
+        article.ranking_points = flag_factor*(10*article.upvotes.count() + comment_points + newness_points)
         article.save()
         #print 'rp', article, article.ranking_points
         
