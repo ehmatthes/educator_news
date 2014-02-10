@@ -414,15 +414,15 @@ def upvote_submission(request, submission_id):
         return redirect(next_page)
 
 
-def get_user_articles(user):
-    """ Gets the articles that have been upvoted by this user."""
+def get_saved_submissions(user):
+    """ Gets the submissions that have been upvoted by this user."""
     # DEV: I'm sure there is an equivalent one-line filtered query for this.
-    articles = Article.objects.all()
-    user_articles = []
-    for article in articles:
-        if user in article.upvotes.all():
-            user_articles.append(article)
-    return user_articles
+    submissions = Submission.objects.all()
+    saved_submissions = []
+    for submission in submissions:
+        if user in submission.upvotes.all():
+            saved_submissions.append(submission)
+    return saved_submissions
 
 
 def upvote_comment(request, comment_id):
