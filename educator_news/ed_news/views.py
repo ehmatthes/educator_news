@@ -397,27 +397,25 @@ def discuss_admin(request, article_id):
     else:
         return redirect('/discuss/%s/' % article_id)
 
-def upvote_submission(request, article_id):
-    # Check if user has upvoted this article.
-    #  If not, increment article points.
-    #  Save article for this user.
+def upvote_submission(request, submission_id):
+    # Check if user has upvoted this submission.
+    #  If not, increment submission points.
+    #  Save submission for this user.
     next_page = request.META.get('HTTP_REFERER', None) or '/'
-    article = Article.objects.get(id=article_id)
-    # Add this to user's articles, if not already there.
-    user_articles = get_user_articles(request.user)
-    if article in user_articles:
-        # This user already upvoted the article.
+    submission = Submission.objects.get(id=submission_id)
+    if request.user in submission.upvotes.all():
+        # This user already upvoted the submission.
         return redirect(next_page)
     else:
-        article.upvotes.add(request.user)
-        article.save()
+        submission.upvotes.add(request.user)
+        submission.save()
 
-        # Increment karma of user who submitted article,
+        # Increment karma of user who submitted submission,
         #  unless this is the user who submitted.
-        if request.user != article.submitter:
-            increment_karma(article.submitter)
+        if request.user != submission.submitter:
+            increment_karma(submission.submitter)
 
-        # Update article ranking points, and redirect back to page.
+        # Update submission ranking points, and redirect back to page.
         update_submission_ranking_points()
         return redirect(next_page)
 
