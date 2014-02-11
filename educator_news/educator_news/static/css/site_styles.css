@@ -87,3 +87,8 @@ span.beta_notice {
 	 font-style: italic;
 	 color: red;
 }
+
+.text_post {
+	 margin-left: 20px;
+	 margin-bottom: 30px;
+}
