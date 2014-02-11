@@ -27,6 +27,11 @@
 		    </a>
 		  </div>
 
+		  {% comment %} If this is a text post, display the body of the post. {% endcomment %}
+		  <div class='text_post'>
+			 {% if submission.textpost %}{{ submission.textpost.post_body|linebreaks }}{% endif %}
+		  </div>
+
 
 		  {% comment %} --- Comment entry form --- {% endcomment%}
 		  <form id='comment_form' method="post" action="{% url 'ed_news:discuss' submission.id %}" enctype='multipart/form-data'>

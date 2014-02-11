@@ -335,9 +335,12 @@ def discuss(request, submission_id, admin=False):
 
 def reply(request, submission_id, comment_id):
     submission = Submission.objects.get(id=submission_id)
-    submission_age = get_submission_age(submission)
+
     comment = Comment.objects.get(id=comment_id)
     comment_age = get_submission_age(comment)
+
+    parent_submission = get_parent_submission(comment)
+    parent_comment = comment.parent_comment
     
     # Redirect unauthenticated users to register/ login.
     if not request.user.is_authenticated():
@@ -352,12 +355,15 @@ def reply(request, submission_id, comment_id):
             reply.author = request.user
             reply.parent_comment = comment
             reply.save()
+
             # Update the ranking points for all comments on 
             #  a submission at the same time, to be fair.
             update_comment_ranking_points(submission)
             update_submission_ranking_points()
+
             # Redirect to discussion page.
             return redirect('/discuss/%s/' % submission.id)
+
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -368,22 +374,6 @@ def reply(request, submission_id, comment_id):
 
     # Get comment information after processing form, to include comment
     #  that was just saved.
-    comment_count = submission.comment_set.count()
-    comment_count = get_comment_count(submission)
-
-    # Check if user has flagged or saved submission.
-    # Check if user can flag the submission.
-    flagged = False
-    can_flag = False
-    saved_submission = True
-    if request.user.is_authenticated():
-        if request.user in submission.upvotes.all():
-            saved_submission = True
-        if request.user in submission.flags.all():
-            flagged = True
-        if request.user != submission.submitter and request.user.has_perm('ed_news.can_flag_submission'):
-            can_flag = True
-
     upvoted, can_upvote = False, False
     downvoted, can_downvote = False, False
     can_flag_comment = False
@@ -403,11 +393,10 @@ def reply(request, submission_id, comment_id):
             can_flag_comment = True
 
     return render_to_response('ed_news/reply.html',
-                              {'submission': submission, 'submission_age': submission_age,
+                              {'submission': submission,
                                'comment': comment, 'comment_age': comment_age,
-                               'comment_count': comment_count,
-                               'saved_submission': saved_submission,
-                               'flagged': flagged, 'can_flag': can_flag,
+                               'parent_comment': parent_comment,
+                               'parent_submission': parent_submission,
                                'can_upvote': can_upvote, 'upvoted': upvoted,
                                'can_downvote': can_downvote, 'downvoted': downvoted,
                                'can_flag_comment': can_flag_comment,
