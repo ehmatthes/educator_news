@@ -9,7 +9,7 @@ urlpatterns = patterns('',
     url(r'^$', views.index, name='index'),
 
     url(r'^new/', views.new, name='new'),
-    url(r'^submit/', views.submit, name='submit'),
+    url(r'^submit_link/', views.submit_link, name='submit_link'),
     url(r'^submit_textpost/', views.submit_textpost, name='submit_textpost'),
     url(r'^upvote_submission/(?P<submission_id>\d+)/$', views.upvote_submission, name='upvote_submission'),
     url(r'^discuss/(?P<submission_id>\d+)/$', views.discuss, name='discuss'),
