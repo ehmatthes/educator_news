@@ -43,6 +43,7 @@ INSTALLED_APPS = (
 
     # Utilities/ libraries
     'south',
+    'debug_toolbar',
 
     # My apps
     'ed_news',
