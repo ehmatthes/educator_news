@@ -338,6 +338,8 @@ def reply(request, submission_id, comment_id):
     submission_age = get_submission_age(submission)
     comment = Comment.objects.get(id=comment_id)
     comment_age = get_submission_age(comment)
+    parent_submission = get_parent_submission(comment)
+    parent_comment = comment.parent_comment
     
     # Redirect unauthenticated users to register/ login.
     if not request.user.is_authenticated():
@@ -406,6 +408,8 @@ def reply(request, submission_id, comment_id):
                               {'submission': submission, 'submission_age': submission_age,
                                'comment': comment, 'comment_age': comment_age,
                                'comment_count': comment_count,
+                               'parent_comment': parent_comment,
+                               'parent_submission': parent_submission,
                                'saved_submission': saved_submission,
                                'flagged': flagged, 'can_flag': can_flag,
                                'can_upvote': can_upvote, 'upvoted': upvoted,
