@@ -185,7 +185,7 @@ def register(request):
 
 
 # --- Educator News views ---
-def submit(request):
+def submit_link(request):
     """Page to allow users to submit a new article.
     """
 
@@ -199,7 +199,7 @@ def submit(request):
             for article in articles:
                 if article_form.cleaned_data['url'] == article.url:
                     # This should return the discussion page for this article.
-                    return redirect('ed_news:submit')
+                    return redirect('ed_news:submit_link')
             article = article_form.save(commit=False)
             article.submitter = request.user
             article.save()
@@ -215,7 +215,7 @@ def submit(request):
         # Send blank forms.
         article_form = ArticleForm()
 
-    return render_to_response('ed_news/submit.html',
+    return render_to_response('ed_news/submit_link.html',
                               {'article_form': article_form,
                                'submission_accepted': submission_accepted,
                                },

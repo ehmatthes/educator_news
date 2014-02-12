@@ -10,7 +10,7 @@
 
 	 {% elif user.is_authenticated %}
 	     <p>Submit form</p>
-		  <form id='submission_form' method="post" action="{% url 'ed_news:submit' %}" enctype='multipart/form-data'>
+		  <form id='submission_form' method="post" action="{% url 'ed_news:submit_link' %}" enctype='multipart/form-data'>
 			 {% csrf_token %}
 
 			 {{ article_form.as_p }}
