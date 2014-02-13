@@ -35,6 +35,9 @@ TEMPLATE_DIRS = (
     os.path.join(DIRNAME, 'static/templates'),
 )
 
+# Django-debug-toolbar configuration
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
+
 # Application definition
 
 INSTALLED_APPS = (
@@ -60,6 +63,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # Django-debug-toolbar
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+
 )
 
 ROOT_URLCONF = 'educator_news.urls'

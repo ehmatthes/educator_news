@@ -1,5 +1,7 @@
+from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.core.urlresolvers import reverse
+    
 
 from django.contrib import admin
 admin.autodiscover()
@@ -19,3 +21,7 @@ urlpatterns = patterns('',
     url(r'^password_change_successful/', 'ed_news.views.password_change_successful', name='password_change_successful'),
     url(r'^register/', 'ed_news.views.register', name='register'),
 )
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += patterns('', url(r'^__debug__/', include(debug_toolbar.urls)),)
