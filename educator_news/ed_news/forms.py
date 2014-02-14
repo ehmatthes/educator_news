@@ -20,10 +20,19 @@ class ArticleForm(forms.ModelForm):
         model = Article
         fields = ('title', 'url',)
 
+
 class TextPostForm(forms.ModelForm):
     class Meta:
         model = TextPost
         fields = ('title', 'post_body',)
+        widgets = {
+            'title': forms.TextInput(attrs={'size': 80}),
+            'post_body': forms.Textarea(attrs={'cols': 100, 'rows': 10}),
+            }
+        labels = {
+            'post_body': '',
+            }
+
 
 class EditUserForm(forms.ModelForm):
     class Meta:
