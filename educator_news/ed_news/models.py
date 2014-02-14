@@ -76,3 +76,12 @@ class Comment(models.Model):
 
     def __unicode__(self):
         return self.comment_text[:50] + '...'
+
+
+# Save a textpost's url based on its id, once the id has been identified.
+def create_textpost_url(sender, instance, created, **kwargs):
+    if created:
+        instance.url = "/discuss/%s/" % instance.id
+        instance.save()
+
+models.signals.post_save.connect(create_textpost_url, sender=TextPost, dispatch_uid='create_textpost_url')
