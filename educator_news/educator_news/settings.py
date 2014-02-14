@@ -37,6 +37,7 @@ TEMPLATE_DIRS = (
 
 # Django-debug-toolbar configuration
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
+INTERNAL_IPS = ('127.0.0.1', )
 
 # Application definition
 
@@ -99,8 +100,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
 STATIC_URL = '/static/'
-
-STATIC_ROOT = '/srv/projects/educator_news/educator_news/educator_news/static/'
 
 STATICFILES_DIRS = (
     os.path.join(DIRNAME, 'static'),
