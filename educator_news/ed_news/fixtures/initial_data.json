@@ -1,1 +1,896 @@
-[{"pk": 1, "model": "contenttypes.contenttype", "fields": {"model": "logentry", "name": "log entry", "app_label": "admin"}}, {"pk": 2, "model": "contenttypes.contenttype", "fields": {"model": "permission", "name": "permission", "app_label": "auth"}}, {"pk": 3, "model": "contenttypes.contenttype", "fields": {"model": "group", "name": "group", "app_label": "auth"}}, {"pk": 4, "model": "contenttypes.contenttype", "fields": {"model": "user", "name": "user", "app_label": "auth"}}, {"pk": 5, "model": "contenttypes.contenttype", "fields": {"model": "contenttype", "name": "content type", "app_label": "contenttypes"}}, {"pk": 6, "model": "contenttypes.contenttype", "fields": {"model": "session", "name": "session", "app_label": "sessions"}}, {"pk": 7, "model": "contenttypes.contenttype", "fields": {"model": "migrationhistory", "name": "migration history", "app_label": "south"}}, {"pk": 8, "model": "contenttypes.contenttype", "fields": {"model": "submission", "name": "submission", "app_label": "ed_news"}}, {"pk": 9, "model": "contenttypes.contenttype", "fields": {"model": "article", "name": "article", "app_label": "ed_news"}}, {"pk": 10, "model": "contenttypes.contenttype", "fields": {"model": "textpost", "name": "text post", "app_label": "ed_news"}}, {"pk": 11, "model": "contenttypes.contenttype", "fields": {"model": "userprofile", "name": "user profile", "app_label": "ed_news"}}, {"pk": 12, "model": "contenttypes.contenttype", "fields": {"model": "comment", "name": "comment", "app_label": "ed_news"}}, {"pk": "k5q1wssdgm1ts6ci2zjr3edxle7vvip2", "model": "sessions.session", "fields": {"expire_date": "2014-02-24T07:03:21.231Z", "session_data": "ODkxOTczYjJkNDhhZjc5YTQzNDMwYjc3YjA2ZDJjMjJjYTI1MWM2Mjp7fQ=="}}, {"pk": "klihjalohogfiubkeskqecijr7uos8mc", "model": "sessions.session", "fields": {"expire_date": "2014-02-24T06:58:07.072Z", "session_data": "ODkxOTczYjJkNDhhZjc5YTQzNDMwYjc3YjA2ZDJjMjJjYTI1MWM2Mjp7fQ=="}}, {"pk": "s4mg0wb5fzi4sflkfbojli00s1a8s1jo", "model": "sessions.session", "fields": {"expire_date": "2014-02-24T08:02:46.142Z", "session_data": "YzlkYzRkMjYwZTc1ZWE3OTQ3ODFiMzYzYzIyZTVmNjI1NDliOGM1NDp7Il9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9pZCI6MX0="}}, {"pk": "sdea8011n6mwhfhhw714v0m014inbx1v", "model": "sessions.session", "fields": {"expire_date": "2014-02-24T07:57:16.251Z", "session_data": "MDhiNTVmNjM4NjliOWY5MWZmMDI0OWI1MzIxOGM4NWI5MDBlY2Y2Nzp7Il9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9pZCI6Mn0="}}, {"pk": 1, "model": "south.migrationhistory", "fields": {"applied": "2014-02-10T06:39:10.458Z", "app_name": "ed_news", "migration": "0001_initial"}}, {"pk": 2, "model": "south.migrationhistory", "fields": {"applied": "2014-02-10T16:32:07.811Z", "app_name": "ed_news", "migration": "0002_auto__add_field_textpost_url"}}, {"pk": 3, "model": "south.migrationhistory", "fields": {"applied": "2014-02-10T16:36:58.398Z", "app_name": "ed_news", "migration": "0003_auto__del_field_article_url__del_field_textpost_url__add_field_submiss"}}, {"pk": 1, "model": "auth.permission", "fields": {"codename": "add_logentry", "name": "Can add log entry", "content_type": 1}}, {"pk": 2, "model": "auth.permission", "fields": {"codename": "change_logentry", "name": "Can change log entry", "content_type": 1}}, {"pk": 3, "model": "auth.permission", "fields": {"codename": "delete_logentry", "name": "Can delete log entry", "content_type": 1}}, {"pk": 4, "model": "auth.permission", "fields": {"codename": "add_permission", "name": "Can add permission", "content_type": 2}}, {"pk": 5, "model": "auth.permission", "fields": {"codename": "change_permission", "name": "Can change permission", "content_type": 2}}, {"pk": 6, "model": "auth.permission", "fields": {"codename": "delete_permission", "name": "Can delete permission", "content_type": 2}}, {"pk": 7, "model": "auth.permission", "fields": {"codename": "add_group", "name": "Can add group", "content_type": 3}}, {"pk": 8, "model": "auth.permission", "fields": {"codename": "change_group", "name": "Can change group", "content_type": 3}}, {"pk": 9, "model": "auth.permission", "fields": {"codename": "delete_group", "name": "Can delete group", "content_type": 3}}, {"pk": 10, "model": "auth.permission", "fields": {"codename": "add_user", "name": "Can add user", "content_type": 4}}, {"pk": 11, "model": "auth.permission", "fields": {"codename": "change_user", "name": "Can change user", "content_type": 4}}, {"pk": 12, "model": "auth.permission", "fields": {"codename": "delete_user", "name": "Can delete user", "content_type": 4}}, {"pk": 13, "model": "auth.permission", "fields": {"codename": "add_contenttype", "name": "Can add content type", "content_type": 5}}, {"pk": 14, "model": "auth.permission", "fields": {"codename": "change_contenttype", "name": "Can change content type", "content_type": 5}}, {"pk": 15, "model": "auth.permission", "fields": {"codename": "delete_contenttype", "name": "Can delete content type", "content_type": 5}}, {"pk": 16, "model": "auth.permission", "fields": {"codename": "add_session", "name": "Can add session", "content_type": 6}}, {"pk": 17, "model": "auth.permission", "fields": {"codename": "change_session", "name": "Can change session", "content_type": 6}}, {"pk": 18, "model": "auth.permission", "fields": {"codename": "delete_session", "name": "Can delete session", "content_type": 6}}, {"pk": 19, "model": "auth.permission", "fields": {"codename": "add_migrationhistory", "name": "Can add migration history", "content_type": 7}}, {"pk": 20, "model": "auth.permission", "fields": {"codename": "change_migrationhistory", "name": "Can change migration history", "content_type": 7}}, {"pk": 21, "model": "auth.permission", "fields": {"codename": "delete_migrationhistory", "name": "Can delete migration history", "content_type": 7}}, {"pk": 22, "model": "auth.permission", "fields": {"codename": "add_submission", "name": "Can add submission", "content_type": 8}}, {"pk": 23, "model": "auth.permission", "fields": {"codename": "change_submission", "name": "Can change submission", "content_type": 8}}, {"pk": 24, "model": "auth.permission", "fields": {"codename": "delete_submission", "name": "Can delete submission", "content_type": 8}}, {"pk": 25, "model": "auth.permission", "fields": {"codename": "add_article", "name": "Can add article", "content_type": 9}}, {"pk": 26, "model": "auth.permission", "fields": {"codename": "change_article", "name": "Can change article", "content_type": 9}}, {"pk": 27, "model": "auth.permission", "fields": {"codename": "delete_article", "name": "Can delete article", "content_type": 9}}, {"pk": 28, "model": "auth.permission", "fields": {"codename": "add_textpost", "name": "Can add text post", "content_type": 10}}, {"pk": 29, "model": "auth.permission", "fields": {"codename": "change_textpost", "name": "Can change text post", "content_type": 10}}, {"pk": 30, "model": "auth.permission", "fields": {"codename": "delete_textpost", "name": "Can delete text post", "content_type": 10}}, {"pk": 31, "model": "auth.permission", "fields": {"codename": "add_userprofile", "name": "Can add user profile", "content_type": 11}}, {"pk": 32, "model": "auth.permission", "fields": {"codename": "change_userprofile", "name": "Can change user profile", "content_type": 11}}, {"pk": 33, "model": "auth.permission", "fields": {"codename": "delete_userprofile", "name": "Can delete user profile", "content_type": 11}}, {"pk": 34, "model": "auth.permission", "fields": {"codename": "add_comment", "name": "Can add comment", "content_type": 12}}, {"pk": 35, "model": "auth.permission", "fields": {"codename": "change_comment", "name": "Can change comment", "content_type": 12}}, {"pk": 36, "model": "auth.permission", "fields": {"codename": "delete_comment", "name": "Can delete comment", "content_type": 12}}, {"pk": 37, "model": "auth.permission", "fields": {"codename": "can_downvote_comment", "name": "Can downvote comments", "content_type": 12}}, {"pk": 38, "model": "auth.permission", "fields": {"codename": "can_flag_comment", "name": "Can flag comments", "content_type": 12}}, {"pk": 39, "model": "auth.permission", "fields": {"codename": "can_flag_submission", "name": "Can flag submissions", "content_type": 8}}, {"pk": 1, "model": "auth.group", "fields": {"name": "Moderators", "permissions": [37, 38, 39]}}, {"pk": 1, "model": "auth.user", "fields": {"username": "ehmatthes", "first_name": "", "last_name": "", "is_active": true, "is_superuser": true, "is_staff": true, "last_login": "2014-02-10T08:02:46.132Z", "groups": [], "user_permissions": [], "password": "pbkdf2_sha256$12000$Kg9o2puOg8nM$7IjkdHL8RqjeWhHUfeHeyR1ejXdquDwVWDKxStk+Y6A=", "email": "ehm@gm.com", "date_joined": "2014-02-10T06:38:42.763Z"}}, {"pk": 2, "model": "auth.user", "fields": {"username": "erinm", "first_name": "", "last_name": "", "is_active": true, "is_superuser": false, "is_staff": false, "last_login": "2014-02-10T07:57:16.244Z", "groups": [], "user_permissions": [], "password": "pbkdf2_sha256$12000$4ZOxRBA6JsJS$yBFREdS0k+DITv01MEJK51nmQYGhzbyrasP02ZjPasM=", "email": "", "date_joined": "2014-02-10T07:56:49.351Z"}}, {"pk": 4, "model": "ed_news.submission", "fields": {"ranking_points": 20, "title": "Gittip is about people, not projects", "url": "https://peak5390.wordpress.com/2013/06/13/gittip-is-about-people-not-products/", "visible": true, "flags": [], "submission_time": "2014-02-10T07:27:57.320Z", "submitter": 1, "upvotes": [2, 1]}}, {"pk": 5, "model": "ed_news.submission", "fields": {"ranking_points": 10, "title": "Ninety days on Github", "url": "https://peak5390.wordpress.com/2013/12/08/ninety-days-on-github/", "visible": true, "flags": [], "submission_time": "2014-02-10T07:36:48.919Z", "submitter": 1, "upvotes": [1]}}, {"pk": 6, "model": "ed_news.submission", "fields": {"ranking_points": 31, "title": "Art Therapy: A Proposal for Inclusion in School Settings", "url": "http://education.jhu.edu/PD/newhorizons/strategies/topics/Arts%20in%20Education/jarboe.htm", "visible": true, "flags": [], "submission_time": "2014-02-10T08:19:27.275Z", "submitter": 2, "upvotes": [2]}}, {"pk": 7, "model": "ed_news.submission", "fields": {"ranking_points": 26, "title": "Works?", "url": "http://localhost:8000/discuss/7/", "visible": true, "flags": [], "submission_time": "2014-02-10T16:24:29.626Z", "submitter": 1, "upvotes": [1]}}, {"pk": 4, "model": "ed_news.article", "fields": {"upvotes": [2, 1], "flags": []}}, {"pk": 5, "model": "ed_news.article", "fields": {"upvotes": [1], "flags": []}}, {"pk": 6, "model": "ed_news.article", "fields": {"upvotes": [2], "flags": []}}, {"pk": 7, "model": "ed_news.textpost", "fields": {"upvotes": [1], "post_body": "Does this feature work yet?\r\n\r\nAnyone?", "flags": []}}, {"pk": 1, "model": "ed_news.userprofile", "fields": {"email_public": false, "user": 1, "show_invisible": true, "karma": 2}}, {"pk": 2, "model": "ed_news.userprofile", "fields": {"email_public": false, "user": 2, "show_invisible": false, "karma": 0}}, {"pk": 1, "model": "ed_news.comment", "fields": {"ranking_points": 34, "comment_text": "I love art therapy. It's so nice to know that kids don't have to try and put all of their ugliest experiences into words.", "author": 1, "parent_submission": 6, "parent_comment": null, "visible": true, "flags": [], "submission_time": "2014-02-10T15:26:20.063Z", "upvotes": [2], "downvotes": []}}, {"pk": 2, "model": "ed_news.comment", "fields": {"ranking_points": 29, "comment_text": "Art therapy is really an under-utilized approach. I would love to see it offered in more school settings.", "author": 2, "parent_submission": 6, "parent_comment": null, "visible": true, "flags": [], "submission_time": "2014-02-10T15:29:40.295Z", "upvotes": [], "downvotes": []}}, {"pk": 3, "model": "ed_news.comment", "fields": {"ranking_points": 29, "comment_text": "Does writing a comment increment karma?", "author": 1, "parent_submission": 6, "parent_comment": null, "visible": true, "flags": [], "submission_time": "2014-02-10T15:42:09.947Z", "upvotes": [], "downvotes": []}}, {"pk": 4, "model": "ed_news.comment", "fields": {"ranking_points": 0, "comment_text": "Are you an art therapist? I'd love to learn more about how to help existing counselors use art therapy appropriately.", "author": 1, "parent_submission": null, "parent_comment": 2, "visible": true, "flags": [], "submission_time": "2014-02-10T15:51:20.408Z", "upvotes": [], "downvotes": []}}, {"pk": 5, "model": "ed_news.comment", "fields": {"ranking_points": 30, "comment_text": "It does. It's for asking questions of the community, and sharing brief thoughts.", "author": 2, "parent_submission": 7, "parent_comment": null, "visible": true, "flags": [], "submission_time": "2014-02-11T07:00:14.653Z", "upvotes": [], "downvotes": []}}, {"pk": 1, "model": "admin.logentry", "fields": {"action_flag": 1, "action_time": "2014-02-10T07:04:04.237Z", "object_repr": "ehmatthes", "object_id": "1", "change_message": "", "user": 1, "content_type": 11}}, {"pk": 2, "model": "admin.logentry", "fields": {"action_flag": 3, "action_time": "2014-02-10T07:25:48.022Z", "object_repr": "Gittip is about people, not projects", "object_id": "1", "change_message": "", "user": 1, "content_type": 9}}, {"pk": 3, "model": "admin.logentry", "fields": {"action_flag": 3, "action_time": "2014-02-10T07:26:38.975Z", "object_repr": "Gittip is about people, not projects", "object_id": "2", "change_message": "", "user": 1, "content_type": 9}}, {"pk": 4, "model": "admin.logentry", "fields": {"action_flag": 3, "action_time": "2014-02-10T07:27:53.384Z", "object_repr": "Gittip is about people, not projects", "object_id": "3", "change_message": "", "user": 1, "content_type": 9}}, {"pk": 5, "model": "admin.logentry", "fields": {"action_flag": 2, "action_time": "2014-02-10T08:28:09.183Z", "object_repr": "ehmatthes", "object_id": "1", "change_message": "Changed show_invisible.", "user": 1, "content_type": 11}}, {"pk": 6, "model": "admin.logentry", "fields": {"action_flag": 2, "action_time": "2014-02-10T16:37:37.275Z", "object_repr": "Gittip is about people, not projects", "object_id": "4", "change_message": "Changed url.", "user": 1, "content_type": 9}}, {"pk": 7, "model": "admin.logentry", "fields": {"action_flag": 2, "action_time": "2014-02-10T16:37:49.066Z", "object_repr": "Art Therapy: A Proposal for Inclusion in School Settings", "object_id": "6", "change_message": "Changed url.", "user": 1, "content_type": 9}}, {"pk": 8, "model": "admin.logentry", "fields": {"action_flag": 2, "action_time": "2014-02-10T16:38:00.913Z", "object_repr": "Ninety days on Github", "object_id": "5", "change_message": "Changed url.", "user": 1, "content_type": 9}}, {"pk": 9, "model": "admin.logentry", "fields": {"action_flag": 2, "action_time": "2014-02-10T16:38:41.983Z", "object_repr": "Works?", "object_id": "7", "change_message": "Changed url.", "user": 1, "content_type": 10}}, {"pk": 10, "model": "admin.logentry", "fields": {"action_flag": 2, "action_time": "2014-02-10T16:40:03.683Z", "object_repr": "Works?", "object_id": "7", "change_message": "Changed url.", "user": 1, "content_type": 10}}]
+[
+  {
+    "pk": 1,
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "model": "logentry",
+      "name": "log entry",
+      "app_label": "admin"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "model": "permission",
+      "name": "permission",
+      "app_label": "auth"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "model": "group",
+      "name": "group",
+      "app_label": "auth"
+    }
+  },
+  {
+    "pk": 4,
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "model": "user",
+      "name": "user",
+      "app_label": "auth"
+    }
+  },
+  {
+    "pk": 5,
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "model": "contenttype",
+      "name": "content type",
+      "app_label": "contenttypes"
+    }
+  },
+  {
+    "pk": 6,
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "model": "session",
+      "name": "session",
+      "app_label": "sessions"
+    }
+  },
+  {
+    "pk": 7,
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "model": "migrationhistory",
+      "name": "migration history",
+      "app_label": "south"
+    }
+  },
+  {
+    "pk": 8,
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "model": "submission",
+      "name": "submission",
+      "app_label": "ed_news"
+    }
+  },
+  {
+    "pk": 9,
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "model": "article",
+      "name": "article",
+      "app_label": "ed_news"
+    }
+  },
+  {
+    "pk": 10,
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "model": "textpost",
+      "name": "text post",
+      "app_label": "ed_news"
+    }
+  },
+  {
+    "pk": 11,
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "model": "userprofile",
+      "name": "user profile",
+      "app_label": "ed_news"
+    }
+  },
+  {
+    "pk": 12,
+    "model": "contenttypes.contenttype",
+    "fields": {
+      "model": "comment",
+      "name": "comment",
+      "app_label": "ed_news"
+    }
+  },
+  {
+    "pk": "k5q1wssdgm1ts6ci2zjr3edxle7vvip2",
+    "model": "sessions.session",
+    "fields": {
+      "expire_date": "2014-02-24T07:03:21.231Z",
+      "session_data": "ODkxOTczYjJkNDhhZjc5YTQzNDMwYjc3YjA2ZDJjMjJjYTI1MWM2Mjp7fQ=="
+    }
+  },
+  {
+    "pk": "klihjalohogfiubkeskqecijr7uos8mc",
+    "model": "sessions.session",
+    "fields": {
+      "expire_date": "2014-02-24T06:58:07.072Z",
+      "session_data": "ODkxOTczYjJkNDhhZjc5YTQzNDMwYjc3YjA2ZDJjMjJjYTI1MWM2Mjp7fQ=="
+    }
+  },
+  {
+    "pk": "s4mg0wb5fzi4sflkfbojli00s1a8s1jo",
+    "model": "sessions.session",
+    "fields": {
+      "expire_date": "2014-02-24T08:02:46.142Z",
+      "session_data": "YzlkYzRkMjYwZTc1ZWE3OTQ3ODFiMzYzYzIyZTVmNjI1NDliOGM1NDp7Il9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9pZCI6MX0="
+    }
+  },
+  {
+    "pk": "sdea8011n6mwhfhhw714v0m014inbx1v",
+    "model": "sessions.session",
+    "fields": {
+      "expire_date": "2014-02-24T07:57:16.251Z",
+      "session_data": "MDhiNTVmNjM4NjliOWY5MWZmMDI0OWI1MzIxOGM4NWI5MDBlY2Y2Nzp7Il9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9pZCI6Mn0="
+    }
+  },
+  {
+    "pk": 1,
+    "model": "south.migrationhistory",
+    "fields": {
+      "applied": "2014-02-10T06:39:10.458Z",
+      "app_name": "ed_news",
+      "migration": "0001_initial"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "south.migrationhistory",
+    "fields": {
+      "applied": "2014-02-10T16:32:07.811Z",
+      "app_name": "ed_news",
+      "migration": "0002_auto__add_field_textpost_url"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "south.migrationhistory",
+    "fields": {
+      "applied": "2014-02-10T16:36:58.398Z",
+      "app_name": "ed_news",
+      "migration": "0003_auto__del_field_article_url__del_field_textpost_url__add_field_submiss"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "add_logentry",
+      "name": "Can add log entry",
+      "content_type": 1
+    }
+  },
+  {
+    "pk": 2,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "change_logentry",
+      "name": "Can change log entry",
+      "content_type": 1
+    }
+  },
+  {
+    "pk": 3,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "delete_logentry",
+      "name": "Can delete log entry",
+      "content_type": 1
+    }
+  },
+  {
+    "pk": 4,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "add_permission",
+      "name": "Can add permission",
+      "content_type": 2
+    }
+  },
+  {
+    "pk": 5,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "change_permission",
+      "name": "Can change permission",
+      "content_type": 2
+    }
+  },
+  {
+    "pk": 6,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "delete_permission",
+      "name": "Can delete permission",
+      "content_type": 2
+    }
+  },
+  {
+    "pk": 7,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "add_group",
+      "name": "Can add group",
+      "content_type": 3
+    }
+  },
+  {
+    "pk": 8,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "change_group",
+      "name": "Can change group",
+      "content_type": 3
+    }
+  },
+  {
+    "pk": 9,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "delete_group",
+      "name": "Can delete group",
+      "content_type": 3
+    }
+  },
+  {
+    "pk": 10,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "add_user",
+      "name": "Can add user",
+      "content_type": 4
+    }
+  },
+  {
+    "pk": 11,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "change_user",
+      "name": "Can change user",
+      "content_type": 4
+    }
+  },
+  {
+    "pk": 12,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "delete_user",
+      "name": "Can delete user",
+      "content_type": 4
+    }
+  },
+  {
+    "pk": 13,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "add_contenttype",
+      "name": "Can add content type",
+      "content_type": 5
+    }
+  },
+  {
+    "pk": 14,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "change_contenttype",
+      "name": "Can change content type",
+      "content_type": 5
+    }
+  },
+  {
+    "pk": 15,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "delete_contenttype",
+      "name": "Can delete content type",
+      "content_type": 5
+    }
+  },
+  {
+    "pk": 16,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "add_session",
+      "name": "Can add session",
+      "content_type": 6
+    }
+  },
+  {
+    "pk": 17,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "change_session",
+      "name": "Can change session",
+      "content_type": 6
+    }
+  },
+  {
+    "pk": 18,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "delete_session",
+      "name": "Can delete session",
+      "content_type": 6
+    }
+  },
+  {
+    "pk": 19,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "add_migrationhistory",
+      "name": "Can add migration history",
+      "content_type": 7
+    }
+  },
+  {
+    "pk": 20,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "change_migrationhistory",
+      "name": "Can change migration history",
+      "content_type": 7
+    }
+  },
+  {
+    "pk": 21,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "delete_migrationhistory",
+      "name": "Can delete migration history",
+      "content_type": 7
+    }
+  },
+  {
+    "pk": 22,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "add_submission",
+      "name": "Can add submission",
+      "content_type": 8
+    }
+  },
+  {
+    "pk": 23,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "change_submission",
+      "name": "Can change submission",
+      "content_type": 8
+    }
+  },
+  {
+    "pk": 24,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "delete_submission",
+      "name": "Can delete submission",
+      "content_type": 8
+    }
+  },
+  {
+    "pk": 25,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "add_article",
+      "name": "Can add article",
+      "content_type": 9
+    }
+  },
+  {
+    "pk": 26,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "change_article",
+      "name": "Can change article",
+      "content_type": 9
+    }
+  },
+  {
+    "pk": 27,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "delete_article",
+      "name": "Can delete article",
+      "content_type": 9
+    }
+  },
+  {
+    "pk": 28,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "add_textpost",
+      "name": "Can add text post",
+      "content_type": 10
+    }
+  },
+  {
+    "pk": 29,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "change_textpost",
+      "name": "Can change text post",
+      "content_type": 10
+    }
+  },
+  {
+    "pk": 30,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "delete_textpost",
+      "name": "Can delete text post",
+      "content_type": 10
+    }
+  },
+  {
+    "pk": 31,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "add_userprofile",
+      "name": "Can add user profile",
+      "content_type": 11
+    }
+  },
+  {
+    "pk": 32,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "change_userprofile",
+      "name": "Can change user profile",
+      "content_type": 11
+    }
+  },
+  {
+    "pk": 33,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "delete_userprofile",
+      "name": "Can delete user profile",
+      "content_type": 11
+    }
+  },
+  {
+    "pk": 34,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "add_comment",
+      "name": "Can add comment",
+      "content_type": 12
+    }
+  },
+  {
+    "pk": 35,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "change_comment",
+      "name": "Can change comment",
+      "content_type": 12
+    }
+  },
+  {
+    "pk": 36,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "delete_comment",
+      "name": "Can delete comment",
+      "content_type": 12
+    }
+  },
+  {
+    "pk": 37,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "can_downvote_comment",
+      "name": "Can downvote comments",
+      "content_type": 12
+    }
+  },
+  {
+    "pk": 38,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "can_flag_comment",
+      "name": "Can flag comments",
+      "content_type": 12
+    }
+  },
+  {
+    "pk": 39,
+    "model": "auth.permission",
+    "fields": {
+      "codename": "can_flag_submission",
+      "name": "Can flag submissions",
+      "content_type": 8
+    }
+  },
+  {
+    "pk": 1,
+    "model": "auth.group",
+    "fields": {
+      "name": "Moderators",
+      "permissions": [
+        37,
+        38,
+        39
+      ]
+    }
+  },
+  {
+    "pk": 1,
+    "model": "auth.user",
+    "fields": {
+      "username": "ehmatthes",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": true,
+      "is_staff": true,
+      "last_login": "2014-02-10T08:02:46.132Z",
+      "groups": [],
+      "user_permissions": [],
+      "password": "pbkdf2_sha256$12000$Kg9o2puOg8nM$7IjkdHL8RqjeWhHUfeHeyR1ejXdquDwVWDKxStk+Y6A=",
+      "email": "ehm@gm.com",
+      "date_joined": "2014-02-10T06:38:42.763Z"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "auth.user",
+    "fields": {
+      "username": "erinm",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": false,
+      "is_staff": false,
+      "last_login": "2014-02-10T07:57:16.244Z",
+      "groups": [],
+      "user_permissions": [],
+      "password": "pbkdf2_sha256$12000$4ZOxRBA6JsJS$yBFREdS0k+DITv01MEJK51nmQYGhzbyrasP02ZjPasM=",
+      "email": "",
+      "date_joined": "2014-02-10T07:56:49.351Z"
+    }
+  },
+  {
+    "pk": 4,
+    "model": "ed_news.submission",
+    "fields": {
+      "ranking_points": 20,
+      "title": "Gittip is about people, not projects",
+      "url": "https://peak5390.wordpress.com/2013/06/13/gittip-is-about-people-not-products/",
+      "visible": true,
+      "flags": [],
+      "submission_time": "2014-02-10T07:27:57.320Z",
+      "submitter": 1,
+      "upvotes": [
+        2,
+        1
+      ]
+    }
+  },
+  {
+    "pk": 5,
+    "model": "ed_news.submission",
+    "fields": {
+      "ranking_points": 10,
+      "title": "Ninety days on Github",
+      "url": "https://peak5390.wordpress.com/2013/12/08/ninety-days-on-github/",
+      "visible": true,
+      "flags": [],
+      "submission_time": "2014-02-10T07:36:48.919Z",
+      "submitter": 1,
+      "upvotes": [
+        1
+      ]
+    }
+  },
+  {
+    "pk": 6,
+    "model": "ed_news.submission",
+    "fields": {
+      "ranking_points": 31,
+      "title": "Art Therapy: A Proposal for Inclusion in School Settings",
+      "url": "http://education.jhu.edu/PD/newhorizons/strategies/topics/Arts%20in%20Education/jarboe.htm",
+      "visible": true,
+      "flags": [],
+      "submission_time": "2014-02-10T08:19:27.275Z",
+      "submitter": 2,
+      "upvotes": [
+        2
+      ]
+    }
+  },
+  {
+    "pk": 7,
+    "model": "ed_news.submission",
+    "fields": {
+      "ranking_points": 26,
+      "title": "Works?",
+      "url": "http://localhost:8000/discuss/7/",
+      "visible": true,
+      "flags": [],
+      "submission_time": "2014-02-10T16:24:29.626Z",
+      "submitter": 1,
+      "upvotes": [
+        1
+      ]
+    }
+  },
+  {
+    "pk": 4,
+    "model": "ed_news.article",
+    "fields": {
+      "upvotes": [
+        2,
+        1
+      ],
+      "flags": []
+    }
+  },
+  {
+    "pk": 5,
+    "model": "ed_news.article",
+    "fields": {
+      "upvotes": [
+        1
+      ],
+      "flags": []
+    }
+  },
+  {
+    "pk": 6,
+    "model": "ed_news.article",
+    "fields": {
+      "upvotes": [
+        2
+      ],
+      "flags": []
+    }
+  },
+  {
+    "pk": 1,
+    "model": "ed_news.userprofile",
+    "fields": {
+      "email_public": false,
+      "user": 1,
+      "show_invisible": true,
+      "karma": 2
+    }
+  },
+  {
+    "pk": 2,
+    "model": "ed_news.userprofile",
+    "fields": {
+      "email_public": false,
+      "user": 2,
+      "show_invisible": false,
+      "karma": 0
+    }
+  },
+  {
+    "pk": 1,
+    "model": "ed_news.comment",
+    "fields": {
+      "ranking_points": 34,
+      "comment_text": "I love art therapy. It's so nice to know that kids don't have to try and put all of their ugliest experiences into words.",
+      "author": 1,
+      "parent_submission": 6,
+      "parent_comment": null,
+      "visible": true,
+      "flags": [],
+      "submission_time": "2014-02-10T15:26:20.063Z",
+      "upvotes": [
+        2
+      ],
+      "downvotes": []
+    }
+  },
+  {
+    "pk": 2,
+    "model": "ed_news.comment",
+    "fields": {
+      "ranking_points": 29,
+      "comment_text": "Art therapy is really an under-utilized approach. I would love to see it offered in more school settings.",
+      "author": 2,
+      "parent_submission": 6,
+      "parent_comment": null,
+      "visible": true,
+      "flags": [],
+      "submission_time": "2014-02-10T15:29:40.295Z",
+      "upvotes": [],
+      "downvotes": []
+    }
+  },
+  {
+    "pk": 3,
+    "model": "ed_news.comment",
+    "fields": {
+      "ranking_points": 29,
+      "comment_text": "Does writing a comment increment karma?",
+      "author": 1,
+      "parent_submission": 6,
+      "parent_comment": null,
+      "visible": true,
+      "flags": [],
+      "submission_time": "2014-02-10T15:42:09.947Z",
+      "upvotes": [],
+      "downvotes": []
+    }
+  },
+  {
+    "pk": 4,
+    "model": "ed_news.comment",
+    "fields": {
+      "ranking_points": 0,
+      "comment_text": "Are you an art therapist? I'd love to learn more about how to help existing counselors use art therapy appropriately.",
+      "author": 1,
+      "parent_submission": null,
+      "parent_comment": 2,
+      "visible": true,
+      "flags": [],
+      "submission_time": "2014-02-10T15:51:20.408Z",
+      "upvotes": [],
+      "downvotes": []
+    }
+  },
+  {
+    "pk": 5,
+    "model": "ed_news.comment",
+    "fields": {
+      "ranking_points": 30,
+      "comment_text": "It does. It's for asking questions of the community, and sharing brief thoughts.",
+      "author": 2,
+      "parent_submission": 7,
+      "parent_comment": null,
+      "visible": true,
+      "flags": [],
+      "submission_time": "2014-02-11T07:00:14.653Z",
+      "upvotes": [],
+      "downvotes": []
+    }
+  },
+  {
+    "pk": 1,
+    "model": "admin.logentry",
+    "fields": {
+      "action_flag": 1,
+      "action_time": "2014-02-10T07:04:04.237Z",
+      "object_repr": "ehmatthes",
+      "object_id": "1",
+      "change_message": "",
+      "user": 1,
+      "content_type": 11
+    }
+  },
+  {
+    "pk": 2,
+    "model": "admin.logentry",
+    "fields": {
+      "action_flag": 3,
+      "action_time": "2014-02-10T07:25:48.022Z",
+      "object_repr": "Gittip is about people, not projects",
+      "object_id": "1",
+      "change_message": "",
+      "user": 1,
+      "content_type": 9
+    }
+  },
+  {
+    "pk": 3,
+    "model": "admin.logentry",
+    "fields": {
+      "action_flag": 3,
+      "action_time": "2014-02-10T07:26:38.975Z",
+      "object_repr": "Gittip is about people, not projects",
+      "object_id": "2",
+      "change_message": "",
+      "user": 1,
+      "content_type": 9
+    }
+  },
+  {
+    "pk": 4,
+    "model": "admin.logentry",
+    "fields": {
+      "action_flag": 3,
+      "action_time": "2014-02-10T07:27:53.384Z",
+      "object_repr": "Gittip is about people, not projects",
+      "object_id": "3",
+      "change_message": "",
+      "user": 1,
+      "content_type": 9
+    }
+  },
+  {
+    "pk": 5,
+    "model": "admin.logentry",
+    "fields": {
+      "action_flag": 2,
+      "action_time": "2014-02-10T08:28:09.183Z",
+      "object_repr": "ehmatthes",
+      "object_id": "1",
+      "change_message": "Changed show_invisible.",
+      "user": 1,
+      "content_type": 11
+    }
+  },
+  {
+    "pk": 6,
+    "model": "admin.logentry",
+    "fields": {
+      "action_flag": 2,
+      "action_time": "2014-02-10T16:37:37.275Z",
+      "object_repr": "Gittip is about people, not projects",
+      "object_id": "4",
+      "change_message": "Changed url.",
+      "user": 1,
+      "content_type": 9
+    }
+  },
+  {
+    "pk": 7,
+    "model": "admin.logentry",
+    "fields": {
+      "action_flag": 2,
+      "action_time": "2014-02-10T16:37:49.066Z",
+      "object_repr": "Art Therapy: A Proposal for Inclusion in School Settings",
+      "object_id": "6",
+      "change_message": "Changed url.",
+      "user": 1,
+      "content_type": 9
+    }
+  },
+  {
+    "pk": 8,
+    "model": "admin.logentry",
+    "fields": {
+      "action_flag": 2,
+      "action_time": "2014-02-10T16:38:00.913Z",
+      "object_repr": "Ninety days on Github",
+      "object_id": "5",
+      "change_message": "Changed url.",
+      "user": 1,
+      "content_type": 9
+    }
+  },
+  {
+    "pk": 9,
+    "model": "admin.logentry",
+    "fields": {
+      "action_flag": 2,
+      "action_time": "2014-02-10T16:38:41.983Z",
+      "object_repr": "Works?",
+      "object_id": "7",
+      "change_message": "Changed url.",
+      "user": 1,
+      "content_type": 10
+    }
+  },
+  {
+    "pk": 10,
+    "model": "admin.logentry",
+    "fields": {
+      "action_flag": 2,
+      "action_time": "2014-02-10T16:40:03.683Z",
+      "object_repr": "Works?",
+      "object_id": "7",
+      "change_message": "Changed url.",
+      "user": 1,
+      "content_type": 10
+    }
+  }
+]
