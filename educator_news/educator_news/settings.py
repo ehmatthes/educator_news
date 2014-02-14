@@ -100,6 +100,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATIC_ROOT = '/srv/projects/educator_news/educator_news/educator_news/static/'
+
 STATICFILES_DIRS = (
     os.path.join(DIRNAME, 'static'),
 )
