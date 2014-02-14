@@ -37,6 +37,7 @@ TEMPLATE_DIRS = (
 
 # Django-debug-toolbar configuration
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
+INTERNAL_IPS = ('127.0.0.1', )
 
 # Application definition
 
