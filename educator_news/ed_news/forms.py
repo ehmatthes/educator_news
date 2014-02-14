@@ -19,7 +19,13 @@ class ArticleForm(forms.ModelForm):
     class Meta:
         model = Article
         fields = ('title', 'url',)
-
+        widgets = {
+            'title': forms.TextInput(attrs={'size': 80}),
+            'url': forms.TextInput(attrs={'size': 80}),
+            }
+        labels = {
+            'url': 'url',
+            }
 
 class TextPostForm(forms.ModelForm):
     class Meta:
