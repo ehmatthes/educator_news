@@ -36,10 +36,40 @@ def index(request):
         
     submission_set = get_submission_set(submissions, request.user)
 
+    # Diagnostic for query optimization.
+    test_query_optimization(request)
+
     return render_to_response('ed_news/index.html',
                               {'submission_set': submission_set,
                                },
                               context_instance = RequestContext(request))
+
+
+def test_query_optimization(request):
+    """Query some objects, watch number of SQL queries rise."""
+    from django.core.cache import cache
+    cache._cache.clear()
+    subs = Submission.objects.all().filter(visible=True).order_by('submission_time').prefetch_related('flags', 'upvotes')
+
+    for sub in subs:
+        # 2 queries!
+        # .prefetch_related('flags')
+        request.user in sub.flags.all()
+        # trying .prefetch_related('flags', 'upvotes')
+        request.user in sub.upvotes.all()
+
+
+    return 0
+    # The following results in ~80 queries (~30 new queries)
+    for sub in subs:
+        # 21 queries:
+        get_comment_count(sub)
+        # 16 queries:
+        request.user in sub.flags.all()
+        # 16 queries
+        request.user in sub.upvotes.all()
+
+
 
 
 def get_submission_set(submissions, user):
