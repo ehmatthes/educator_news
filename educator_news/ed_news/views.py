@@ -30,9 +30,9 @@ def index(request):
     # Get a list of submissions, sorted by date.
 
     if request.user.is_authenticated() and request.user.userprofile.show_invisible:
-        submissions = Submission.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
+        submissions = Submission.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes')
     else:
-        submissions = Submission.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS]
+        submissions = Submission.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes')
         
     submission_set = get_submission_set(submissions, request.user)
 
