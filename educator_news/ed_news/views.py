@@ -42,18 +42,6 @@ def index(request):
                               context_instance = RequestContext(request))
 
 
-def get_comment_count_optimized(submission):
-    # Trace comment threads, and report the number of overall comments.
-    print 'here'
-
-    total_comments = 0
-    total_comments += submission.comment_set.count()
-    for comment in submission.comment_set.all():
-        total_comments += get_comment_count(comment)
-        
-    return total_comments
-
-
 def get_submission_set(submissions, user):
     """From a set of submissions, builds a list of submission_dicts for a template.
     """
@@ -62,7 +50,7 @@ def get_submission_set(submissions, user):
     submission_set = []
     for submission in submissions:
         submission_age = get_submission_age(submission)
-        comment_count = get_comment_count_optimized(submission)
+        comment_count = get_comment_count(submission)
         
         flagged = False
         if user in submission.flags.all():
