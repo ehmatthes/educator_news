@@ -30,9 +30,9 @@ def index(request):
     # Get a list of submissions, sorted by date.
 
     if request.user.is_authenticated() and request.user.userprofile.show_invisible:
-        submissions = Submission.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes')
+        submissions = Submission.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set')
     else:
-        submissions = Submission.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes')
+        submissions = Submission.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set')
         
     submission_set = get_submission_set(submissions, request.user)
 
@@ -40,6 +40,18 @@ def index(request):
                               {'submission_set': submission_set,
                                },
                               context_instance = RequestContext(request))
+
+
+def get_comment_count_optimized(submission):
+    # Trace comment threads, and report the number of overall comments.
+    print 'here'
+
+    total_comments = 0
+    total_comments += submission.comment_set.count()
+    for comment in submission.comment_set.all():
+        total_comments += get_comment_count(comment)
+        
+    return total_comments
 
 
 def get_submission_set(submissions, user):
@@ -50,7 +62,7 @@ def get_submission_set(submissions, user):
     submission_set = []
     for submission in submissions:
         submission_age = get_submission_age(submission)
-        comment_count = get_comment_count(submission)
+        comment_count = get_comment_count_optimized(submission)
         
         flagged = False
         if user in submission.flags.all():
@@ -267,9 +279,9 @@ def new(request):
     #  and posts.
 
     if request.user.is_authenticated() and request.user.userprofile.show_invisible:
-        submissions = Submission.objects.all().order_by('submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes')
+        submissions = Submission.objects.all().order_by('submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set')
     else:
-        submissions = Submission.objects.filter(visible=True).order_by('submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes')
+        submissions = Submission.objects.filter(visible=True).order_by('submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set')
 
     submission_set = get_submission_set(submissions, request.user)
 
