@@ -131,7 +131,7 @@ def edit_profile(request):
 
 def password_change_form(request):
     if request.method == 'POST':
-        return password_change(request, post_change_redirect='/password_change_successful')
+        return password_change(request, post_change_redirect='password_change_successful')
     else:
         return render_to_response('registration/password_change_form.html',
                                   {},
