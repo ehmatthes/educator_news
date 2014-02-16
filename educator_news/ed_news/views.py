@@ -690,7 +690,7 @@ def update_submission_ranking_points():
         
 def update_comment_ranking_points(article):
     # Update the ranking points for an article's comments.
-    comments = article.comment_set.all()
+    comments = article.comment_set.all().prefetch_related('upvotes', 'downvotes', 'flags')
     for comment in comments:
         newness_points = get_newness_points(comment)
         voting_points = comment.upvotes.count() - comment.downvotes.count() - 3*comment.flags.count()
