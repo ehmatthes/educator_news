@@ -30,9 +30,9 @@ def index(request):
     # Get a list of submissions, sorted by date.
 
     if request.user.is_authenticated() and request.user.userprofile.show_invisible:
-        submissions = Submission.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes')
+        submissions = Submission.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set')
     else:
-        submissions = Submission.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes')
+        submissions = Submission.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set')
         
     submission_set = get_submission_set(submissions, request.user)
 
@@ -267,9 +267,9 @@ def new(request):
     #  and posts.
 
     if request.user.is_authenticated() and request.user.userprofile.show_invisible:
-        submissions = Submission.objects.all().order_by('submission_time').reverse()[:MAX_SUBMISSIONS]
+        submissions = Submission.objects.all().order_by('submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set')
     else:
-        submissions = Submission.objects.filter(visible=True).order_by('submission_time').reverse()[:MAX_SUBMISSIONS]
+        submissions = Submission.objects.filter(visible=True).order_by('submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set')
 
     submission_set = get_submission_set(submissions, request.user)
 
@@ -690,7 +690,7 @@ def update_submission_ranking_points():
         
 def update_comment_ranking_points(article):
     # Update the ranking points for an article's comments.
-    comments = article.comment_set.all()
+    comments = article.comment_set.all().prefetch_related('upvotes', 'downvotes', 'flags')
     for comment in comments:
         newness_points = get_newness_points(comment)
         voting_points = comment.upvotes.count() - comment.downvotes.count() - 3*comment.flags.count()
@@ -722,7 +722,7 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
     #  used to render all comments on a page.
 
     # Get first-order comments, then recursively pull all nested comments.
-    comments = submission.comment_set.all().order_by('ranking_points', 'submission_time').reverse()
+    comments = submission.comment_set.all().order_by('ranking_points', 'submission_time').reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author')
 
     for comment in comments:
 
