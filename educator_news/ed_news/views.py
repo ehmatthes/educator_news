@@ -722,7 +722,7 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
     #  used to render all comments on a page.
 
     # Get first-order comments, then recursively pull all nested comments.
-    comments = submission.comment_set.all().order_by('ranking_points', 'submission_time').reverse()
+    comments = submission.comment_set.all().order_by('ranking_points', 'submission_time').reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author')
 
     for comment in comments:
 
