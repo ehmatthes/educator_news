@@ -7,6 +7,10 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.views import password_change
 from django.contrib.auth.models import User, Group
 from django.utils.timezone import utc
+from django.views.decorators.cache import cache_page
+from django.utils.cache import get_cache_key
+from django.core.cache import cache
+from django.http import HttpRequest
 
 from ed_news.forms import UserForm, UserProfileForm
 from ed_news.forms import EditUserForm, EditUserProfileForm
@@ -25,7 +29,7 @@ MAX_SUBMISSIONS = 30
 #  Or maybe one flag from a super-mod?
 FLAGS_TO_DISAPPEAR = 1
 
-
+@cache_page(60 * 30)
 def index(request):
     # Get a list of submissions, sorted by date.
 
@@ -258,6 +262,7 @@ def submit_textpost(request):
 
 
 def new(request):
+    invalidate_cache('index', namespace='ed_news', key_prefix=':1:')
     """Page to show the newest submissions.
     """
 
@@ -687,6 +692,7 @@ def update_submission_ranking_points():
         submission.ranking_points = flag_factor*(10*submission.upvotes.count() + comment_points + newness_points)
         submission.save()
         #print 'rp', submission, submission.ranking_points
+
         
 def update_comment_ranking_points(article):
     # Update the ranking points for an article's comments.
@@ -801,3 +807,58 @@ def get_parent_submission(comment):
 
 def is_moderator(user):
     return user.groups.filter(name='Moderators')
+
+def invalidate_cache(view_path, args=[], namespace=None, key_prefix=None):
+    """Function to allow invalidating a view-level cache.
+    Adapted from: http://stackoverflow.com/questions/2268417/expire-a-view-cache-in-django
+    """
+
+    print '\n\nAttempting to invalidate cache...'
+
+    # Create a fake request.
+    request = HttpRequest()
+    # Lookup the request path:
+    if namespace:
+        view_path = namespace + ":" + view_path
+
+    print 'view_path:', view_path
+
+    request.path = reverse(view_path, args=args)
+
+    print 'request.path', request.path
+
+    # Get cache key, expire if the cached item exists.
+    #key = get_cache_key(request, key_prefix=key_prefix)
+    key = get_cache_key(request)
+    header_key = ''
+    if key:
+        #key = key_prefix + key
+
+
+        import re
+        p = re.compile("(.*)_page\.\.GET\.([a-z0-9]*)\.[a-z0-9]*(.*en-us.UTC)")
+        m = p.search(key)
+        print 'groups:', str(m.groups())
+        header_key = m.groups()[0] + '_header..' + m.groups()[1] + m.groups()[2]
+        print 'header_key:', header_key
+
+    print 'key:', key
+
+    if key:
+
+        print 'key exists, trying to get cache'
+
+        if cache.get(key):
+            # Delete the cache entry.
+            #cache.set(key, '', 0)
+            cache.delete(key)
+            cache.delete(header_key)
+            print 'reset cache\n\n'
+        else:
+            print "couldn't get cache\n\n"
+
+        return True
+
+    print "couldn't get key\n\n"
+
+    return False

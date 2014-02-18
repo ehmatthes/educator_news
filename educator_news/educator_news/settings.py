@@ -82,6 +82,14 @@ import dj_database_url
 DATABASES = {'default': dj_database_url.config(default=os.environ.get('DATABASE_URL')) }
 DATABASES = {'default': dj_database_url.config() }
 
+# Caching
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+        }
+    }
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 
