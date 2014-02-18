@@ -805,60 +805,47 @@ def get_parent_submission(comment):
 
     return parent_object
 
+
 def is_moderator(user):
     return user.groups.filter(name='Moderators')
+
 
 def invalidate_cache(view_path, args=[], namespace=None, key_prefix=None):
     """Function to allow invalidating a view-level cache.
     Adapted from: http://stackoverflow.com/questions/2268417/expire-a-view-cache-in-django
     """
 
-    print '\n\nAttempting to invalidate cache...'
-
     # Create a fake request.
     request = HttpRequest()
-    # Lookup the request path:
+    # Get the request path.
     if namespace:
         view_path = namespace + ":" + view_path
 
-    print 'view_path:', view_path
-
     request.path = reverse(view_path, args=args)
 
-    print 'request.path', request.path
-
     # Get cache key, expire if the cached item exists.
+    # Using the key_prefix did not work on first testing.
     #key = get_cache_key(request, key_prefix=key_prefix)
     key = get_cache_key(request)
     header_key = ''
     if key:
-        #key = key_prefix + key
-
-
+        # Need to clear page and header cache. Get the header key
+        #  from the page key.
+        # Typical page key: :1:views.decorators.cache.cache_page..GET.6666cd76f96956469e7be39d750cc7d9.d41d8cd98f00b204e9800998ecf8427e.en-us.UTC
+        # Typical header key: :1:views.decorators.cache.cache_header..6666cd76f96956469e7be39d750cc7d9.en-us.UTC
+        #  Change _page..GET. to _header..
+        #  then lose the second hash.
         import re
         p = re.compile("(.*)_page\.\.GET\.([a-z0-9]*)\.[a-z0-9]*(.*en-us.UTC)")
         m = p.search(key)
-        print 'groups:', str(m.groups())
         header_key = m.groups()[0] + '_header..' + m.groups()[1] + m.groups()[2]
-        print 'header_key:', header_key
 
-    print 'key:', key
-
-    if key:
-
-        print 'key exists, trying to get cache'
-
+        # If the page/ header have been cached, destroy them.
         if cache.get(key):
-            # Delete the cache entry.
-            #cache.set(key, '', 0)
+            # Delete the page and header caches.
             cache.delete(key)
             cache.delete(header_key)
-            print 'reset cache\n\n'
-        else:
-            print "couldn't get cache\n\n"
 
         return True
-
-    print "couldn't get key\n\n"
 
     return False
