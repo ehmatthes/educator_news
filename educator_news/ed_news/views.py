@@ -857,16 +857,16 @@ def invalidate_cache(view_path, args=[], namespace=None, key_prefix=None):
     page_key = get_cache_key(request)
 
     if page_key:
-        print '\n\nviews.invalidate_cache'
-        print 'page_key:', page_key
+        #print '\n\nviews.invalidate_cache'
+        #print 'page_key:', page_key
     
         # If the page has been cached, destroy them.
         if cache.get(page_key):
             # Delete the page cache.
             cache.delete(page_key)
 
-            print 'invalidated cache'
+            #print 'invalidated cache'
             return True
 
-    print "couldn't invalidate cache"
+    #print "couldn't invalidate cache"
     return False
