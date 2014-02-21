@@ -94,7 +94,7 @@ def invalidate_caches(sender, instance, **kwargs):
     if sender in [Submission, Article, TextPost, Comment]:
         invalidate_cache('index', namespace='ed_news')
 
-#models.signals.post_save.connect(invalidate_caches)
+models.signals.post_save.connect(invalidate_caches)
 
 from django.core.urlresolvers import reverse
 from django.utils.cache import get_cache_key

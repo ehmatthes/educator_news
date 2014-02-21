@@ -262,7 +262,7 @@ def submit_textpost(request):
 
 
 def new(request):
-    invalidate_cache('index', namespace='ed_news')
+    #invalidate_cache('index', namespace='ed_news')
 
     """Page to show the newest submissions.
     """
