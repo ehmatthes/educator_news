@@ -7,6 +7,10 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.views import password_change
 from django.contrib.auth.models import User, Group
 from django.utils.timezone import utc
+from django.views.decorators.cache import cache_page, patch_cache_control
+from django.utils.cache import get_cache_key
+from django.core.cache import cache
+from django.http import HttpRequest
 
 from ed_news.forms import UserForm, UserProfileForm
 from ed_news.forms import EditUserForm, EditUserProfileForm
@@ -26,6 +30,7 @@ MAX_SUBMISSIONS = 30
 FLAGS_TO_DISAPPEAR = 1
 
 
+@cache_page(60 * 10)
 def index(request):
     # Get a list of submissions, sorted by date.
 
@@ -36,10 +41,12 @@ def index(request):
         
     submission_set = get_submission_set(submissions, request.user)
 
-    return render_to_response('ed_news/index.html',
+    response = render_to_response('ed_news/index.html',
                               {'submission_set': submission_set,
                                },
                               context_instance = RequestContext(request))
+    patch_cache_control(response, no_cache=True, no_store=True, must_revalidate=True, max_age=600)
+    return response
 
 
 def get_submission_set(submissions, user):
@@ -206,6 +213,8 @@ def submit_link(request):
             submission_accepted = True
             # Upvote this article.
             upvote_submission(request, article.id)
+            # Invalidate caches: index, 
+            invalidate_cache('index', namespace='ed_news')
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -297,6 +306,8 @@ def discuss(request, submission_id, admin=False):
             comment.save()
             update_comment_ranking_points(submission)
             update_submission_ranking_points()
+            # Invalidate caches: index, 
+            invalidate_cache('index', namespace='ed_news')
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -687,6 +698,7 @@ def update_submission_ranking_points():
         submission.ranking_points = flag_factor*(10*submission.upvotes.count() + comment_points + newness_points)
         submission.save()
         #print 'rp', submission, submission.ranking_points
+
         
 def update_comment_ranking_points(article):
     # Update the ranking points for an article's comments.
@@ -799,5 +811,42 @@ def get_parent_submission(comment):
 
     return parent_object
 
+
 def is_moderator(user):
     return user.groups.filter(name='Moderators')
+
+
+def invalidate_cache(view_path, args=[], namespace=None, key_prefix=None):
+    """Function to allow invalidating a view-level cache.
+    Adapted from: http://stackoverflow.com/questions/2268417/expire-a-view-cache-in-django
+    """
+    # Usage: invalidate_cache('index', namespace='ed_news', key_prefix=':1:')
+
+    # Create a fake request.
+    request = HttpRequest()
+    # Get the request path.
+    if namespace:
+        view_path = namespace + ":" + view_path
+
+    request.path = reverse(view_path, args=args)
+    #print 'request:', request
+
+    # Get cache key, expire if the cached item exists.
+    # Using the key_prefix did not work on first testing.
+    #key = get_cache_key(request, key_prefix=key_prefix)
+    page_key = get_cache_key(request)
+
+    if page_key:
+        print '\n\nviews.invalidate_cache'
+        print 'page_key:', page_key
+    
+        # If the page has been cached, destroy them.
+        if cache.get(page_key):
+            # Delete the page cache.
+            cache.delete(page_key)
+
+            print 'invalidated cache'
+            return True
+
+    print "couldn't invalidate cache"
+    return False

@@ -51,6 +51,7 @@ class UserProfile(models.Model):
     def __unicode__(self):
         return self.user.username
 
+
 class Comment(models.Model):
     # Allow essay-length comments.
     comment_text = models.TextField()
