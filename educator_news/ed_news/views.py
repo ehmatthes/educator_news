@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.views import password_change
 from django.contrib.auth.models import User, Group
 from django.utils.timezone import utc
-from django.views.decorators.cache import cache_page
+from django.views.decorators.cache import cache_page, patch_cache_control
 from django.utils.cache import get_cache_key
 from django.core.cache import cache
 from django.http import HttpRequest
@@ -29,7 +29,8 @@ MAX_SUBMISSIONS = 30
 #  Or maybe one flag from a super-mod?
 FLAGS_TO_DISAPPEAR = 1
 
-@cache_page(60 * 30)
+
+@cache_page(60 * 10)
 def index(request):
     # Get a list of submissions, sorted by date.
 
@@ -40,10 +41,12 @@ def index(request):
         
     submission_set = get_submission_set(submissions, request.user)
 
-    return render_to_response('ed_news/index.html',
+    response = render_to_response('ed_news/index.html',
                               {'submission_set': submission_set,
                                },
                               context_instance = RequestContext(request))
+    patch_cache_control(response, no_cache=True, no_store=True, must_revalidate=True, max_age=600)
+    return response
 
 
 def get_submission_set(submissions, user):
@@ -210,6 +213,8 @@ def submit_link(request):
             submission_accepted = True
             # Upvote this article.
             upvote_submission(request, article.id)
+            # Invalidate caches: index, 
+            invalidate_cache('index', namespace='ed_news')
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -262,8 +267,6 @@ def submit_textpost(request):
 
 
 def new(request):
-    #invalidate_cache('index', namespace='ed_news')
-
     """Page to show the newest submissions.
     """
 
@@ -303,6 +306,8 @@ def discuss(request, submission_id, admin=False):
             comment.save()
             update_comment_ranking_points(submission)
             update_submission_ranking_points()
+            # Invalidate caches: index, 
+            invalidate_cache('index', namespace='ed_news')
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -830,29 +835,15 @@ def invalidate_cache(view_path, args=[], namespace=None, key_prefix=None):
     # Using the key_prefix did not work on first testing.
     #key = get_cache_key(request, key_prefix=key_prefix)
     page_key = get_cache_key(request)
-    header_key = ''
 
     if page_key:
-        # Need to clear page and header cache. Get the header key
-        #  from the page key.
-        # Typical page key: :1:views.decorators.cache.cache_page..GET.6666cd76f96956469e7be39d750cc7d9.d41d8cd98f00b204e9800998ecf8427e.en-us.UTC
-        # Typical header key: :1:views.decorators.cache.cache_header..6666cd76f96956469e7be39d750cc7d9.en-us.UTC
-        #  Change _page..GET. to _header..
-        #  then lose the second hash.
-        import re
-        p = re.compile("(.*)_page\.\.GET\.([a-z0-9]*)\.[a-z0-9]*(.*en-us.UTC)")
-        m = p.search(page_key)
-        header_key = m.groups()[0] + '_header..' + m.groups()[1] + m.groups()[2]
-
         print '\n\nviews.invalidate_cache'
         print 'page_key:', page_key
-        print 'header_key:', header_key
     
-        # If the page/ header have been cached, destroy them.
+        # If the page has been cached, destroy them.
         if cache.get(page_key):
-            # Delete the page and header caches.
+            # Delete the page cache.
             cache.delete(page_key)
-            cache.delete(header_key)
 
             print 'invalidated cache'
             return True
