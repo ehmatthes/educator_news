@@ -250,6 +250,9 @@ def submit_textpost(request):
             submission_accepted = True
             # Upvote this submission.
             upvote_submission(request, textpost.id)
+            # Invalidate caches: index, 
+            invalidate_cache('index', namespace='ed_news')
+
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -375,6 +378,9 @@ def reply(request, submission_id, comment_id):
             update_comment_ranking_points(submission)
             update_submission_ranking_points()
 
+            # Invalidate caches: index, 
+            invalidate_cache('index', namespace='ed_news')
+
             # Redirect to discussion page.
             return redirect('/discuss/%s/' % submission.id)
 
@@ -446,6 +452,8 @@ def upvote_submission(request, submission_id):
 
         # Update submission ranking points, and redirect back to page.
         update_submission_ranking_points()
+        # Invalidate caches: index, 
+        invalidate_cache('index', namespace='ed_news')
         return redirect(next_page)
 
 
@@ -501,6 +509,9 @@ def upvote_comment(request, comment_id):
     article = get_parent_submission(comment)
     update_comment_ranking_points(article)
 
+    # Invalidate caches: index, 
+    invalidate_cache('index', namespace='ed_news')
+
     return redirect(next_page)
 
 
@@ -539,6 +550,9 @@ def downvote_comment(request, comment_id):
     # Recalculate comment order.
     article = get_parent_submission(comment)
     update_comment_ranking_points(article)
+
+    # Invalidate caches: index, 
+    invalidate_cache('index', namespace='ed_news')
 
     return redirect(next_page)
 
@@ -589,6 +603,9 @@ def flag_comment(request, submission_id, comment_id):
 
     # Recalculate comment order.
     update_comment_ranking_points(Submission.objects.get(id=submission_id))
+
+    # Invalidate caches: index, 
+    invalidate_cache('index', namespace='ed_news')
 
     return redirect(next_page)
 
@@ -642,6 +659,9 @@ def flag_submission(request, submission_id):
 
     # Recalculate submission ranking points.
     update_submission_ranking_points()
+
+    # Invalidate caches: index, 
+    invalidate_cache('index', namespace='ed_news')
 
     return redirect(next_page)
 
