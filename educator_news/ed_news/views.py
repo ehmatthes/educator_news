@@ -214,7 +214,7 @@ def submit_link(request):
             # Upvote this article.
             upvote_submission(request, article.id)
             # Invalidate caches: index, 
-            invalidate_cache('index', namespace='ed_news')
+            invalidate_caches('ed_news', 'index')
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -251,7 +251,7 @@ def submit_textpost(request):
             # Upvote this submission.
             upvote_submission(request, textpost.id)
             # Invalidate caches: index, 
-            invalidate_cache('index', namespace='ed_news')
+            invalidate_caches('ed_news', 'index')
 
         else:
             # Invalid form/s.
@@ -310,7 +310,7 @@ def discuss(request, submission_id, admin=False):
             update_comment_ranking_points(submission)
             update_submission_ranking_points()
             # Invalidate caches: index, 
-            invalidate_cache('index', namespace='ed_news')
+            invalidate_caches('ed_news', 'index')
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -379,7 +379,7 @@ def reply(request, submission_id, comment_id):
             update_submission_ranking_points()
 
             # Invalidate caches: index, 
-            invalidate_cache('index', namespace='ed_news')
+            invalidate_caches('ed_news', 'index')
 
             # Redirect to discussion page.
             return redirect('/discuss/%s/' % submission.id)
@@ -453,7 +453,7 @@ def upvote_submission(request, submission_id):
         # Update submission ranking points, and redirect back to page.
         update_submission_ranking_points()
         # Invalidate caches: index, 
-        invalidate_cache('index', namespace='ed_news')
+        invalidate_caches('ed_news', 'index')
         return redirect(next_page)
 
 
@@ -510,7 +510,7 @@ def upvote_comment(request, comment_id):
     update_comment_ranking_points(article)
 
     # Invalidate caches: index, 
-    invalidate_cache('index', namespace='ed_news')
+    invalidate_caches('ed_news', 'index')
 
     return redirect(next_page)
 
@@ -552,7 +552,7 @@ def downvote_comment(request, comment_id):
     update_comment_ranking_points(article)
 
     # Invalidate caches: index, 
-    invalidate_cache('index', namespace='ed_news')
+    invalidate_caches('ed_news', 'index')
 
     return redirect(next_page)
 
@@ -605,7 +605,7 @@ def flag_comment(request, submission_id, comment_id):
     update_comment_ranking_points(Submission.objects.get(id=submission_id))
 
     # Invalidate caches: index, 
-    invalidate_cache('index', namespace='ed_news')
+    invalidate_caches('ed_news', 'index')
 
     return redirect(next_page)
 
@@ -661,7 +661,7 @@ def flag_submission(request, submission_id):
     update_submission_ranking_points()
 
     # Invalidate caches: index, 
-    invalidate_cache('index', namespace='ed_news')
+    invalidate_caches('ed_news', 'index')
 
     return redirect(next_page)
 
@@ -835,6 +835,10 @@ def get_parent_submission(comment):
 def is_moderator(user):
     return user.groups.filter(name='Moderators')
 
+
+def invalidate_caches(namespace=None, *pages):
+    for page in pages:
+        invalidate_cache(page, namespace=namespace)
 
 def invalidate_cache(view_path, args=[], namespace=None, key_prefix=None):
     """Function to allow invalidating a view-level cache.
