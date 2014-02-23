@@ -214,7 +214,7 @@ def submit_link(request):
             # Upvote this article.
             upvote_submission(request, article.id)
             # Invalidate caches: index, 
-            invalidate_caches('ed_news', 'index')
+            invalidate_caches('ed_news', 'index', 'new')
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -251,7 +251,7 @@ def submit_textpost(request):
             # Upvote this submission.
             upvote_submission(request, textpost.id)
             # Invalidate caches: index, 
-            invalidate_caches('ed_news', 'index')
+            invalidate_caches('ed_news', 'index', 'new')
 
         else:
             # Invalid form/s.
@@ -269,6 +269,7 @@ def submit_textpost(request):
                               context_instance = RequestContext(request))
 
 
+@cache_page(60 * 10)
 def new(request):
     """Page to show the newest submissions.
     """
@@ -285,10 +286,12 @@ def new(request):
 
     submission_set = get_submission_set(submissions, request.user)
 
-    return render_to_response('ed_news/new.html',
+    response = render_to_response('ed_news/new.html',
                               {'submission_set': submission_set,
                                },
                               context_instance = RequestContext(request))
+    patch_cache_control(response, no_cache=True, no_store=True, must_revalidate=True, max_age=600)
+    return response
 
 
 def discuss(request, submission_id, admin=False):
@@ -310,7 +313,7 @@ def discuss(request, submission_id, admin=False):
             update_comment_ranking_points(submission)
             update_submission_ranking_points()
             # Invalidate caches: index, 
-            invalidate_caches('ed_news', 'index')
+            invalidate_caches('ed_news', 'index', 'new')
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -379,7 +382,7 @@ def reply(request, submission_id, comment_id):
             update_submission_ranking_points()
 
             # Invalidate caches: index, 
-            invalidate_caches('ed_news', 'index')
+            invalidate_caches('ed_news', 'index', 'new')
 
             # Redirect to discussion page.
             return redirect('/discuss/%s/' % submission.id)
@@ -453,7 +456,7 @@ def upvote_submission(request, submission_id):
         # Update submission ranking points, and redirect back to page.
         update_submission_ranking_points()
         # Invalidate caches: index, 
-        invalidate_caches('ed_news', 'index')
+        invalidate_caches('ed_news', 'index', 'new')
         return redirect(next_page)
 
 
@@ -510,7 +513,7 @@ def upvote_comment(request, comment_id):
     update_comment_ranking_points(article)
 
     # Invalidate caches: index, 
-    invalidate_caches('ed_news', 'index')
+    invalidate_caches('ed_news', 'index', 'new')
 
     return redirect(next_page)
 
@@ -552,7 +555,7 @@ def downvote_comment(request, comment_id):
     update_comment_ranking_points(article)
 
     # Invalidate caches: index, 
-    invalidate_caches('ed_news', 'index')
+    invalidate_caches('ed_news', 'index', 'new')
 
     return redirect(next_page)
 
@@ -605,7 +608,7 @@ def flag_comment(request, submission_id, comment_id):
     update_comment_ranking_points(Submission.objects.get(id=submission_id))
 
     # Invalidate caches: index, 
-    invalidate_caches('ed_news', 'index')
+    invalidate_caches('ed_news', 'index', 'new')
 
     return redirect(next_page)
 
@@ -661,7 +664,7 @@ def flag_submission(request, submission_id):
     update_submission_ranking_points()
 
     # Invalidate caches: index, 
-    invalidate_caches('ed_news', 'index')
+    invalidate_caches('ed_news', 'index', 'new')
 
     return redirect(next_page)
 
