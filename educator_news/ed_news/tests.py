@@ -7,23 +7,32 @@ from ed_news.views import invalidate_cache
 class EdNewsViewTests(TestCase):
 
     def test_index_cache(self):
-        self.test_single_cache_invalidation('index')
-
-    def test_single_cache_invalidation(self, page_name):
-        """
-        Very simple test for now; just testing that invalidate function works.
-        Not testing triggers for invalidation.
-
-        Request page_name, then invalidate cache.
+        """Request index, then invalidate cache.
         Cache should be invalidated, returning True.
         Then try to invalidate, and should return False.
         """
-        view_path = 'ed_news:index'
         response = self.client.get(reverse('ed_news:index'))
         self.assertEqual(response.status_code, 200)
 
-        invalidated = invalidate_cache(page_name, 'ed_news')
+        invalidated = invalidate_cache('index', namespace='ed_news')
         self.assertEqual(invalidated, True)
 
-        invalidated = invalidate_cache(page_name, 'ed_news')
-        self.assertEqual(invalidated, False)        
+        invalidated = invalidate_cache('index', namespace='ed_news')
+        self.assertEqual(invalidated, False)
+
+
+    # I am running into namespace issues when trying to generalize these tests.
+    def test_new_cache(self):
+        """Request new, then invalidate cache.
+        Cache should be invalidated, returning True.
+        Then try to invalidate, and should return False.
+        """
+        response = self.client.get(reverse('ed_news:new'))
+        self.assertEqual(response.status_code, 200)
+
+        invalidated = invalidate_cache('new', namespace='ed_news')
+        self.assertEqual(invalidated, True)
+
+        invalidated = invalidate_cache('new', namespace='ed_news')
+        self.assertEqual(invalidated, False)
+
