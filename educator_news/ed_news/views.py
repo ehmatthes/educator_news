@@ -315,7 +315,7 @@ def discuss(request, submission_id, admin=False):
             update_submission_ranking_points()
             # Invalidate caches: index, 
             invalidate_caches('ed_news', 'index', 'new')
-            invalidate_cache('discuss', submission_id, namespace='ed_news')
+            invalidate_cache('discuss', (submission_id, ), namespace='ed_news')
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -388,7 +388,7 @@ def reply(request, submission_id, comment_id):
 
             # Invalidate caches: index, 
             invalidate_caches('ed_news', 'index', 'new')
-            invalidate_cache('discuss', submission_id, namespace='ed_news')
+            invalidate_cache('discuss', (submission_id, ), namespace='ed_news')
 
             # Redirect to discussion page.
             return redirect('/discuss/%s/' % submission.id)
@@ -463,7 +463,7 @@ def upvote_submission(request, submission_id):
         update_submission_ranking_points()
         # Invalidate caches: index, 
         invalidate_caches('ed_news', 'index', 'new')
-        invalidate_cache('discuss', submission_id, namespace='ed_news')
+        invalidate_cache('discuss', (submission_id, ), namespace='ed_news')
         return redirect(next_page)
 
 
@@ -521,7 +521,7 @@ def upvote_comment(request, comment_id):
 
     # Invalidate caches: index, 
     invalidate_caches('ed_news', 'index', 'new')
-    invalidate_cache('discuss', str(submission.id), namespace='ed_news')
+    invalidate_cache('discuss', (str(submission.id), ), namespace='ed_news')
 
     return redirect(next_page)
 
@@ -564,7 +564,7 @@ def downvote_comment(request, comment_id):
 
     # Invalidate caches: index, 
     invalidate_caches('ed_news', 'index', 'new')
-    invalidate_cache('discuss', str(submission.id), namespace='ed_news')
+    invalidate_cache('discuss', (str(submission.id), ), namespace='ed_news')
 
     return redirect(next_page)
 
@@ -618,7 +618,7 @@ def flag_comment(request, submission_id, comment_id):
 
     # Invalidate caches: index, 
     invalidate_caches('ed_news', 'index', 'new')
-    invalidate_cache('discuss', submission_id, namespace='ed_news')
+    invalidate_cache('discuss', (submission_id, ), namespace='ed_news')
 
     return redirect(next_page)
 
@@ -675,7 +675,7 @@ def flag_submission(request, submission_id):
 
     # Invalidate caches: index, 
     invalidate_caches('ed_news', 'index', 'new')
-    invalidate_cache('discuss', submission_id, namespace='ed_news')
+    invalidate_cache('discuss', (submission_id, ), namespace='ed_news')
 
     return redirect(next_page)
 
