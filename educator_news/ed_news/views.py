@@ -294,6 +294,7 @@ def new(request):
     return response
 
 
+@cache_page(60 * 10)
 def discuss(request, submission_id, admin=False):
     submission = Submission.objects.get(id=submission_id)
     age = get_submission_age(submission)
@@ -314,6 +315,7 @@ def discuss(request, submission_id, admin=False):
             update_submission_ranking_points()
             # Invalidate caches: index, 
             invalidate_caches('ed_news', 'index', 'new')
+            invalidate_cache('discuss', submission_id, namespace='ed_news')
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
@@ -343,7 +345,7 @@ def discuss(request, submission_id, admin=False):
     if request.user in submission.upvotes.all():
         saved_submission = True
 
-    return render_to_response('ed_news/discuss.html',
+    response = render_to_response('ed_news/discuss.html',
                               {'submission': submission, 'age': age,
                                'comment_count': comment_count,
                                'saved_submission': saved_submission,
@@ -352,6 +354,9 @@ def discuss(request, submission_id, admin=False):
                                'comment_set': comment_set,
                                },
                               context_instance = RequestContext(request))
+    patch_cache_control(response, no_cache=True, no_store=True, must_revalidate=True, max_age=600)
+    return response
+
 
 def reply(request, submission_id, comment_id):
     submission = Submission.objects.get(id=submission_id)
@@ -383,6 +388,7 @@ def reply(request, submission_id, comment_id):
 
             # Invalidate caches: index, 
             invalidate_caches('ed_news', 'index', 'new')
+            invalidate_cache('discuss', submission_id, namespace='ed_news')
 
             # Redirect to discussion page.
             return redirect('/discuss/%s/' % submission.id)
@@ -457,6 +463,7 @@ def upvote_submission(request, submission_id):
         update_submission_ranking_points()
         # Invalidate caches: index, 
         invalidate_caches('ed_news', 'index', 'new')
+        invalidate_cache('discuss', submission_id, namespace='ed_news')
         return redirect(next_page)
 
 
@@ -509,11 +516,12 @@ def upvote_comment(request, comment_id):
         increment_karma(comment.author)
 
     # Recalculate comment order.
-    article = get_parent_submission(comment)
-    update_comment_ranking_points(article)
+    submission = get_parent_submission(comment)
+    update_comment_ranking_points(submission)
 
     # Invalidate caches: index, 
     invalidate_caches('ed_news', 'index', 'new')
+    invalidate_cache('discuss', str(submission.id), namespace='ed_news')
 
     return redirect(next_page)
 
@@ -551,11 +559,12 @@ def downvote_comment(request, comment_id):
         decrement_karma(comment.author)
 
     # Recalculate comment order.
-    article = get_parent_submission(comment)
-    update_comment_ranking_points(article)
+    submission = get_parent_submission(comment)
+    update_comment_ranking_points(submission)
 
     # Invalidate caches: index, 
     invalidate_caches('ed_news', 'index', 'new')
+    invalidate_cache('discuss', str(submission.id), namespace='ed_news')
 
     return redirect(next_page)
 
@@ -609,6 +618,7 @@ def flag_comment(request, submission_id, comment_id):
 
     # Invalidate caches: index, 
     invalidate_caches('ed_news', 'index', 'new')
+    invalidate_cache('discuss', submission_id, namespace='ed_news')
 
     return redirect(next_page)
 
@@ -665,6 +675,7 @@ def flag_submission(request, submission_id):
 
     # Invalidate caches: index, 
     invalidate_caches('ed_news', 'index', 'new')
+    invalidate_cache('discuss', submission_id, namespace='ed_news')
 
     return redirect(next_page)
 
