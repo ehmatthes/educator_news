@@ -20,9 +20,9 @@ from ed_news.models import Submission, Article, TextPost, Comment
 
 
 # These should be moved to a settings, config, or .env file.
-# Moderation level will start at 10, increase as site becomes more active.
+# Active members level will start at 10, increase as site becomes more active.
 #  Should have low level if debug = True?
-KARMA_LEVEL_MODERATORS = 2
+KARMA_LEVEL_ACTIVE_MEMBERS = 10
 #  Continue to follow HN example, which is 30 articles per screen.
 MAX_SUBMISSIONS = 30
 # Number of flags it takes to make an article disappear.
@@ -105,14 +105,14 @@ def profile(request, profile_id):
 def edit_profile(request):
     user = request.user
 
-    # If user is moderator, they can choose to set show_invisible = True.
+    # If user is active_member, they can choose to set show_invisible = True.
     allow_show_invisible = False
-    if is_moderator(user):
+    if is_active_member(user):
         allow_show_invisible = True
 
     if request.method == 'POST':
         edit_user_form = EditUserForm(data=request.POST, instance=request.user)
-        # if user is moderator, let them set show_invisible
+        # if user is active member, let them set show_invisible
         edit_user_profile_form = EditUserProfileForm(data=request.POST, instance=request.user.userprofile)
 
         if edit_user_form.is_valid():
@@ -686,20 +686,20 @@ def increment_karma(user):
     user.userprofile.karma = new_karma
     user.userprofile.save()
 
-    # Add user to moderators group if passed karma level.
-    if new_karma > KARMA_LEVEL_MODERATORS:
-        moderators = Group.objects.get(name='Moderators')
-        user.groups.add(moderators)
+    # Add user to active_members group if passed karma level.
+    if new_karma > KARMA_LEVEL_ACTIVE_MEMBERS:
+        active_members = Group.objects.get(name='Active Members')
+        user.groups.add(active_members)
 
 def decrement_karma(user):
     new_karma = user.userprofile.karma - 1
     user.userprofile.karma = new_karma
     user.userprofile.save()
 
-    # Remove user from moderators group if below karma level.
-    if new_karma < KARMA_LEVEL_MODERATORS:
-        moderators = Group.objects.get(name='Moderators')
-        user.groups.remove(moderators)
+    # Remove user from active_members group if below karma level.
+    if new_karma < KARMA_LEVEL_ACTIVE_MEMBERS:
+        active_members  = Group.objects.get(name='Active Members')
+        user.groups.remove(active_members)
 
 def get_submission_age(submission):
     """Returns a formatted string stating how old the article is.
@@ -846,8 +846,11 @@ def get_parent_submission(comment):
     return parent_object
 
 
-def is_moderator(user):
-    return user.groups.filter(name='Moderators')
+def is_active_member(user):
+    if user.groups.filter(name='Active Members'):
+        return True
+    else:
+        return False
 
 
 def invalidate_caches(namespace=None, *pages):

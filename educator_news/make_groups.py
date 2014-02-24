@@ -4,14 +4,26 @@ from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from ed_news.models import Comment, Submission
 
+"""
+Main groups are active_members, moderators, and admins(?)
+- active_members
+  - can downvote comments, flag articles
+  - can also flag comments for now
+- moderators
+  - can act on flagged comments (later)
+- admin
+  - ?
+"""
+
+
 # Make group Moderators if it doesn't exist.
 try:
-    moderators = Group.objects.get(name='Moderators')
-    print "Found group Moderators."
+    active_members = Group.objects.get(name='Active Members')
+    print "Found group Active Members."
 except Group.DoesNotExist:
-    moderators = Group(name='Moderators')
-    moderators.save()
-    print "Created group Moderators."
+    active_members = Group(name='Active Members')
+    active_members.save()
+    print "Created group Active Members."
 
 # Permission: can_downvote_comment
 try:
@@ -24,8 +36,8 @@ except Permission.DoesNotExist:
     downvote_comment_permission.save()
 
 try:
-    moderators.permissions.add(downvote_comment_permission)
-    print "Moderators can downvote comments."
+    active_members.permissions.add(downvote_comment_permission)
+    print "Active Members can downvote comments."
 except:
     pass
     
@@ -41,8 +53,8 @@ except Permission.DoesNotExist:
     flag_comment_permission.save()
 
 try:
-    moderators.permissions.add(flag_comment_permission)
-    print "Moderators can flag comments."
+    active_members.permissions.add(flag_comment_permission)
+    print "Active Members can flag comments."
 except:
     pass
 
@@ -58,13 +70,15 @@ except Permission.DoesNotExist:
     flag_submission_permission.save()
 
 try:
-    moderators.permissions.add(flag_submission_permission)
-    print "Moderators can flag submissions."
+    active_members.permissions.add(flag_submission_permission)
+    print "Active Members can flag submissions."
 except:
     pass
 
 
-
+for user in User.objects.all():
+    if user.groups.filter(name='Moderators'):
+        user.groups.add(active_members)
 
 #print Comment.permissions.can_downvote in moderators.permissions
 #ehm = User.objects.get(username='ehmatthes')
