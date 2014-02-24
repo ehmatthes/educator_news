@@ -847,7 +847,10 @@ def get_parent_submission(comment):
 
 
 def is_active_member(user):
-    return user.groups.filter(name='Active Members')
+    if user.groups.filter(name='Active Members'):
+        return True
+    else:
+        return False
 
 
 def invalidate_caches(namespace=None, *pages):
