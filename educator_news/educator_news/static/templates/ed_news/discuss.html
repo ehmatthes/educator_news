@@ -99,6 +99,10 @@
 
 				  {{ comment_dict.age }} ago
 
+				  {% if comment_dict.can_edit %}
+						| <a href="{% url 'ed_news:edit_comment' comment_dict.comment.id %}">edit</a>
+				  {% endif %}
+
 				  {% if comment_dict.flagged and comment_dict.can_flag %}
 						| <a href="{% url 'ed_news:flag_comment' submission.id comment_dict.comment.id %}">unflag</a>
 				  {% elif comment_dict.can_flag %}

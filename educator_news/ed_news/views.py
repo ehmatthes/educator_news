@@ -28,7 +28,8 @@ MAX_SUBMISSIONS = 30
 # Number of flags it takes to make an article disappear.
 #  Or maybe one flag from a super-mod?
 FLAGS_TO_DISAPPEAR = 1
-
+# How long does a user have to edit a comment?
+COMMENT_EDIT_WINDOW = 60*10
 
 @cache_page(60 * 10)
 def index(request):
@@ -434,6 +435,51 @@ def reply(request, submission_id, comment_id):
                                },
                               context_instance = RequestContext(request))
 
+
+def edit_comment(request, comment_id):
+    comment = Comment.objects.get(id=comment_id)
+    comment_age = get_submission_age(comment)
+
+    parent_submission = get_parent_submission(comment)
+    parent_comment = comment.parent_comment
+    
+    # Redirect unauthenticated users to register/ login.
+    if not request.user.is_authenticated():
+        return redirect('login')
+
+    if request.method == 'POST':
+
+        edit_comment_form = CommentEntryForm(data=request.POST, instance=comment)
+
+        if edit_comment_form.is_valid():
+            # Really just need to save the new comment text.
+            edited_comment = edit_comment_form.save(commit=False)
+            comment.comment_text = edited_comment.comment_text
+            comment.save()
+
+            # Invalidate caches: This only affects the discussion page for the parent submission. 
+            invalidate_cache('discuss', (parent_submission.id, ), namespace='ed_news')
+
+            # Redirect to discussion page.
+            return redirect('/discuss/%s/' % parent_submission.id)
+
+        else:
+            # Invalid form/s.
+            #  Print errors to console; should log these?
+            print 'ce', edit_comment_form.errors
+
+    # Prepare a blank entry form.
+    edit_comment_form = CommentEntryForm(instance=comment)
+
+    return render_to_response('ed_news/edit_comment.html',
+                              {'comment': comment, 'comment_age': comment_age,
+                               'parent_comment': parent_comment,
+                               'parent_submission': parent_submission,
+                               'edit_comment_form': edit_comment_form,
+                               },
+                              context_instance = RequestContext(request))
+
+
 def discuss_admin(request, article_id):
     if request.user == User.objects.get(username='ehmatthes'):
         response = discuss(request, article_id, True)
@@ -749,6 +795,7 @@ def get_newness_points(submission):
     # From 0 to 30 points, depending on newness. Linear function.
     #  This should probably be a rapidly-decaying function,
     #  rather than a linear function.
+    # DEV: Should call get_age_seconds()
     age = (datetime.utcnow().replace(tzinfo=utc) - submission.submission_time).seconds
     newness_points = int(max((((86400.0-age)/86400)*30),0))
     return newness_points
@@ -789,6 +836,7 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
                 downvoted = True
             elif request.user.has_perm('ed_news.can_downvote_comment'):
                 can_downvote = True
+        can_edit = can_edit_comment(comment, request)
 
         # Note whether user has flagged this comment.
         flagged = False
@@ -824,6 +872,7 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
                             'nesting_level': nesting_level,
                             'margin_left': margin_left,
                             'text_color': text_color,
+                            'can_edit': can_edit,
                             })
 
         # Append nested comments, if there are any.
@@ -832,6 +881,23 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
         if comment.comment_set.count() > 0:
             get_comment_set(comment, request, comment_set, nesting_level + 1)
 
+
+def can_edit_comment(comment, request):
+    # Find out if this comment can be edited.
+    #  User needs to be author, and comment needs to be less than 
+    #   COMMENT_EDIT_WINDOW seconds old.
+    user_is_author = (request.user == comment.author)
+    recent_comment = (get_age_seconds(comment.submission_time) < COMMENT_EDIT_WINDOW)
+
+    if user_is_author and recent_comment:
+        return True
+    else:
+        return False
+
+
+def get_age_seconds(timestamp_in):
+    age = (datetime.utcnow().replace(tzinfo=utc) - timestamp_in).seconds
+    return age
 
 def get_parent_submission(comment):
     """Takes in a comment, and searches up the comment chain to find
