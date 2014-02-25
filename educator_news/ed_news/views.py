@@ -346,6 +346,13 @@ def discuss(request, submission_id, admin=False):
     if request.user in submission.upvotes.all():
         saved_submission = True
 
+    # Check if this is a textpost that can be edited.
+    textpost_can_edit = False
+    try:
+        textpost_can_edit = can_edit_textpost(submission.textpost, request)
+    except Exception, err:
+        pass
+
     response = render_to_response('ed_news/discuss.html',
                               {'submission': submission, 'age': age,
                                'comment_count': comment_count,
@@ -353,6 +360,7 @@ def discuss(request, submission_id, admin=False):
                                'flagged': flagged, 'can_flag': can_flag,
                                'comment_entry_form': comment_entry_form,
                                'comment_set': comment_set,
+                               'textpost_can_edit': textpost_can_edit,
                                },
                               context_instance = RequestContext(request))
     patch_cache_control(response, no_cache=True, no_store=True, must_revalidate=True, max_age=600)
@@ -483,6 +491,55 @@ def edit_comment(request, comment_id):
                                'edit_comment_form': edit_comment_form,
                                },
                               context_instance = RequestContext(request))
+
+
+def edit_textpost(request, textpost_id):
+    """Page to allow users to edit a textpost.
+    """
+
+    textpost = TextPost.objects.get(id=textpost_id)
+    textpost_age = get_submission_age(textpost)
+
+    # Redirect unauthenticated users to register/ login.
+    if not request.user.is_authenticated():
+        return redirect('login')
+
+    if request.method == 'POST':
+
+        edit_textpost_form = TextPostForm(data=request.POST, instance=textpost)
+
+        if edit_textpost_form.is_valid():
+            # Make sure user can still edit,
+            #  and window has not passed since form displayed.
+            if not can_edit_textpost(textpost, request):
+                return redirect('/discuss/%s/' % textpost.id)
+
+            edited_textpost = edit_textpost_form.save(commit=False)
+            textpost.post_body = edited_textpost.post_body
+            textpost.title = edited_textpost.title
+            textpost.save()
+
+            # Invalidate caches: This only affects the discussion page for the parent submission. 
+            invalidate_cache('discuss', (textpost.id, ), namespace='ed_news')
+
+            # Redirect to discussion page.
+            return redirect('/discuss/%s/' % textpost.id)
+
+        else:
+            # Invalid form/s.
+            #  Print errors to console; should log these?
+            print 'ae', edit_textpost_form.errors
+
+    else:
+        # Send blank forms.
+        edit_textpost_form = TextPostForm(instance=textpost)
+
+    return render_to_response('ed_news/edit_textpost.html',
+                              {'edit_textpost_form': edit_textpost_form,
+                               'textpost_id': textpost.id,
+                               },
+                              context_instance = RequestContext(request))
+
 
 
 def discuss_admin(request, article_id):
@@ -895,6 +952,19 @@ def can_edit_comment(comment, request):
     recent_comment = (get_age_seconds(comment.submission_time) < COMMENT_EDIT_WINDOW)
 
     if user_is_author and recent_comment:
+        return True
+    else:
+        return False
+
+
+def can_edit_textpost(textpost, request):
+    # Find out if this textpost can be edited.
+    #  User needs to be author, and textpost needs to be less than 
+    #   COMMENT_EDIT_WINDOW seconds old.
+    user_is_author = (request.user == textpost.submitter)
+    recent_textpost = (get_age_seconds(textpost.submission_time) < COMMENT_EDIT_WINDOW)
+    print user_is_author, recent_textpost
+    if user_is_author and recent_textpost:
         return True
     else:
         return False

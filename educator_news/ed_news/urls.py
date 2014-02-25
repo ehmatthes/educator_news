@@ -16,6 +16,7 @@ urlpatterns = patterns('',
     url(r'^reply/(?P<submission_id>\d+)/(?P<comment_id>\d+)/$', views.reply, name='reply'),
 
     url(r'^edit_comment/(?P<comment_id>\d+)/$', views.edit_comment, name='edit_comment'),
+    url(r'^edit_textpost/(?P<textpost_id>\d+)/$', views.edit_textpost, name='edit_textpost'),
 
     url(r'^upvote_submission/(?P<submission_id>\d+)/$', views.upvote_submission, name='upvote_submission'),
 
