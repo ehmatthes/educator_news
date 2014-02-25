@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+		  <div class='comment'>
+			   <div>
+
+				    {% comment %}Everyone who makes it to this page should be authenticated. {% endcomment %}
+					 {% comment %}Can only edit own comment, so no voting or flagging.{% endcomment %}
+
+					 {% comment %}Display title line, with voting arrows. {% endcomment %}
+					 <a class='comment_author_title_line_cant_downvote' href="{% url 'profile' comment.author.id %}">{{ comment.author }}</a>
+
+				  {{ comment_age }} ago
+
+				  {% comment %} Links to parent comment if exists, and parent submission. {% endcomment %}
+				  {% if parent_comment %}
+						| <a href="{% url 'ed_news:reply' parent_submission.id parent_comment.id %}">parent comment</a>
+				  {% endif %}
+				  | <a href="{% url 'ed_news:discuss' parent_submission.id %}">parent submission</a>
+
+			   </div>
+
+		  </div>
+
+
+		  {% comment %} --- Reply entry form --- {% endcomment%}
+		  <form id='reply_form' method="post" action="{% url 'ed_news:edit_comment' comment.id %}" enctype='multipart/form-data'>
+			 {% csrf_token %}
+
+			 <div class='comment_entry_form reply_entry_form'>
+
+				{{ edit_comment_form.as_p }}
+
+				<div class='comment_submit_button'>
+				  <input id='submit_comment_button' type="submit" name='submit' value="Save changes" />
+            </div>
+
+			 </div>
+				  
+		  </form>
+
+
+{% endblock %}
