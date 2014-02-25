@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h2>Edit Text Post</h2>
+
+		  <form id='submission_form' method="post" action="{% url 'ed_news:edit_textpost' textpost_id %}" enctype='multipart/form-data'>
+			 {% csrf_token %}
+
+			 {{ edit_textpost_form.as_p }}
+
+			 <p><input type="submit" name='submit' value="Save changes" />
+		  </form>
+
+{% endblock %}
+

@@ -16,6 +16,10 @@
 			 by <a href="{% url 'profile' submission.submitter.id %}">{{ submission.submitter }}</a>
 			 {{ age }} ago |
 
+			 {% if textpost_can_edit %}
+			   <a href="{% url 'ed_news:edit_textpost' submission.textpost.id %}">edit</a> |
+			 {% endif %}
+
 			 {% if can_flag %}
 			   <a href="{% url 'ed_news:flag_submission' submission.id %}">
 				  {% if flagged %}unflag{% else %}flag{% endif %}

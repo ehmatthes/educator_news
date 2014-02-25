@@ -9,7 +9,6 @@
 	     <p>Thank you for your submission!</p>
 
 	 {% elif user.is_authenticated %}
-	     <p>Submit form</p>
 		  <form id='submission_form' method="post" action="{% url 'ed_news:submit_link' %}" enctype='multipart/form-data'>
 			 {% csrf_token %}
 
