@@ -452,6 +452,11 @@ def edit_comment(request, comment_id):
         edit_comment_form = CommentEntryForm(data=request.POST, instance=comment)
 
         if edit_comment_form.is_valid():
+            # Make sure user can still edit, 
+            #  and window has not passed since form displayed.
+            if not can_edit_comment(comment, request):
+                return redirect('/discuss/%s/' % parent_submission.id)
+
             # Really just need to save the new comment text.
             edited_comment = edit_comment_form.save(commit=False)
             comment.comment_text = edited_comment.comment_text
