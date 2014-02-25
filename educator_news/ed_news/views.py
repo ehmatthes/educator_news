@@ -519,7 +519,9 @@ def edit_textpost(request, textpost_id):
             textpost.title = edited_textpost.title
             textpost.save()
 
-            # Invalidate caches: This only affects the discussion page for the parent submission. 
+            # Invalidate caches: This affects the discussion page for the textpost.
+            #  If title changed, also affects /index and /new caches.
+            invalidate_caches('ed_news', 'index', 'new')
             invalidate_cache('discuss', (textpost.id, ), namespace='ed_news')
 
             # Redirect to discussion page.
