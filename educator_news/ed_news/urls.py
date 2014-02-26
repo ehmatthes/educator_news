@@ -27,5 +27,7 @@ urlpatterns = patterns('',
 
     url(r'^flag_submission/(?P<submission_id>\d+)/$', views.flag_submission, name='flag_submission'),
 
+    url(r'^about/', views.about, name='about'),
+
     # --- My admin pages ---
 )
