@@ -80,6 +80,13 @@ def get_submission_set(submissions, user):
 
     return submission_set
 
+
+def about(request):
+    return render_to_response('ed_news/about.html',
+                              {},
+                              context_instance = RequestContext(request))
+
+
 # --- Authentication views ---
 def logout_view(request):
     logout(request)
