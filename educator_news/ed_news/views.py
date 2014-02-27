@@ -81,10 +81,18 @@ def get_submission_set(submissions, user):
     return submission_set
 
 
+# --- Mostly-static page views ---
 def about(request):
     return render_to_response('ed_news/about.html',
                               {},
                               context_instance = RequestContext(request))
+
+
+def guidelines(request):
+    return render_to_response('ed_news/guidelines.html',
+                              {},
+                              context_instance = RequestContext(request))
+
 
 
 # --- Authentication views ---
