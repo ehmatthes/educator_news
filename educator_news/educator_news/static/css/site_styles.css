@@ -1,4 +1,13 @@
 /* New Submissions page (new.html) */
+.my_jumbotron {
+	 padding: 25px;
+}
+
+.problem_label {
+	 font-size: 20px;
+	 font-weight: bold;
+}
+
 .title_line {
 	 font-size: 110%;
 }
