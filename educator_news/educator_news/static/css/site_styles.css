@@ -1,4 +1,12 @@
 /* New Submissions page (new.html) */
+.my_jumbotron {
+	 padding: 25px;
+}
+
+.li_par {
+	 padding-top: 5px;
+}
+
 .title_line {
 	 font-size: 110%;
 }
