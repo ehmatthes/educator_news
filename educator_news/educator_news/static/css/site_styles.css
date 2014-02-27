@@ -1,4 +1,8 @@
 /* New Submissions page (new.html) */
+a.anchor_tag {
+	 color: black;
+}
+
 .my_jumbotron {
 	 padding: 25px;
 }
@@ -12,6 +16,10 @@
 }
 
 .li_par {
+	 padding-top: 5px;
+}
+
+li {
 	 padding-top: 5px;
 }
 
