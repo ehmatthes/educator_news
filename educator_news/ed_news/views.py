@@ -98,6 +98,11 @@ def guidelines(request):
 # --- Authentication views ---
 def logout_view(request):
     logout(request)
+
+    # Invalidate caches: index, new
+    #  Probably better to start caching just the stable parts of pages.
+    invalidate_caches('ed_news', 'index', 'new')
+
     # Redirect to home page.
     return redirect('/')
 
