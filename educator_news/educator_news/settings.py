@@ -28,7 +28,7 @@ else:
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 DIRNAME = os.path.dirname(__file__)
 TEMPLATE_DIRS = (
