@@ -13,7 +13,6 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
 
     # Auth urls
-    #url(r'^login/', 'django.contrib.auth.views.login', name='login'),
     url(r'^login/', 'ed_news.views.login_view', name='login_view'),
     url(r'^logout/', 'ed_news.views.logout_view', name='logout_view'),
     url(r'^profile/(?P<profile_id>\d+)/$', 'ed_news.views.profile', name='profile'),
