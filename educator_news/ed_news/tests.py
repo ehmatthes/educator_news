@@ -1,9 +1,11 @@
 from django.test import TestCase
+from django.test.client import Client
 from django.core.urlresolvers import reverse
 
 from ed_news.views import invalidate_cache
 
 from django.contrib.auth.models import User, Group
+from django.contrib.auth import login
 from ed_news.models import UserProfile
 from ed_news.views import KARMA_LEVEL_ACTIVE_MEMBERS
 from ed_news.views import increment_karma, decrement_karma, is_active_member
