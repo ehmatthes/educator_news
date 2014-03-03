@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from django.contrib.auth import logout
+from django.contrib.auth import logout, login, authenticate
 from django.core.urlresolvers import reverse
 from django.contrib.auth.views import password_change
 from django.contrib.auth.models import User, Group
@@ -96,6 +96,34 @@ def guidelines(request):
 
 
 # --- Authentication views ---
+def login_view(request):
+
+    username = ''
+    password = ''
+    if request.method == 'POST':
+        print request.POST
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+
+                # Invalidate caches: index, new
+                #  Probably better to start caching just the stable parts of pages.
+                invalidate_caches('ed_news', 'index', 'new')
+
+                return redirect('/')
+
+    return render_to_response('ed_news/login.html',
+                              {},
+                              context_instance = RequestContext(request))
+            
+
+
+    
+
+
 def logout_view(request):
     logout(request)
 

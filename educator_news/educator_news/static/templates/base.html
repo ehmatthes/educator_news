@@ -71,7 +71,7 @@
 				    <li><a href="{% url 'profile' user.id %}">{{ user.username }} ({{ user.userprofile.karma }})</a><li>
                 <li><a href="{% url 'logout_view' %}">logout</a></li>
 				{% else %}
-                <li><a href="{% url 'login' %}">login</a></li>
+                <li><a href="{% url 'login_view' %}">login</a></li>
                 <li><a href="{% url 'register' %}">register</a></li>
 				{% endif %}
 
