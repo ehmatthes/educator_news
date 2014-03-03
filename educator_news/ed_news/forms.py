@@ -10,6 +10,7 @@ class UserForm(forms.ModelForm):
         model = User
         fields = ('username', 'password')
 
+
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
@@ -60,3 +61,7 @@ class CommentEntryForm(forms.ModelForm):
         labels = {
             'comment_text': '',
             }
+
+class MyLoginForm(forms.Form):
+    username = forms.CharField()
+    password = forms.CharField()
