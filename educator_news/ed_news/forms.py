@@ -61,3 +61,7 @@ class CommentEntryForm(forms.ModelForm):
         labels = {
             'comment_text': '',
             }
+
+class MyLoginForm(forms.Form):
+    username = forms.CharField()
+    password = forms.CharField()

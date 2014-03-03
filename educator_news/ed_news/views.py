@@ -15,6 +15,7 @@ from django.http import HttpRequest
 from ed_news.forms import UserForm, UserProfileForm
 from ed_news.forms import EditUserForm, EditUserProfileForm
 from ed_news.forms import ArticleForm, TextPostForm, CommentEntryForm
+from ed_news.forms import MyLoginForm
 
 from ed_news.models import Submission, Article, TextPost, Comment
 
@@ -98,30 +99,30 @@ def guidelines(request):
 # --- Authentication views ---
 def login_view(request):
 
-    username = ''
-    password = ''
     if request.method == 'POST':
-        print request.POST
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
+        form = MyLoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
 
-                # Invalidate caches: index, new
-                #  Probably better to start caching just the stable parts of pages.
-                invalidate_caches('ed_news', 'index', 'new')
+                    # Invalidate caches: index, new
+                    #  Probably better to start caching just the stable parts of pages.
+                    invalidate_caches('ed_news', 'index', 'new')
 
-                return redirect('/')
+                    return redirect('/')
+
+    else:
+        form = MyLoginForm()
 
     return render_to_response('ed_news/login.html',
-                              {},
+                              {'my_login_form': form,
+                               },
                               context_instance = RequestContext(request))
-            
-
-
-    
 
 
 def logout_view(request):

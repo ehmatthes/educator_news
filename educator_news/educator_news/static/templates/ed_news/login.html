@@ -7,10 +7,13 @@
 		  <form id='login_form' method="post" action="{% url 'login_view' %}" enctype='multipart/form-data'>
 
 			 {% csrf_token %}
-			 <p>Username: <input type='text' name='username' id='username' placeholder='Username'></p>
-			 <p>Password: <input type='password' name='password' id='password' placeholder='password'></p>
+			 {{ my_login_form.as_p }}
 
 			 <p><input type="submit" name='submit' value="Log in" />
+
 		  </form>
+
+		  If you do not have an account, you can <a href="{% url 'register' %}">register here</a>.
+
 
 {% endblock %}
