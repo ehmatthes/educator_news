@@ -2,22 +2,18 @@
 
 {% block content %}
 
-                <h2>log in:</h2>
+    <h2>Login</h2>
 
-                {% if form.errors %}
-                <p>Your username and password didn't match. Please try again.</p>
-                {% endif %}
+		  <form id='login_form' method="post" action="{% url 'login_view' %}" enctype='multipart/form-data'>
 
-                <form method="post" action="{% url 'django.contrib.auth.views.login' %}">
-                  {% csrf_token %}
+			 {% csrf_token %}
+			 {{ my_login_form.as_p }}
 
-                  <p>{{ form.username.label_tag }}{{ form.username }}
-                  <p>{{ form.password.label_tag }}{{ form.password }}
+			 <p><input type="submit" name='submit' value="Log in" />
 
-                  <p><input type="submit" value="login" />
-                  <input type="hidden" name="next" value="/" />
-                </form>
+		  </form>
 
-					 If you do not have an account, you can <a href="{% url 'register' %}">register here</a>.
+		  If you do not have an account, you can <a href="{% url 'register' %}">register here</a>.
+
 
 {% endblock %}

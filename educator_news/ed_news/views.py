@@ -119,7 +119,7 @@ def login_view(request):
     else:
         form = MyLoginForm()
 
-    return render_to_response('ed_news/login.html',
+    return render_to_response('registration/login.html',
                               {'my_login_form': form,
                                },
                               context_instance = RequestContext(request))
