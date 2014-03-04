@@ -42,16 +42,13 @@ class EdNewsViewTests(TestCase):
         invalidated = invalidate_cache('new', namespace='ed_news')
         self.assertEqual(invalidated, False)
 
+
     def test_join_active_members(self):
         """
         If a member crosses the active_member threshold,
         they should be put in the active_member group automatically.
         """
-        # Create a new user and userprofile.
-        new_user = User(username='paulo', password='password')
-        new_user.save()
-        new_user_profile = UserProfile(user=new_user)
-        new_user_profile.save()
+        new_user = self.create_user_with_profile('paulo', 'password')
 
         # Make active_members group.
         #  This should run the make_groups.py script.
@@ -60,7 +57,7 @@ class EdNewsViewTests(TestCase):
 
         # Set karma just below critical level.
         #  Test that user is not in active_members.
-        new_user_profile.karma = KARMA_LEVEL_ACTIVE_MEMBERS - 1
+        new_user.userprofile.karma = KARMA_LEVEL_ACTIVE_MEMBERS - 1
         self.assertEqual(is_active_member(new_user), False)
 
         # Increment karma past threshold, not just to threshold.
@@ -74,3 +71,12 @@ class EdNewsViewTests(TestCase):
         decrement_karma(new_user)
         decrement_karma(new_user)
         self.assertEqual(is_active_member(new_user), False)
+
+
+    def create_user_with_profile(self, username, password):
+        # Create a new user and userprofile.
+        new_user = User(username='paulo', password='password')
+        new_user.save()
+        new_user_profile = UserProfile(user=new_user)
+        new_user_profile.save()
+        return new_user
