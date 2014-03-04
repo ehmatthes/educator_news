@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.test.client import Client
 from django.core.urlresolvers import reverse
+from django.core.management import call_command
 
 from ed_news.views import invalidate_cache
 
@@ -73,9 +74,75 @@ class EdNewsViewTests(TestCase):
         self.assertEqual(is_active_member(new_user), False)
 
 
+
+    def test_login_client_user(self):
+        c = Client()
+        user = self.create_user_with_profile('user_0', 'password')
+        print 'user: ', user.username
+        print 'password: ', user.password
+        login = c.login(username=user.username, password=user.password)
+        print 'login successful: ', login
+        login = c.login(username=user.username, password='password')
+        print 'login successful: ', login
+
+        # Can't rely on status_code==200 to verify /login/ page successful.
+        #  Failed login attempt still returns a proper html response.
+        #response = c.post('/login/', {'username': user.username, 'password': 'password'})
+        #print 'login page successful: ', response
+
+    def test_overall_site(self):
+        return 0
+        # Create a number of users.
+        # Create a number of link submissions for each user.
+        # Create a number of text posts from each user.
+        # Create a number of comments on each submission.
+
+        num_users = 5
+        num_link_submissions = 3
+        num_textpost_submissions = 2
+
+        for x in range(0,num_users):
+            new_user = self.create_user_with_profile('user_%d' % x, 'password')#'user_%d' %x)
+            #print 'new user:', new_user
+        
+        print 'num users created:', User.objects.count()
+
+        # Create a test client.
+        c = Client()
+        response = c.get('/new/')
+        print 'status code - new: ', response.status_code
+
+        link = 'google.com'
+        title = 'my submission'
+        print 'new user', new_user
+        login = c.login(username=new_user.username, password='password')
+        print 'login successful: ', login
+
+        response = c.post('/login/', {'username': new_user.username, 'password': 'password'})
+        print 'login page response: ', response.status_code
+
+        # Make sure all users can log in.
+        for user in User.objects.all():
+            response = c.post('/login/', {'username': user.username, 'password': 'password'})
+            self.assertEqual(response.status_code, 200)
+
+        return 0
+
+        response = c.post('/submit_link/', {'url': link, 'title': title})
+        print 'status code - submit: ', response.status_code
+
+        # Submit a link from each user.
+        
+
+        with open('/home/ehmatthes/Desktop/test_fixture.json', 'w') as f:
+            pass#call_command('dumpdata', stdout=f)
+
+
     def create_user_with_profile(self, username, password):
         # Create a new user and userprofile.
-        new_user = User(username='paulo', password='password')
+        new_user = User(username=username)
+        new_user.set_password(password)
+        new_user = User.objects.create_user(username=username, password=password)
         new_user.save()
         new_user_profile = UserProfile(user=new_user)
         new_user_profile.save()
