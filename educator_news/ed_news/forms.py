@@ -64,4 +64,4 @@ class CommentEntryForm(forms.ModelForm):
 
 class MyLoginForm(forms.Form):
     username = forms.CharField()
-    password = forms.CharField()
+    password = forms.CharField(widget=forms.PasswordInput)
