@@ -229,7 +229,20 @@ class EdNewsViewTests(TestCase):
                     target_comment.upvotes.add(user)
                     target_comment.save()
                     views.increment_karma(target_comment.author)
-
+                if user in target_comment.upvotes.all():
+                    target_comment.upvotes.remove(user)
+                    target_comment.save()
+                    views.decrement_karma(target_comment.author)
+                if user in target_comment.downvotes.all():
+                    # Undo the downvote, and increment author's karma.
+                    target_comment.downvotes.remove(user)
+                    target_comment.save()
+                    views.increment_karma(target_comment.author)
+                if user in target_comment.flags.all():
+                    # Deal with flags.
+                    pass
+                parent_submission = views.get_parent_submission(target_comment)
+                views.update_comment_ranking_points(parent_submission)
 
                 print '%s upvoted %s.' % (user.username, target_comment)
 
@@ -241,9 +254,6 @@ class EdNewsViewTests(TestCase):
                 response = c.post('/downvote_comment/%d/' % target_comment.id)
                 self.assertEqual(response.status_code, 302)
                 print '%s downvoted %s.' % (user.username, target_comment)
-
-
-        return 0
 
 
         # Show karma for all users.
