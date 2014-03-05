@@ -50,7 +50,7 @@
 				    <input id='submit_comment_button' type="submit" name='submit' value="Add comment" />
 				  {% else %}
 				    <input id='submit_comment_button' type="submit" name='submit' value="Add comment" disabled />
-				    You will have to <a href="{% url 'login' %}">log in</a> or <a href="{% url 'register' %}">register</a> to make a comment.</p>
+				    You will have to <a href="{% url 'login_view' %}">log in</a> or <a href="{% url 'register' %}">register</a> to make a comment.</p>
 				  {% endif %}
             </div>
 
@@ -116,7 +116,7 @@
 			   </div>
 				{% if not user.is_authenticated %}
 				  <div class='comment_text comment_text_no_downvote'>{{ comment_dict.comment.comment_text|linebreaks }}</div>
-				  <div class='reply_link reply_link_no_downvote'><a href="{% url 'login' %}">reply</a></div>
+				  <div class='reply_link reply_link_no_downvote'><a href="{% url 'login_view' %}">reply</a></div>
 				{% elif user.is_authenticated and perms.ed_news.can_downvote_comment %}
 				  <div class='comment_text'>{{ comment_dict.comment.comment_text|linebreaks }}</div>
 				  <div class='reply_link'><a href="{% url 'ed_news:reply' submission.id comment_dict.comment.id %}">reply</a></div>

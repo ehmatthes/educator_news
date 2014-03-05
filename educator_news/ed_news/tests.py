@@ -11,7 +11,10 @@ from ed_news.models import UserProfile
 from ed_news.views import KARMA_LEVEL_ACTIVE_MEMBERS
 from ed_news.views import increment_karma, decrement_karma, is_active_member
 
-from ed_news.models import Submission
+from ed_news.models import Submission, Comment
+
+import random
+
 
 class EdNewsViewTests(TestCase):
 
@@ -107,10 +110,12 @@ class EdNewsViewTests(TestCase):
         # Create a number of link submissions for each user.
         # Create a number of text posts from each user.
         # Create a number of comments on each submission.
+        # Create a random number of upvotes and downvotes.
 
         num_users = 5
         num_link_submissions = 3
         num_textpost_submissions = 2
+        num_comments = 3
 
         for x in range(0,num_users):
             # Each user's password is their username.
@@ -125,19 +130,34 @@ class EdNewsViewTests(TestCase):
             login = c.login(username=user.username, password=password)
             self.assertEqual(login, True)
             
-            # Need many unique urls; google your username.
-            url = 'http://google.com/#q=%s' % user.username
-            title = 'I googled my username: %s' % user.username
-            response = c.post('/submit_link/', {'url': url, 'title': title})
-            self.assertEqual(response.status_code, 200)
-            # Make sure most recently submitted link matches current title.
-            latest_submission = Submission.objects.latest('submission_time')
-            self.assertEqual(latest_submission.url, url)
-            self.assertEqual(latest_submission.title, title)
+            for x in range(0, num_link_submissions):
+                # Need many unique urls; google your username.
+                url = 'http://google.com/#q=%s%d' % (user.username, x)
+                title = 'I googled my username: %s%d' % (user.username, x)
+                response = c.post('/submit_link/', {'url': url, 'title': title})
+                self.assertEqual(response.status_code, 200)
+                # Make sure most recently submitted link matches current title.
+                latest_submission = Submission.objects.latest('submission_time')
+                self.assertEqual(latest_submission.url, url)
+                self.assertEqual(latest_submission.title, title)
+
+        # Create some comments.
+        # Go through all submissions.
+        #  Pick num_comments random users to make a comment.
+        for submission in Submission.objects.all():
+            for comment_num in range(0, num_comments):
+                user = random.choice(User.objects.all())
+                c.login(username=user.username, password=user.username)
+                comment_text = "I just don't think you'll ever make a magnetic monopole."
+                response = c.post('/discuss/%d/' % submission.id, {'comment_text': comment_text})
+                self.assertEqual(response.status_code, 200)
+        print '%d comments made.' % Comment.objects.count()
 
 
         # Make a fixture from this data.
-        with open('/home/ehmatthes/Desktop/test_fixture.json', 'w') as f:
+        #with open('/home/ehmatthes/Desktop/test_fixture.json', 'w') as f:
+        # Assumes being run from same directory as manage.py.
+        with open('ed_news/fixtures/test_fixture.json', 'w') as f:
             call_command('dumpdata', stdout=f)
 
 
