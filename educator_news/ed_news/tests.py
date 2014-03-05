@@ -154,6 +154,7 @@ class EdNewsViewTests(TestCase):
 
         # Create a test client.
         #  Prove that each user can be logged in, and make link submissions.
+        #  DEV: should upvote own article automatically.
         c = Client()
         for user in User.objects.all():
             password = user.username
@@ -195,10 +196,6 @@ class EdNewsViewTests(TestCase):
                 print 'Made reply %d for %s.' % (reply_num, user.username)
         print 'finished replying.'
 
-        return 0
-
-
-
         # For each user, upvote/downvote submissions, comments.
         #  Fine if have same user upvoting same submission; should toggle.
 
@@ -207,11 +204,24 @@ class EdNewsViewTests(TestCase):
         execfile('make_groups.py')
         for user in User.objects.all():
             for upvote_num in range(0, num_submission_upvotes):
-                c.login(username=user.username, password=user.username)
                 target_submission = random.choice(Submission.objects.all())
-                response = c.post('/upvote_submission/%d/' % target_submission.id)
-                self.assertEqual(response.status_code, 302)
+                if user in target_submission.upvotes.all():
+                    # User already upvoted this submission,
+                    #  can't un-upvote submissions yet.
+                    continue
+                else:
+                    target_submission.upvotes.add(user)
+                    target_submission.save()
+
+                    if user != target_submission.submitter:
+                        views.increment_karma(target_submission.submitter)
+
+                views.update_submission_ranking_points()
+
+
                 print '%s upvoted %s.' % (user.username, target_submission)
+
+            continue
 
             for upvote_num in range(0, num_comment_upvotes):
                 c.login(username=user.username, password=user.username)
@@ -226,6 +236,9 @@ class EdNewsViewTests(TestCase):
                 response = c.post('/downvote_comment/%d/' % target_comment.id)
                 self.assertEqual(response.status_code, 302)
                 print '%s downvoted %s.' % (user.username, target_comment)
+
+
+        return 0
 
 
         # Show karma for all users.
