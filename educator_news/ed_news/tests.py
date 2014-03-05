@@ -221,14 +221,19 @@ class EdNewsViewTests(TestCase):
 
                 print '%s upvoted %s.' % (user.username, target_submission)
 
-            continue
-
             for upvote_num in range(0, num_comment_upvotes):
-                c.login(username=user.username, password=user.username)
                 target_comment = random.choice(Comment.objects.all())
-                response = c.post('/upvote_comment/%d/' % target_comment.id)
-                self.assertEqual(response.status_code, 302)
+                if user == target_comment.author:
+                    continue
+                if user not in target_comment.upvotes.all():
+                    target_comment.upvotes.add(user)
+                    target_comment.save()
+                    views.increment_karma(target_comment.author)
+
+
                 print '%s upvoted %s.' % (user.username, target_comment)
+
+            continue
 
             for downvote_num in range(0, num_comment_downvotes):
                 c.login(username=user.username, password=user.username)
