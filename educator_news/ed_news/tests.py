@@ -10,6 +10,7 @@ from django.contrib.auth import login
 from ed_news.models import UserProfile
 from ed_news.views import KARMA_LEVEL_ACTIVE_MEMBERS
 from ed_news.views import increment_karma, decrement_karma, is_active_member
+from ed_news.views import get_parent_submission
 
 from ed_news.models import Submission, Comment
 
@@ -19,6 +20,7 @@ import random
 class EdNewsViewTests(TestCase):
 
     def test_index_cache(self):
+        return 0
         """Request index, then invalidate cache.
         Cache should be invalidated, returning True.
         Then try to invalidate, and should return False.
@@ -35,6 +37,7 @@ class EdNewsViewTests(TestCase):
 
     # I am running into namespace issues when trying to generalize these tests.
     def test_new_cache(self):
+        return 0
         """Request new, then invalidate cache.
         Cache should be invalidated, returning True.
         Then try to invalidate, and should return False.
@@ -112,10 +115,16 @@ class EdNewsViewTests(TestCase):
         # Create a number of comments on each submission.
         # Create a random number of upvotes and downvotes.
 
-        num_users = 5
-        num_link_submissions = 3
+        num_users = 2
+        # Number of links each user submits.
+        num_link_submissions = 2
+        # Number of text posts each user submits.
         num_textpost_submissions = 2
+        # Number of submissions each user comments on.
         num_comments = 3
+        # Number of comments each user replies to.
+        num_replies = 2
+
 
         for x in range(0,num_users):
             # Each user's password is their username.
@@ -140,6 +149,7 @@ class EdNewsViewTests(TestCase):
                 latest_submission = Submission.objects.latest('submission_time')
                 self.assertEqual(latest_submission.url, url)
                 self.assertEqual(latest_submission.title, title)
+                print 'Made submission %d for %s.' % (x, user.username)
 
         # Create some comments.
         # Go through all submissions.
@@ -151,7 +161,23 @@ class EdNewsViewTests(TestCase):
                 comment_text = "I just don't think you'll ever make a magnetic monopole."
                 response = c.post('/discuss/%d/' % submission.id, {'comment_text': comment_text})
                 self.assertEqual(response.status_code, 200)
+                print 'Made comment %d for %s.' % (comment_num, user.username)
         print '%d comments made.' % Comment.objects.count()
+
+        # For each user, pick some random comments to reply to.
+        for user in User.objects.all():
+            for reply_num in range(0, num_replies):
+                c.login(username=user.username, password=user.username)
+                target_comment = random.choice(Comment.objects.all())
+                parent_submission = get_parent_submission(target_comment)
+                reply_text = "Yeah, I was kind of thinking that."
+                print 'parent_submission, target_comment', parent_submission.id, target_comment.id
+                print Submission.objects.get(id=parent_submission.id)
+                print Comment.objects.get(id=target_comment.id)
+                response = c.post('/reply/%d/%d/' % (parent_submission.id, target_comment.id), {'comment_text': reply_text})
+                #self.assertEqual(response.status_code, 200)
+                print 'Made reply %d for %s.' % (reply_num, user.username)
+        print 'finished replying.'
 
 
         # Make a fixture from this data.
