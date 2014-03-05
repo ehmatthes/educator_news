@@ -11,8 +11,9 @@ from ed_news.models import UserProfile
 from ed_news.views import KARMA_LEVEL_ACTIVE_MEMBERS
 from ed_news.views import increment_karma, decrement_karma, is_active_member
 from ed_news.views import get_parent_submission
+import ed_news.views as views
 
-from ed_news.models import Submission, Comment
+from ed_news.models import Submission, Article, Comment
 
 import random
 
@@ -108,7 +109,146 @@ class EdNewsViewTests(TestCase):
             self.assertEqual(response.status_code, 200)
 
 
+    def test_load(self):
+        # Generate a fixture for load testing.
+        # Create a number of users.
+        # Create a number of link submissions for each user.
+        # Create a number of text posts from each user.
+        # Create a number of comments on each submission.
+        # Create a random number of upvotes and downvotes.
+
+        size = 'tiny'
+        if size == 'tiny':
+            num_users = 2
+            # Number of links each user submits.
+            num_link_submissions = 2
+            # Number of text posts each user submits.
+            num_textpost_submissions = 2
+            # Number of submissions each user comments on.
+            num_comments = 3
+            # Number of comments each user replies to.
+            num_replies = 2
+            # Number of items each user will vote/ flag.
+            num_submission_upvotes = 2
+            num_comment_upvotes = 2
+            num_comment_downvotes = 1
+        elif size == 'medium':
+            num_users = 50
+            # Number of links each user submits.
+            num_link_submissions = 3
+            # Number of text posts each user submits.
+            num_textpost_submissions = 2
+            # Number of submissions each user comments on.
+            num_comments = 5
+            # Number of comments each user replies to.
+            num_replies = 3
+            # Number of items each user will vote/ flag.
+            num_submission_upvotes = 10
+            num_comment_upvotes = 10
+            num_comment_downvotes = 1
+
+        for x in range(0,num_users):
+            # Each user's password is their username.
+            new_user = self.create_user_with_profile('user_%d' % x, 'user_%d' %x)
+        print 'num users created:', User.objects.count()
+
+        # Create a test client.
+        #  Prove that each user can be logged in, and make link submissions.
+        c = Client()
+        for user in User.objects.all():
+            password = user.username
+            login = c.login(username=user.username, password=password)
+            self.assertEqual(login, True)
+            
+            for x in range(0, num_link_submissions):
+                # Need many unique urls; google your username.
+                url = 'http://google.com/#q=%s%d' % (user.username, x)
+                title = 'I googled my username: %s%d' % (user.username, x)
+                article = Article(title=title, url=url, submitter=user)
+                article.save()
+
+                # Make sure most recently submitted link matches current title.
+                latest_submission = Submission.objects.latest('submission_time')
+                self.assertEqual(latest_submission.url, url)
+                self.assertEqual(latest_submission.title, title)
+                print 'Made submission %d for %s.' % (x, user.username)
+
+        # Create some comments.
+        # Go through all submissions.
+        #  Pick num_comments random users to make a comment.
+        for submission in Submission.objects.all():
+            for comment_num in range(0, num_comments):
+                user = random.choice(User.objects.all())
+                comment_text = "I just don't think you'll ever make a magnetic monopole."
+                new_comment = Comment(comment_text=comment_text, author=user, parent_submission=submission)
+                new_comment.save()
+                print 'Made comment %d for %s.' % (comment_num, user.username)
+        print '%d comments made.' % Comment.objects.count()
+
+        # For each user, pick some random comments to reply to.
+        for user in User.objects.all():
+            for reply_num in range(0, num_replies):
+                target_comment = random.choice(Comment.objects.all())
+                reply_text = "Yeah, I was kind of thinking that."
+                new_reply = Comment(comment_text=reply_text, author=user,
+                                    parent_comment=target_comment)
+                print 'Made reply %d for %s.' % (reply_num, user.username)
+        print 'finished replying.'
+
+        return 0
+
+
+
+        # For each user, upvote/downvote submissions, comments.
+        #  Fine if have same user upvoting same submission; should toggle.
+
+        # Need to make permissions before downvoting.
+        #  make_groups should be a function or class that I can import and then call.
+        execfile('make_groups.py')
+        for user in User.objects.all():
+            for upvote_num in range(0, num_submission_upvotes):
+                c.login(username=user.username, password=user.username)
+                target_submission = random.choice(Submission.objects.all())
+                response = c.post('/upvote_submission/%d/' % target_submission.id)
+                self.assertEqual(response.status_code, 302)
+                print '%s upvoted %s.' % (user.username, target_submission)
+
+            for upvote_num in range(0, num_comment_upvotes):
+                c.login(username=user.username, password=user.username)
+                target_comment = random.choice(Comment.objects.all())
+                response = c.post('/upvote_comment/%d/' % target_comment.id)
+                self.assertEqual(response.status_code, 302)
+                print '%s upvoted %s.' % (user.username, target_comment)
+
+            for downvote_num in range(0, num_comment_downvotes):
+                c.login(username=user.username, password=user.username)
+                target_comment = random.choice(Comment.objects.all())
+                response = c.post('/downvote_comment/%d/' % target_comment.id)
+                self.assertEqual(response.status_code, 302)
+                print '%s downvoted %s.' % (user.username, target_comment)
+
+
+        # Show karma for all users.
+        print "All users' karma:"
+        for user in User.objects.all():
+            print "%s: %d" % (user.username, user.userprofile.karma)
+
+
+
+        # Make a fixture from this data.
+        #with open('/home/ehmatthes/Desktop/test_fixture.json', 'w') as f:
+        # Assumes being run from same directory as manage.py.
+        with open('ed_news/fixtures/test_fixture.json', 'w') as f:
+            call_command('dumpdata', stdout=f)
+
+
+
+
     def test_overall_site(self):
+        # This approach is appropriate for testing user experience.
+        #  Working through requests is too slow for generating large
+        #  amounts of data for load testing.
+        return 0
         # Create a number of users.
         # Create a number of link submissions for each user.
         # Create a number of text posts from each user.
