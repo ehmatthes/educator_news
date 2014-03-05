@@ -90,6 +90,16 @@ class EdNewsViewTests(TestCase):
         #  Failed login attempt still returns a proper html response.
         #response = c.post('/login/', {'username': user.username, 'password': 'password'})
         #print 'login page successful: ', response
+        # Make sure all users can log in.
+        num_users = 5
+        for x in range(0,num_users):
+            # Each user's password is their username.
+            new_user = self.create_user_with_profile('user_%d' % x, 'user_%d' %x)
+
+        c = Client()
+        for user in User.objects.all():
+            response = c.post('/login/', {'username': user.username, 'password': 'password'})
+            self.assertEqual(response.status_code, 200)
 
 
     def test_overall_site(self):
@@ -125,16 +135,10 @@ class EdNewsViewTests(TestCase):
             self.assertEqual(latest_submission.url, url)
             self.assertEqual(latest_submission.title, title)
 
-        # Make sure all users can log in.
-        for user in User.objects.all():
-            response = c.post('/login/', {'username': user.username, 'password': 'password'})
-            self.assertEqual(response.status_code, 200)
 
-        return 0
-
-        # Submit a link from each user.
+        # Make a fixture from this data.
         with open('/home/ehmatthes/Desktop/test_fixture.json', 'w') as f:
-            pass#call_command('dumpdata', stdout=f)
+            call_command('dumpdata', stdout=f)
 
 
     def create_user_with_profile(self, username, password):
