@@ -117,7 +117,7 @@ class EdNewsViewTests(TestCase):
         # Create a number of comments on each submission.
         # Create a random number of upvotes and downvotes.
 
-        size = 'tiny'
+        size = 'medium'
         if size == 'tiny':
             num_users = 2
             # Number of links each user submits.
@@ -255,21 +255,16 @@ class EdNewsViewTests(TestCase):
                 self.assertEqual(response.status_code, 302)
                 print '%s downvoted %s.' % (user.username, target_comment)
 
-
         # Show karma for all users.
         print "All users' karma:"
         for user in User.objects.all():
             print "%s: %d" % (user.username, user.userprofile.karma)
-
-
 
         # Make a fixture from this data.
         #with open('/home/ehmatthes/Desktop/test_fixture.json', 'w') as f:
         # Assumes being run from same directory as manage.py.
         with open('ed_news/fixtures/test_fixture.json', 'w') as f:
             call_command('dumpdata', stdout=f)
-
-
 
 
     def test_overall_site(self):
