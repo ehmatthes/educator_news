@@ -11,6 +11,8 @@ from ed_news.models import UserProfile
 from ed_news.views import KARMA_LEVEL_ACTIVE_MEMBERS
 from ed_news.views import increment_karma, decrement_karma, is_active_member
 
+from ed_news.models import Submission
+
 class EdNewsViewTests(TestCase):
 
     def test_index_cache(self):
@@ -74,24 +76,23 @@ class EdNewsViewTests(TestCase):
         self.assertEqual(is_active_member(new_user), False)
 
 
-
     def test_login_client_user(self):
+        # Prove that I know how to log in a user using the test client.
         c = Client()
         user = self.create_user_with_profile('user_0', 'password')
-        print 'user: ', user.username
-        print 'password: ', user.password
-        login = c.login(username=user.username, password=user.password)
-        print 'login successful: ', login
         login = c.login(username=user.username, password='password')
-        print 'login successful: ', login
+        self.assertEqual(login, True)
 
+
+    def test_login_page(self):
+        pass
         # Can't rely on status_code==200 to verify /login/ page successful.
         #  Failed login attempt still returns a proper html response.
         #response = c.post('/login/', {'username': user.username, 'password': 'password'})
         #print 'login page successful: ', response
 
+
     def test_overall_site(self):
-        return 0
         # Create a number of users.
         # Create a number of link submissions for each user.
         # Create a number of text posts from each user.
@@ -102,24 +103,27 @@ class EdNewsViewTests(TestCase):
         num_textpost_submissions = 2
 
         for x in range(0,num_users):
-            new_user = self.create_user_with_profile('user_%d' % x, 'password')#'user_%d' %x)
-            #print 'new user:', new_user
-        
+            # Each user's password is their username.
+            new_user = self.create_user_with_profile('user_%d' % x, 'user_%d' %x)
         print 'num users created:', User.objects.count()
 
         # Create a test client.
+        #  Prove that each user can be log in, and make 5 link submissions.
         c = Client()
-        response = c.get('/new/')
-        print 'status code - new: ', response.status_code
-
-        link = 'google.com'
-        title = 'my submission'
-        print 'new user', new_user
-        login = c.login(username=new_user.username, password='password')
-        print 'login successful: ', login
-
-        response = c.post('/login/', {'username': new_user.username, 'password': 'password'})
-        print 'login page response: ', response.status_code
+        for user in User.objects.all():
+            password = user.username
+            login = c.login(username=user.username, password=password)
+            self.assertEqual(login, True)
+            
+            # Need many unique urls; google your username.
+            url = 'http://google.com/#q=%s' % user.username
+            title = 'I googled my username: %s' % user.username
+            response = c.post('/submit_link/', {'url': url, 'title': title})
+            self.assertEqual(response.status_code, 200)
+            # Make sure most recently submitted link matches current title.
+            latest_submission = Submission.objects.latest('submission_time')
+            self.assertEqual(latest_submission.url, url)
+            self.assertEqual(latest_submission.title, title)
 
         # Make sure all users can log in.
         for user in User.objects.all():
@@ -128,20 +132,14 @@ class EdNewsViewTests(TestCase):
 
         return 0
 
-        response = c.post('/submit_link/', {'url': link, 'title': title})
-        print 'status code - submit: ', response.status_code
-
         # Submit a link from each user.
-        
-
         with open('/home/ehmatthes/Desktop/test_fixture.json', 'w') as f:
             pass#call_command('dumpdata', stdout=f)
 
 
     def create_user_with_profile(self, username, password):
         # Create a new user and userprofile.
-        new_user = User(username=username)
-        new_user.set_password(password)
+        # Either this, or new_user = User(username=un); new_user.set_password(pw)
         new_user = User.objects.create_user(username=username, password=password)
         new_user.save()
         new_user_profile = UserProfile(user=new_user)
