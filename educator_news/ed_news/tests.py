@@ -124,7 +124,10 @@ class EdNewsViewTests(TestCase):
         num_comments = 3
         # Number of comments each user replies to.
         num_replies = 2
-
+        # Number of items each user will vote/ flag.
+        num_submission_upvotes = 2
+        num_comment_upvotes = 2
+        num_comment_downvotes = 1
 
         for x in range(0,num_users):
             # Each user's password is their username.
@@ -178,6 +181,42 @@ class EdNewsViewTests(TestCase):
                 #self.assertEqual(response.status_code, 200)
                 print 'Made reply %d for %s.' % (reply_num, user.username)
         print 'finished replying.'
+
+
+        # For each user, upvote/downvote submissions, comments.
+        #  Fine if have same user upvoting same submission; should toggle.
+
+        # Need to make permissions before downvoting.
+        #  make_groups should be a function or class that I can import and then call.
+        execfile('make_groups.py')
+        for user in User.objects.all():
+            for upvote_num in range(0, num_submission_upvotes):
+                c.login(username=user.username, password=user.username)
+                target_submission = random.choice(Submission.objects.all())
+                response = c.post('/upvote_submission/%d/' % target_submission.id)
+                self.assertEqual(response.status_code, 302)
+                print '%s upvoted %s.' % (user.username, target_submission)
+
+            for upvote_num in range(0, num_comment_upvotes):
+                c.login(username=user.username, password=user.username)
+                target_comment = random.choice(Comment.objects.all())
+                response = c.post('/upvote_comment/%d/' % target_comment.id)
+                self.assertEqual(response.status_code, 302)
+                print '%s upvoted %s.' % (user.username, target_comment)
+
+            for downvote_num in range(0, num_comment_downvotes):
+                c.login(username=user.username, password=user.username)
+                target_comment = random.choice(Comment.objects.all())
+                response = c.post('/downvote_comment/%d/' % target_comment.id)
+                self.assertEqual(response.status_code, 302)
+                print '%s downvoted %s.' % (user.username, target_comment)
+
+
+        # Show karma for all users.
+        print "All users' karma:"
+        for user in User.objects.all():
+            print "%s: %d" % (user.username, user.userprofile.karma)
+
 
 
         # Make a fixture from this data.
