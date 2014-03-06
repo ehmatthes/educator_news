@@ -32,7 +32,7 @@ FLAGS_TO_DISAPPEAR = 1
 # How long does a user have to edit a comment?
 COMMENT_EDIT_WINDOW = 60*10
 
-@cache_page(60 * 10)
+@cache_page(60 * 1)
 def index(request):
     # Get a list of submissions, sorted by date.
 
@@ -319,7 +319,7 @@ def submit_textpost(request):
                               context_instance = RequestContext(request))
 
 
-@cache_page(60 * 10)
+@cache_page(60 * 1)
 def new(request):
     """Page to show the newest submissions.
     """
@@ -344,7 +344,7 @@ def new(request):
     return response
 
 
-@cache_page(60 * 10)
+@cache_page(60 * 1)
 def discuss(request, submission_id, admin=False):
     submission = Submission.objects.get(id=submission_id)
     age = get_submission_age(submission)
