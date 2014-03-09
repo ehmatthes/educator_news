@@ -882,7 +882,8 @@ def get_submission_age(submission):
 def update_submission_ranking_points():
     # How many submissions really need this?
     #  Only submissions submitted over last x days?
-    submissions = Submission.objects.all()
+    # DEV: Unclear whether prefetch_related('comment_set') would help.
+    submissions = Submission.objects.all().prefetch_related('flags')
     for submission in submissions:
         newness_points = get_newness_points(submission)
         comment_points = 5*get_comment_count(submission)

@@ -193,6 +193,7 @@ class EdNewsViewTests(TestCase):
                 reply_text = "Yeah, I was kind of thinking that."
                 new_reply = Comment(comment_text=reply_text, author=user,
                                     parent_comment=target_comment)
+                new_reply.save()
                 print 'Made reply %d for %s.' % (reply_num, user.username)
         print 'finished replying.'
 
@@ -215,9 +216,6 @@ class EdNewsViewTests(TestCase):
 
                     if user != target_submission.submitter:
                         views.increment_karma(target_submission.submitter)
-
-                views.update_submission_ranking_points()
-
 
                 print '%s upvoted %s.' % (user.username, target_submission)
 
@@ -254,6 +252,8 @@ class EdNewsViewTests(TestCase):
                 response = c.post('/downvote_comment/%d/' % target_comment.id)
                 self.assertEqual(response.status_code, 302)
                 print '%s downvoted %s.' % (user.username, target_comment)
+
+        views.update_submission_ranking_points()
 
         # Show karma for all users.
         print "All users' karma:"
