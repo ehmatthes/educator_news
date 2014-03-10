@@ -4,8 +4,11 @@
 
         {% comment %} --- Submission information --- {% endcomment%}
 	     <div class='title_line'>
-			 {% if saved_submission or not user.is_authenticated %}
+			 {% if submission.submitter == user or not user.is_authenticated %}
 				  <a class='title_without_upvote' href="{{ submission.url }}">{{ submission.title }}</a></div>
+			 {% elif saved_submission %}
+			     <a href="{% url 'ed_news:upvote_submission' submission.id %}">&#9651</a>
+				  <a href="{{ submission.url }}">{{ submission.title }}</a></div>
 		    {% else %}
 			     <a href="{% url 'ed_news:upvote_submission' submission.id %}">&#9650</a>
 				  <a href="{{ submission.url }}">{{ submission.title }}</a></div>
