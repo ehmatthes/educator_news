@@ -83,6 +83,41 @@ class EdNewsViewTests(TestCase):
         self.assertEqual(is_active_member(new_user), False)
 
 
+    def test_undo_upvote_submission(self):
+        # Create a user, make a submission.
+        # Create a user. Upvote submission.
+        #  Verify user 2 in submission.upvotes.
+        #  Verify user 1 karma increases.
+        # Undo upvote (resubmit upvote request.)
+        #  Verify user 2 not in submission.upvotes.
+        #  Verify user 1 karma back to original.
+
+        # DEV: unfinished
+
+        # Create 2 users.
+        user_0 = self.create_user_with_profile('user_0', 'user_0')
+        user_1 = self.create_user_with_profile('user_1', 'user_1')
+        # Log user_0 in, and make a submission.
+        c = Client()
+        #response = c.post('/login/', {'username': user_0.username, 'password': 'user_0'})
+        #self.assertEqual(response.status_code, 200)
+        login = c.login(username=user_0.username, password='user_0')
+        self.assertEqual(login, True)
+
+        response = c.post('/submit_link/', {'url': 'http://google.com', 'title': 'google'})
+        self.assertEqual(response.status_code, 200)
+
+        original_karma = user_0.userprofile.karma
+        
+        login = c.login(username=user_1.username, password='user_1')
+        self.assertEqual(login, True)
+
+        print Submission.objects.all()[0].id
+        return 0
+        response = c.get('/upvote_submission/', {'submission_id': 5})
+        self.assertEqual(response.status_code, 200)
+
+
     def test_login_client_user(self):
         # Prove that I know how to log in a user using the test client.
         c = Client()
@@ -117,7 +152,7 @@ class EdNewsViewTests(TestCase):
         # Create a number of comments on each submission.
         # Create a random number of upvotes and downvotes.
 
-        size = 'medium'
+        size = 'tiny'
         if size == 'tiny':
             num_users = 2
             # Number of links each user submits.
