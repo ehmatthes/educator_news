@@ -604,12 +604,10 @@ def upvote_submission(request, submission_id):
     # Check if user has upvoted this submission.
     #  If not, increment submission points.
     #  Save submission for this user.
+    # If has upvoted, and not submitter, undo upvote.
     next_page = request.META.get('HTTP_REFERER', None) or '/'
     submission = Submission.objects.get(id=submission_id)
-    if request.user in submission.upvotes.all():
-        # This user already upvoted the submission.
-        return redirect(next_page)
-    else:
+    if request.user not in submission.upvotes.all():
         submission.upvotes.add(request.user)
         submission.save()
 
@@ -618,12 +616,25 @@ def upvote_submission(request, submission_id):
         if request.user != submission.submitter:
             increment_karma(submission.submitter)
 
-        # Update submission ranking points, and redirect back to page.
-        update_submission_ranking_points()
-        # Invalidate caches: index, 
-        invalidate_caches('ed_news', 'index', 'new')
-        invalidate_cache('discuss', (submission_id, ), namespace='ed_news')
-        return redirect(next_page)
+    else:
+        # This user already upvoted the submission.
+        # You can't undo upvote on your own submission.
+        if request.user == submission.submitter:
+            return redirect(next_page)
+        # Remove user from upvotes.
+        submission.upvotes.remove(request.user)
+        submission.save()
+
+        # Decrement karma of submitter.
+        decrement_karma(submission.submitter)
+
+    # Update submission ranking points, and redirect back to page.
+    update_submission_ranking_points()
+    # Invalidate caches: index, 
+    invalidate_caches('ed_news', 'index', 'new')
+    invalidate_cache('discuss', (submission_id, ), namespace='ed_news')
+
+    return redirect(next_page)
 
 
 def get_saved_submissions(user):

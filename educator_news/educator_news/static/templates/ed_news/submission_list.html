@@ -10,8 +10,11 @@
 
 			 {{ forloop.counter }}. 
 
-			 {% if submission_dict.upvoted or not user.is_authenticated %}
+			 {% if submission_dict.submission.submitter == user or not user.is_authenticated %}
 				  <a class='title_without_upvote' href="{{ submission_dict.submission.url }}">{{ submission_dict.submission.title }}</a>
+			 {% elif submission_dict.upvoted %}
+			     <a href="{% url 'ed_news:upvote_submission' submission_dict.submission.id %}">&#9651</a>
+				  <a href="{{ submission_dict.submission.url }}">{{ submission_dict.submission.title }}</a>
 		    {% else %}
 			     <a href="{% url 'ed_news:upvote_submission' submission_dict.submission.id %}">&#9650</a>
 				  <a href="{{ submission_dict.submission.url }}">{{ submission_dict.submission.title }}</a>
