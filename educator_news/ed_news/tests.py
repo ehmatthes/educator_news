@@ -112,7 +112,7 @@ class EdNewsViewTests(TestCase):
         login = c.login(username=user_1.username, password='user_1')
         self.assertEqual(login, True)
 
-        print Submission.objects.all()[0].id
+        #print Submission.objects.all()[0].id
         return 0
         response = c.get('/upvote_submission/', {'submission_id': 5})
         self.assertEqual(response.status_code, 200)
@@ -152,7 +152,7 @@ class EdNewsViewTests(TestCase):
         # Create a number of comments on each submission.
         # Create a random number of upvotes and downvotes.
 
-        size = 'tiny'
+        size = 'small'
         if size == 'tiny':
             num_users = 2
             # Number of links each user submits.
@@ -165,6 +165,20 @@ class EdNewsViewTests(TestCase):
             num_replies = 2
             # Number of items each user will vote/ flag.
             num_submission_upvotes = 2
+            num_comment_upvotes = 2
+            num_comment_downvotes = 1
+        elif size == 'small':
+            num_users = 7
+            # Number of links each user submits.
+            num_link_submissions = 2
+            # Number of text posts each user submits.
+            num_textpost_submissions = 2
+            # Number of submissions each user comments on.
+            num_comments = 15
+            # Number of comments each user replies to.
+            num_replies = 15
+            # Number of items each user will vote/ flag.
+            num_submission_upvotes = 3
             num_comment_upvotes = 2
             num_comment_downvotes = 1
         elif size == 'medium':
@@ -226,8 +240,10 @@ class EdNewsViewTests(TestCase):
             for reply_num in range(0, num_replies):
                 target_comment = random.choice(Comment.objects.all())
                 reply_text = "Yeah, I was kind of thinking that."
+                # A reply has the same parent_submission as the target comment.
                 new_reply = Comment(comment_text=reply_text, author=user,
-                                    parent_comment=target_comment)
+                                    parent_comment=target_comment,
+                                    parent_submission=target_comment.parent_submission)
                 new_reply.save()
                 print 'Made reply %d for %s.' % (reply_num, user.username)
         print 'finished replying.'

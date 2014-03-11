@@ -928,6 +928,7 @@ def get_newness_points(submission):
 
 def get_comment_count(submission):
     # Trace comment threads, and report the number of overall comments.
+    return submission.comment_set.count()
     total_comments = 0
     total_comments += submission.comment_set.count()
     for comment in submission.comment_set.all():
@@ -935,32 +936,38 @@ def get_comment_count(submission):
         
     return total_comments
         
+
 def get_comment_set(submission, request, comment_set, nesting_level=0):
     # Get all comments for a submission, in a format that can be
     #  used to render all comments on a page.
 
-    # Get first-order comments, then recursively pull all nested comments.
-    comments = submission.comment_set.all().order_by('ranking_points', 'submission_time').reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author')
+    # Get all comments and replies for the submission.
+    all_comments = submission.comment_set.all().order_by('ranking_points', 'submission_time').reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author')
 
-    for comment in comments:
+    # Separate the first-order comments (to the submission) from
+    #  the replies (to other comments).
+    first_order_comments = []
+    for comment in all_comments:
+        if not comment.parent_comment:
+            first_order_comments.append(comment)
+    
+    build_comment_reply_set(first_order_comments, all_comments, request, comment_set)
+
+
+
+def build_comment_reply_set(current_level_comments, all_comments, request, comment_set, nesting_level=0):
+    # Given a set of comments at one reply level.
+    # Build comment_set for this level, and
+    #  then grab all descendent replies.
+    for comment in current_level_comments:
 
         age = get_submission_age(comment)
 
         # Report whether this user has already upvoted the comment.
         # Determine whether user can upvote or has upvoted,
         #  can downvote or has downvoted.
-        # DEV: This should be factored out, and stored as a dict.
-        upvoted, can_upvote = False, False
-        downvoted, can_downvote = False, False
-        if request.user.is_authenticated() and request.user != comment.author:
-            if request.user in comment.upvotes.all():
-                upvoted = True
-            else:
-                can_upvote = True
-            if request.user in comment.downvotes.all():
-                downvoted = True
-            elif request.user.has_perm('ed_news.can_downvote_comment'):
-                can_downvote = True
+        upvoted, can_upvote, downvoted, can_downvote = can_upvote_downvote_comment(request, comment)
+
         can_edit = can_edit_comment(comment, request)
 
         # Note whether user has flagged this comment.
@@ -970,7 +977,6 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
         can_flag = False
         if request.user.is_authenticated() and request.user != comment.author and request.user.has_perm('ed_news.can_flag_comment'):
             can_flag = True
-
 
         # Calculate margin-left, based on nesting level.
         margin_left = nesting_level * 30
@@ -1000,11 +1006,36 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
                             'can_edit': can_edit,
                             })
 
-        # Append nested comments, if there are any.
+        # Get replies, if there are any.
         #  Send nesting_level + 1, but when recursion finishes, 
         #  nesting level in top-level for loop should still be 0.
-        if comment.comment_set.count() > 0:
-            get_comment_set(comment, request, comment_set, nesting_level + 1)
+        replies = []
+        # Watch out, can't do 'for comment in comments' because this function's namespace.
+        for reply in all_comments:
+            if reply.parent_comment == comment:
+                replies.append(reply)
+
+        # Verify that the replies are in appropriate order:
+        for reply in replies:
+            print 'rrp: ', reply.ranking_points
+
+        if replies:
+            build_comment_reply_set(replies, all_comments, request, comment_set, nesting_level+1)
+
+
+def can_upvote_downvote_comment(request, comment):
+    upvoted, can_upvote = False, False
+    downvoted, can_downvote = False, False
+    if request.user.is_authenticated() and request.user != comment.author:
+        if request.user in comment.upvotes.all():
+            upvoted = True
+        else:
+            can_upvote = True
+        if request.user in comment.downvotes.all():
+            downvoted = True
+        elif request.user.has_perm('ed_news.can_downvote_comment'):
+            can_downvote = True
+    return([upvoted, can_upvote, downvoted, can_downvote])
 
 
 def can_edit_comment(comment, request):
@@ -1018,6 +1049,7 @@ def can_edit_comment(comment, request):
         return True
     else:
         return False
+
 
 
 def can_edit_textpost(textpost, request):
