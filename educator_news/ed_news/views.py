@@ -914,8 +914,10 @@ def update_comment_ranking_points(article):
         newness_points = get_newness_points(comment)
         voting_points = comment.upvotes.count() - comment.downvotes.count() - 3*comment.flags.count()
         # For now, 5*voting_points.
-        comment.ranking_points = 5*voting_points + newness_points
-        comment.save()
+        new_ranking_points = 5*voting_points + newness_points
+        # Only save if number of points has changed.
+        if new_ranking_points != comment.ranking_points:
+            comment.save()
     
 
 def get_newness_points(submission):
