@@ -942,7 +942,7 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
     #  used to render all comments on a page.
 
     # Get all comments and replies for the submission.
-    all_comments = submission.comment_set.all().order_by('ranking_points', 'submission_time').reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author')
+    all_comments = submission.comment_set.all().order_by('ranking_points', 'submission_time').reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author', 'parent_comment')
 
     # Separate the first-order comments (to the submission) from
     #  the replies (to other comments).
