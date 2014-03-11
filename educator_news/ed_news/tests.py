@@ -174,13 +174,13 @@ class EdNewsViewTests(TestCase):
             # Number of text posts each user submits.
             num_textpost_submissions = 2
             # Number of submissions each user comments on.
-            num_comments = 0#15
+            num_comments = 15
             # Number of comments each user replies to.
-            num_replies = 0#15
+            num_replies = 15
             # Number of items each user will vote/ flag.
             num_submission_upvotes = 3
-            num_comment_upvotes = 0#2
-            num_comment_downvotes = 0#1
+            num_comment_upvotes = 2
+            num_comment_downvotes = 1
         elif size == 'medium':
             num_users = 50
             # Number of links each user submits.
@@ -240,8 +240,10 @@ class EdNewsViewTests(TestCase):
             for reply_num in range(0, num_replies):
                 target_comment = random.choice(Comment.objects.all())
                 reply_text = "Yeah, I was kind of thinking that."
+                # A reply has the same parent_submission as the target comment.
                 new_reply = Comment(comment_text=reply_text, author=user,
-                                    parent_comment=target_comment)
+                                    parent_comment=target_comment,
+                                    parent_submission=target_comment.parent_submission)
                 new_reply.save()
                 print 'Made reply %d for %s.' % (reply_num, user.username)
         print 'finished replying.'
