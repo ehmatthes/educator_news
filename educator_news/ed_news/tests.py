@@ -291,7 +291,6 @@ class EdNewsViewTests(TestCase):
                     # Deal with flags.
                     pass
                 parent_submission = views.get_parent_submission(target_comment)
-                views.update_comment_ranking_points(parent_submission)
 
                 print '%s upvoted %s.' % (user.username, target_comment)
 
@@ -305,7 +304,10 @@ class EdNewsViewTests(TestCase):
                 print '%s downvoted %s.' % (user.username, target_comment)
 
         views.update_submission_ranking_points()
-
+        # This only needs to be run once for each submission.
+        for submission in Submission.objects.all():
+            views.update_comment_ranking_points(submission)
+        
         # Show karma for all users.
         print "All users' karma:"
         for user in User.objects.all():
