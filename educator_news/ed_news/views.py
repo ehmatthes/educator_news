@@ -1007,18 +1007,20 @@ def build_comment_reply_set(current_level_comments, all_comments, request, comme
                             })
 
         # Get replies, if there are any.
-        # DEV: needs recursion, so this entire function needs to be redone.
-        # DEV: Try this using the comment set that was passed in, and see if fewer queries.
-        #       (Is this comment_set a new query?)
-        replies = comment.comment_set.all().order_by('ranking_points', 'submission_time').reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author')
-        if replies:
-            build_comment_reply_set(replies, all_comments, request, comment_set, nesting_level+1)
-
-        # Append nested comments, if there are any.
         #  Send nesting_level + 1, but when recursion finishes, 
         #  nesting level in top-level for loop should still be 0.
-        #if comment.comment_set.count() > 0:
-        #get_comment_set(comment, request, comment_set, nesting_level + 1)
+        replies = []
+        # Watch out, can't do 'for comment in comments' because this function's namespace.
+        for reply in all_comments:
+            if reply.parent_comment == comment:
+                replies.append(reply)
+
+        # Verify that the replies are in appropriate order:
+        for reply in replies:
+            print 'rrp: ', reply.ranking_points
+
+        if replies:
+            build_comment_reply_set(replies, all_comments, request, comment_set, nesting_level+1)
 
 
 def can_upvote_downvote_comment(request, comment):
@@ -1034,78 +1036,6 @@ def can_upvote_downvote_comment(request, comment):
         elif request.user.has_perm('ed_news.can_downvote_comment'):
             can_downvote = True
     return([upvoted, can_upvote, downvoted, can_downvote])
-
-
-def get_comment_set_old(submission, request, comment_set, nesting_level=0):
-    # Get all comments for a submission, in a format that can be
-    #  used to render all comments on a page.
-
-    # Get first-order comments, then recursively pull all nested comments.
-    comments = submission.comment_set.all().order_by('ranking_points', 'submission_time').reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author')
-
-    for comment in comments:
-
-        age = get_submission_age(comment)
-
-        # Report whether this user has already upvoted the comment.
-        # Determine whether user can upvote or has upvoted,
-        #  can downvote or has downvoted.
-        # DEV: This should be factored out, and stored as a dict.
-        upvoted, can_upvote = False, False
-        downvoted, can_downvote = False, False
-        if request.user.is_authenticated() and request.user != comment.author:
-            if request.user in comment.upvotes.all():
-                upvoted = True
-            else:
-                can_upvote = True
-            if request.user in comment.downvotes.all():
-                downvoted = True
-            elif request.user.has_perm('ed_news.can_downvote_comment'):
-                can_downvote = True
-        can_edit = can_edit_comment(comment, request)
-
-        # Note whether user has flagged this comment.
-        flagged = False
-        if request.user in comment.flags.all():
-            flagged = True
-        can_flag = False
-        if request.user.is_authenticated() and request.user != comment.author and request.user.has_perm('ed_news.can_flag_comment'):
-            can_flag = True
-
-
-        # Calculate margin-left, based on nesting level.
-        margin_left = nesting_level * 30
-
-        # Comments with net downvotes fade to background color.
-        # Steps to fade completely.
-        downvote_steps = 10
-        # step_value * net downvotes, but not negative and not more than 255.
-        text_color_value = min(255, (255/downvote_steps)*max(0,(comment.downvotes.count()-comment.upvotes.count())))
-        text_color = "rgb(%d, %d, %d)" % (text_color_value, text_color_value, text_color_value)
-
-        # Comments with net flags fade to background color.
-        # Steps to fade completely.
-        flag_steps = 3
-        # step_value * flags, but not negative and not more than 255.
-        text_color_value = min(255, (255/flag_steps)*max(0,(comment.flags.count()-comment.upvotes.count())))
-        text_color = "rgb(%d, %d, %d)" % (text_color_value, text_color_value, text_color_value)
-
-        # Append current comment information to comment_set.
-        comment_set.append({'comment': comment, 'age': age,
-                            'upvoted': upvoted, 'can_upvote': can_upvote,
-                            'downvoted': downvoted, 'can_downvote': can_downvote,
-                            'flagged': flagged, 'can_flag': can_flag,
-                            'nesting_level': nesting_level,
-                            'margin_left': margin_left,
-                            'text_color': text_color,
-                            'can_edit': can_edit,
-                            })
-
-        # Append nested comments, if there are any.
-        #  Send nesting_level + 1, but when recursion finishes, 
-        #  nesting level in top-level for loop should still be 0.
-        if comment.comment_set.count() > 0:
-            get_comment_set(comment, request, comment_set, nesting_level + 1)
 
 
 def can_edit_comment(comment, request):
