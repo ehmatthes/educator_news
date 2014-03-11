@@ -894,14 +894,16 @@ def update_submission_ranking_points():
     # How many submissions really need this?
     #  Only submissions submitted over last x days?
     # DEV: Unclear whether prefetch_related('comment_set') would help.
-    submissions = Submission.objects.all().prefetch_related('flags')
+    submissions = Submission.objects.all().prefetch_related('flags', 'comment_set', 'upvotes')
     for submission in submissions:
         newness_points = get_newness_points(submission)
         comment_points = 5*get_comment_count(submission)
         # Flags affect submissions proportionally.
         flag_factor = 0.8**submission.flags.count()
-        submission.ranking_points = flag_factor*(10*submission.upvotes.count() + comment_points + newness_points)
-        submission.save()
+        updated_ranking_points = flag_factor*(10*submission.upvotes.count() + comment_points + newness_points)
+        # Only re-save submission if points have changed.
+        if updated_ranking_points != submission.ranking_points:
+            submission.save()
         #print 'rp', submission, submission.ranking_points
 
         
@@ -929,13 +931,7 @@ def get_newness_points(submission):
 def get_comment_count(submission):
     # Trace comment threads, and report the number of overall comments.
     return submission.comment_set.count()
-    total_comments = 0
-    total_comments += submission.comment_set.count()
-    for comment in submission.comment_set.all():
-        total_comments += get_comment_count(comment)
-        
-    return total_comments
-        
+
 
 def get_comment_set(submission, request, comment_set, nesting_level=0):
     # Get all comments for a submission, in a format that can be

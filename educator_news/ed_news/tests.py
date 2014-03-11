@@ -152,7 +152,7 @@ class EdNewsViewTests(TestCase):
         # Create a number of comments on each submission.
         # Create a random number of upvotes and downvotes.
 
-        size = 'small'
+        size = 'medium'
         if size == 'tiny':
             num_users = 2
             # Number of links each user submits.
