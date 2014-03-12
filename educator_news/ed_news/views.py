@@ -436,6 +436,7 @@ def reply(request, submission_id, comment_id):
             reply = reply_entry_form.save(commit=False)
             reply.author = request.user
             reply.parent_comment = comment
+            reply.parent_submission = submission
             reply.save()
 
             # Update the ranking points for all comments on 
