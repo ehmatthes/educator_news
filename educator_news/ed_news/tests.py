@@ -240,9 +240,10 @@ class EdNewsViewTests(TestCase):
         # Create some comments.
         # Go through all submissions.
         #  Pick num_comments random users to make a comment.
+        all_users = User.objects.all()
         for submission in Submission.objects.all():
             for comment_num in range(0, num_comments):
-                user = random.choice(User.objects.all())
+                user = random.choice(all_users)
                 comment_text = "I just don't think you'll ever make a magnetic monopole."
                 new_comment = Comment(comment_text=comment_text, author=user, parent_submission=submission)
                 new_comment.save()
@@ -250,9 +251,10 @@ class EdNewsViewTests(TestCase):
         print '%d comments made.' % Comment.objects.count()
 
         # For each user, pick some random comments to reply to.
+        all_comments = Comment.objects.all()
         for user in User.objects.all():
             for reply_num in range(0, num_replies):
-                target_comment = random.choice(Comment.objects.all())
+                target_comment = random.choice(all_comments)
                 reply_text = "Yeah, I was kind of thinking that."
                 # A reply has the same parent_submission as the target comment.
                 new_reply = Comment(comment_text=reply_text, author=user,
@@ -268,9 +270,11 @@ class EdNewsViewTests(TestCase):
         # Need to make permissions before downvoting.
         #  make_groups should be a function or class that I can import and then call.
         execfile('make_groups.py')
+        all_submissions = Submission.objects.all()
+        all_comments = Comment.objects.all()
         for user in User.objects.all():
             for upvote_num in range(0, num_submission_upvotes):
-                target_submission = random.choice(Submission.objects.all())
+                target_submission = random.choice(all_submissions)
                 if user in target_submission.upvotes.all():
                     # User already upvoted this submission,
                     #  can't un-upvote submissions yet.
@@ -285,7 +289,7 @@ class EdNewsViewTests(TestCase):
                 print '%s upvoted %s.' % (user.username, target_submission)
 
             for upvote_num in range(0, num_comment_upvotes):
-                target_comment = random.choice(Comment.objects.all())
+                target_comment = random.choice(all_comments)
                 if user == target_comment.author:
                     continue
                 if user not in target_comment.upvotes.all():
