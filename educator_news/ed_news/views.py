@@ -892,18 +892,21 @@ def get_submission_age(submission):
 def update_submission_ranking_points():
     # How many submissions really need this?
     #  Only submissions submitted over last x days?
+    # Can't just update one submission's ranking points, because
+    #  time affects points. So when one changes, others have changed.
     # DEV: Unclear whether prefetch_related('comment_set') would help.
-    submissions = Submission.objects.all().prefetch_related('flags', 'comment_set', 'upvotes')
+    submissions = Submission.objects.all().prefetch_related('flags', 'upvotes', 'comment_set')
     for submission in submissions:
         newness_points = get_newness_points(submission)
         comment_points = 5*get_comment_count(submission)
         # Flags affect submissions proportionally.
         flag_factor = 0.8**submission.flags.count()
         updated_ranking_points = flag_factor*(10*submission.upvotes.count() + comment_points + newness_points)
+        updated_ranking_points = int(round(updated_ranking_points))
         # Only re-save submission if points have changed.
         if updated_ranking_points != submission.ranking_points:
+            submission.ranking_points = updated_ranking_points
             submission.save()
-        #print 'rp', submission, submission.ranking_points
 
         
 def update_comment_ranking_points(article):
