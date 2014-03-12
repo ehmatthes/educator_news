@@ -152,7 +152,7 @@ class EdNewsViewTests(TestCase):
         # Create a number of comments on each submission.
         # Create a random number of upvotes and downvotes.
 
-        size = 'medium'
+        size = 'largish'
         if size == 'tiny':
             num_users = 2
             # Number of links each user submits.
@@ -195,6 +195,20 @@ class EdNewsViewTests(TestCase):
             num_submission_upvotes = 10
             num_comment_upvotes = 10
             num_comment_downvotes = 1
+        elif size == 'largish':
+            num_users = 100
+            # Number of links each user submits.
+            num_link_submissions = 10
+            # Number of text posts each user submits.
+            num_textpost_submissions = 2
+            # Number of submissions each user comments on.
+            num_comments = 25
+            # Number of comments each user replies to.
+            num_replies = 50
+            # Number of items each user will vote/ flag.
+            num_submission_upvotes = 50
+            num_comment_upvotes = 50
+            num_comment_downvotes = 10
 
         for x in range(0,num_users):
             # Each user's password is their username.
