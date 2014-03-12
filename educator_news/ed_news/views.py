@@ -35,17 +35,10 @@ COMMENT_EDIT_WINDOW = 60*10
 #@cache_page(60 * 1)
 def index(request):
     # Get a list of submissions, sorted by date.
-    #  Try to get cached version if available.
     if request.user.is_authenticated() and request.user.userprofile.show_invisible:
-        submissions = cache.get('index_cache_show_invisible')
-        if not submissions:
-            submissions = Submission.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set')
-            cache.set('index_cache_show_invisible', submissions)
+        submissions = Submission.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set')
     else:
-        submissions = cache.get('index_cache')
-        if not submissions:
-            submissions = Submission.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set', 'submitter')
-            cache.set('index_cache', submissions)
+        submissions = Submission.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set', 'submitter')
         
     submission_set = get_submission_set(submissions, request.user)
 
@@ -336,9 +329,9 @@ def new(request):
     #  and posts.
 
     if request.user.is_authenticated() and request.user.userprofile.show_invisible:
-        submissions = Submission.objects.all().order_by('submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set')
+        submissions = Submission.objects.all().order_by('submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set', 'submitter')
     else:
-        submissions = Submission.objects.filter(visible=True).order_by('submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set')
+        submissions = Submission.objects.filter(visible=True).order_by('submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set', 'submitter')
 
     submission_set = get_submission_set(submissions, request.user)
 
