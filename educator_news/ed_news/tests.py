@@ -152,7 +152,7 @@ class EdNewsViewTests(TestCase):
         # Create a number of comments on each submission.
         # Create a random number of upvotes and downvotes.
 
-        size = 'largish'
+        size = 'medium'
         if size == 'tiny':
             num_users = 2
             # Number of links each user submits.
@@ -226,8 +226,8 @@ class EdNewsViewTests(TestCase):
             
             for x in range(0, num_link_submissions):
                 # Need many unique urls; google your username.
-                url = 'http://google.com/#q=%s%d' % (user.username, x)
-                title = 'I googled my username: %s%d' % (user.username, x)
+                url = 'http://google.com/#q=%s-%d' % (user.username, x)
+                title = 'I googled my username: %s-%d' % (user.username, x)
                 article = Article(title=title, url=url, submitter=user)
                 article.save()
 
