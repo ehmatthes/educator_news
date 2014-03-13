@@ -32,7 +32,6 @@ FLAGS_TO_DISAPPEAR = 1
 # How long does a user have to edit a comment?
 COMMENT_EDIT_WINDOW = 60*10
 
-#@cache_page(60 * 1)
 def index(request):
     # Get a list of submissions, sorted by ranking_points.
     order_by_criteria = ['ranking_points', 'submission_time']
@@ -50,7 +49,6 @@ def index(request):
                                'start_numbering': 0,
                                },
                               context_instance = RequestContext(request))
-    patch_cache_control(response, no_cache=True, no_store=True, must_revalidate=True, max_age=600)
     return response
 
 
@@ -384,7 +382,6 @@ def submit_textpost(request):
                               context_instance = RequestContext(request))
 
 
-@cache_page(60 * 1)
 def new(request):
     """Page to show the newest submissions.
     """
@@ -405,11 +402,9 @@ def new(request):
                                'start_numbering': 0,
                                },
                               context_instance = RequestContext(request))
-    patch_cache_control(response, no_cache=True, no_store=True, must_revalidate=True, max_age=600)
     return response
 
 
-@cache_page(60 * 1)
 def discuss(request, submission_id, admin=False):
     submission = Submission.objects.get(id=submission_id)
     age = get_submission_age(submission)
@@ -477,7 +472,6 @@ def discuss(request, submission_id, admin=False):
                                'textpost_can_edit': textpost_can_edit,
                                },
                               context_instance = RequestContext(request))
-    patch_cache_control(response, no_cache=True, no_store=True, must_revalidate=True, max_age=600)
     return response
 
 
@@ -1161,36 +1155,7 @@ def invalidate_caches(namespace=None, *pages):
         invalidate_cache(page, namespace=namespace)
 
 def invalidate_cache(view_path, args=[], namespace=None, key_prefix=None):
-    """Function to allow invalidating a view-level cache.
-    Adapted from: http://stackoverflow.com/questions/2268417/expire-a-view-cache-in-django
-    """
-    # Usage: invalidate_cache('index', namespace='ed_news', key_prefix=':1:')
-
-    # Create a fake request.
-    request = HttpRequest()
-    # Get the request path.
-    if namespace:
-        view_path = namespace + ":" + view_path
-
-    request.path = reverse(view_path, args=args)
-    #print 'request:', request
-
-    # Get cache key, expire if the cached item exists.
-    # Using the key_prefix did not work on first testing.
-    #key = get_cache_key(request, key_prefix=key_prefix)
-    page_key = get_cache_key(request)
-
-    if page_key:
-        #print '\n\nviews.invalidate_cache'
-        #print 'page_key:', page_key
-    
-        # If the page has been cached, destroy them.
-        if cache.get(page_key):
-            # Delete the page cache.
-            cache.delete(page_key)
-
-            #print 'invalidated cache'
-            return True
-
-    #print "couldn't invalidate cache"
-    return False
+    # Not going to use view caching, because user-specific information on every page.
+    # Keeping function to preserve invalidation calls, because they are placed
+    #  properly, and will probably implement finer-grained caching shortly.
+    pass
