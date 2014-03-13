@@ -108,7 +108,7 @@ def more_new_submissions(request, page_number):
 
 def get_submissions(request, order_by_criteria, start_index=0, end_index=MAX_SUBMISSIONS):
     if request.user.is_authenticated() and request.user.userprofile.show_invisible:
-        submissions = Submission.objects.all().order_by(*order_by_criteria).reverse()[start_index:end_index].prefetch_related('flags', 'upvotes', 'comment_set')
+        submissions = Submission.objects.all().order_by(*order_by_criteria).reverse()[start_index:end_index].prefetch_related('flags', 'upvotes', 'comment_set', 'submitter')
     else:
         submissions = Submission.objects.filter(visible=True).order_by(*order_by_criteria).reverse()[start_index:end_index].prefetch_related('flags', 'upvotes', 'comment_set', 'submitter')
     return submissions
