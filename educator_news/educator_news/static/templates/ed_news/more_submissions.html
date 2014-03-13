@@ -4,6 +4,8 @@
 
 	 {% include 'ed_news/submission_list.html' %}
 
-    <a href="{% url 'ed_news:more_submissions' 2 %}">more</a>
+    {% if show_more_link %}
+      <a href="{% url 'ed_news:more_submissions' 2 %}">more</a>
+	 {% endif %}
 
 {% endblock %}

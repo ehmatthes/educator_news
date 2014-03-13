@@ -40,10 +40,13 @@ def index(request):
     submission_set = get_submission_set(submissions, request.user)
 
     # Find out if the 'more' link should be shown.
-    
+    show_more_link = True
+    if Submission.objects.count() <= MAX_SUBMISSIONS:
+        show_more_link = False
 
     response = render_to_response('ed_news/index.html',
                               {'submission_set': submission_set,
+                               'show_more_link': show_more_link,
                                },
                               context_instance = RequestContext(request))
     patch_cache_control(response, no_cache=True, no_store=True, must_revalidate=True, max_age=600)
@@ -64,8 +67,14 @@ def more_submissions(request, page_number):
     submissions = get_submissions(request, order_by_criteria, start_index=start_index, end_index=end_index)
     submission_set = get_submission_set(submissions, request.user)
 
+    # Find out if the 'more' link should be shown.
+    show_more_link = True
+    if Submission.objects.count() <= page_number * MAX_SUBMISSIONS:
+        show_more_link = False
+
     response = render_to_response('ed_news/more_submissions.html',
                               {'submission_set': submission_set,
+                               'show_more_link': show_more_link,
                                },
                               context_instance = RequestContext(request))
     return response
