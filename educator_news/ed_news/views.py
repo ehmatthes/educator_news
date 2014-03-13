@@ -39,6 +39,9 @@ def index(request):
     submissions = get_submissions(request, order_by_criteria)
     submission_set = get_submission_set(submissions, request.user)
 
+    # Find out if the 'more' link should be shown.
+    
+
     response = render_to_response('ed_news/index.html',
                               {'submission_set': submission_set,
                                },
@@ -47,19 +50,34 @@ def index(request):
     return response
 
 
-def more_new_submissions(request, page_number):
+def more_submissions(request, page_number):
     # Get a list of submissions, sorted by ranking_points.
     #  Get ~30 submissions, starting at index page*30.
-    start_index = page_number * MAX_SUBMISSIONS
-    # This should be a factored out function, accepting page_number and order_by setting.
-    # HERE
+    # Page numbering starts at 1, indexing starts at 0.
+    print 'pn: ', page_number
+    page_number = int(page_number)
+    print 'pn: ', page_number
+    start_index = (page_number-1) * MAX_SUBMISSIONS
+    end_index = page_number * MAX_SUBMISSIONS
+
+    order_by_criteria = ['ranking_points', 'submission_time']
+    submissions = get_submissions(request, order_by_criteria, start_index=start_index, end_index=end_index)
+    submission_set = get_submission_set(submissions, request.user)
+
+    response = render_to_response('ed_news/more_submissions.html',
+                              {'submission_set': submission_set,
+                               },
+                              context_instance = RequestContext(request))
+    return response
+    
 
 
-def get_submissions(request, order_by_criteria):
+def get_submissions(request, order_by_criteria, start_index=0, end_index=MAX_SUBMISSIONS):
+    print 'si, ei: ', start_index, end_index
     if request.user.is_authenticated() and request.user.userprofile.show_invisible:
-        submissions = Submission.objects.all().order_by(*order_by_criteria).reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set')
+        submissions = Submission.objects.all().order_by(*order_by_criteria).reverse()[start_index:end_index].prefetch_related('flags', 'upvotes', 'comment_set')
     else:
-        submissions = Submission.objects.filter(visible=True).order_by(*order_by_criteria).reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set', 'submitter')
+        submissions = Submission.objects.filter(visible=True).order_by(*order_by_criteria).reverse()[start_index:end_index].prefetch_related('flags', 'upvotes', 'comment_set', 'submitter')
     return submissions
 
 def get_submission_set(submissions, user):
