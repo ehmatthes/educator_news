@@ -35,10 +35,7 @@ COMMENT_EDIT_WINDOW = 60*10
 def index(request):
     # Get a list of submissions, sorted by ranking_points.
     order_by_criteria = ['ranking_points', 'submission_time']
-    submissions = cache.get('index_submissions')
-    if not submissions:
-        submissions = get_submissions(request, order_by_criteria)
-        cache.set('index_submissions', submissions)
+    submissions = get_submissions(request, order_by_criteria)
     submission_set = get_submission_set(submissions, request.user)
 
     # Find out if the 'more' link should be shown.
