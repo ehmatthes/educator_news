@@ -35,7 +35,10 @@ COMMENT_EDIT_WINDOW = 60*10
 def index(request):
     # Get a list of submissions, sorted by ranking_points.
     order_by_criteria = ['ranking_points', 'submission_time']
-    submissions = get_submissions(request, order_by_criteria)
+    submissions = cache.get('index_submissions')
+    if not submissions:
+        submissions = get_submissions(request, order_by_criteria)
+        cache.set('index_submissions', submissions)
     submission_set = get_submission_set(submissions, request.user)
 
     # Find out if the 'more' link should be shown.
@@ -107,12 +110,12 @@ def more_new_submissions(request, page_number):
 
 
 def get_submissions(request, order_by_criteria, start_index=0, end_index=MAX_SUBMISSIONS):
-    print 'si, ei: ', start_index, end_index
     if request.user.is_authenticated() and request.user.userprofile.show_invisible:
         submissions = Submission.objects.all().order_by(*order_by_criteria).reverse()[start_index:end_index].prefetch_related('flags', 'upvotes', 'comment_set')
     else:
         submissions = Submission.objects.filter(visible=True).order_by(*order_by_criteria).reverse()[start_index:end_index].prefetch_related('flags', 'upvotes', 'comment_set', 'submitter')
     return submissions
+
 
 def get_submission_set(submissions, user):
     """From a set of submissions, builds a list of submission_dicts for a template.
@@ -1152,6 +1155,8 @@ def is_active_member(user):
 
 def invalidate_caches(namespace=None, *pages):
     for page in pages:
+        if page == 'index':
+            cache.delete('index_submissions')
         invalidate_cache(page, namespace=namespace)
 
 def invalidate_cache(view_path, args=[], namespace=None, key_prefix=None):
