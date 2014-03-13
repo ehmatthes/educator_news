@@ -58,9 +58,7 @@ def more_submissions(request, page_number):
     # Get a list of submissions, sorted by ranking_points.
     #  Get ~30 submissions, starting at index page*30.
     # Page numbering starts at 1, indexing starts at 0.
-    print 'pn: ', page_number
     page_number = int(page_number)
-    print 'pn: ', page_number
     start_index = (page_number-1) * MAX_SUBMISSIONS
     end_index = page_number * MAX_SUBMISSIONS
 
@@ -82,6 +80,32 @@ def more_submissions(request, page_number):
                               context_instance = RequestContext(request))
     return response
     
+
+def more_new_submissions(request, page_number):
+    # Get a list of submissions, sorted by date.
+    #  Get ~30 submissions, starting at index page*30.
+    # Page numbering starts at 1, indexing starts at 0.
+    page_number = int(page_number)
+    start_index = (page_number-1) * MAX_SUBMISSIONS
+    end_index = page_number * MAX_SUBMISSIONS
+
+    order_by_criteria = ['submission_time']
+    submissions = get_submissions(request, order_by_criteria, start_index=start_index, end_index=end_index)
+    submission_set = get_submission_set(submissions, request.user)
+
+    # Find out if the 'more' link should be shown.
+    show_more_link = True
+    if Submission.objects.count() <= page_number * MAX_SUBMISSIONS:
+        show_more_link = False
+
+    response = render_to_response('ed_news/more_new_submissions.html',
+                              {'submission_set': submission_set,
+                               'show_more_link': show_more_link,
+                               'start_numbering': (page_number-1) * MAX_SUBMISSIONS,
+                               'page_number': page_number,
+                               },
+                              context_instance = RequestContext(request))
+    return response
 
 
 def get_submissions(request, order_by_criteria, start_index=0, end_index=MAX_SUBMISSIONS):
@@ -370,8 +394,15 @@ def new(request):
     submissions = get_submissions(request, order_by_criteria)
     submission_set = get_submission_set(submissions, request.user)
 
+    # Find out if the 'more' link should be shown.
+    show_more_link = True
+    if Submission.objects.count() <= MAX_SUBMISSIONS:
+        show_more_link = False
+
     response = render_to_response('ed_news/new.html',
                               {'submission_set': submission_set,
+                               'show_more_link': show_more_link,
+                               'start_numbering': 0,
                                },
                               context_instance = RequestContext(request))
     patch_cache_control(response, no_cache=True, no_store=True, must_revalidate=True, max_age=600)
