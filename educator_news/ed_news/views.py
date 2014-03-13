@@ -34,21 +34,87 @@ COMMENT_EDIT_WINDOW = 60*10
 
 #@cache_page(60 * 1)
 def index(request):
-    # Get a list of submissions, sorted by date.
-    if request.user.is_authenticated() and request.user.userprofile.show_invisible:
-        submissions = Submission.objects.all().order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set')
-    else:
-        submissions = Submission.objects.filter(visible=True).order_by('ranking_points', 'submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set', 'submitter')
-        
+    # Get a list of submissions, sorted by ranking_points.
+    order_by_criteria = ['ranking_points', 'submission_time']
+    submissions = get_submissions(request, order_by_criteria)
     submission_set = get_submission_set(submissions, request.user)
+
+    # Find out if the 'more' link should be shown.
+    show_more_link = True
+    if Submission.objects.count() <= MAX_SUBMISSIONS:
+        show_more_link = False
 
     response = render_to_response('ed_news/index.html',
                               {'submission_set': submission_set,
+                               'show_more_link': show_more_link,
+                               'start_numbering': 0,
                                },
                               context_instance = RequestContext(request))
     patch_cache_control(response, no_cache=True, no_store=True, must_revalidate=True, max_age=600)
     return response
 
+
+def more_submissions(request, page_number):
+    # Get a list of submissions, sorted by ranking_points.
+    #  Get ~30 submissions, starting at index page*30.
+    # Page numbering starts at 1, indexing starts at 0.
+    page_number = int(page_number)
+    start_index = (page_number-1) * MAX_SUBMISSIONS
+    end_index = page_number * MAX_SUBMISSIONS
+
+    order_by_criteria = ['ranking_points', 'submission_time']
+    submissions = get_submissions(request, order_by_criteria, start_index=start_index, end_index=end_index)
+    submission_set = get_submission_set(submissions, request.user)
+
+    # Find out if the 'more' link should be shown.
+    show_more_link = True
+    if Submission.objects.count() <= page_number * MAX_SUBMISSIONS:
+        show_more_link = False
+
+    response = render_to_response('ed_news/more_submissions.html',
+                              {'submission_set': submission_set,
+                               'show_more_link': show_more_link,
+                               'start_numbering': (page_number-1) * MAX_SUBMISSIONS,
+                               'page_number': page_number,
+                               },
+                              context_instance = RequestContext(request))
+    return response
+    
+
+def more_new_submissions(request, page_number):
+    # Get a list of submissions, sorted by date.
+    #  Get ~30 submissions, starting at index page*30.
+    # Page numbering starts at 1, indexing starts at 0.
+    page_number = int(page_number)
+    start_index = (page_number-1) * MAX_SUBMISSIONS
+    end_index = page_number * MAX_SUBMISSIONS
+
+    order_by_criteria = ['submission_time']
+    submissions = get_submissions(request, order_by_criteria, start_index=start_index, end_index=end_index)
+    submission_set = get_submission_set(submissions, request.user)
+
+    # Find out if the 'more' link should be shown.
+    show_more_link = True
+    if Submission.objects.count() <= page_number * MAX_SUBMISSIONS:
+        show_more_link = False
+
+    response = render_to_response('ed_news/more_new_submissions.html',
+                              {'submission_set': submission_set,
+                               'show_more_link': show_more_link,
+                               'start_numbering': (page_number-1) * MAX_SUBMISSIONS,
+                               'page_number': page_number,
+                               },
+                              context_instance = RequestContext(request))
+    return response
+
+
+def get_submissions(request, order_by_criteria, start_index=0, end_index=MAX_SUBMISSIONS):
+    print 'si, ei: ', start_index, end_index
+    if request.user.is_authenticated() and request.user.userprofile.show_invisible:
+        submissions = Submission.objects.all().order_by(*order_by_criteria).reverse()[start_index:end_index].prefetch_related('flags', 'upvotes', 'comment_set')
+    else:
+        submissions = Submission.objects.filter(visible=True).order_by(*order_by_criteria).reverse()[start_index:end_index].prefetch_related('flags', 'upvotes', 'comment_set', 'submitter')
+    return submissions
 
 def get_submission_set(submissions, user):
     """From a set of submissions, builds a list of submission_dicts for a template.
@@ -324,19 +390,19 @@ def new(request):
     """
 
     # Get a list of submissions, sorted by date.
-    #  This is where MTI inheritance might be better; query all submissions,
-    #  rather than building a list of submissions from separate articles
-    #  and posts.
-
-    if request.user.is_authenticated() and request.user.userprofile.show_invisible:
-        submissions = Submission.objects.all().order_by('submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set', 'submitter')
-    else:
-        submissions = Submission.objects.filter(visible=True).order_by('submission_time').reverse()[:MAX_SUBMISSIONS].prefetch_related('flags', 'upvotes', 'comment_set', 'submitter')
-
+    order_by_criteria = ['submission_time']
+    submissions = get_submissions(request, order_by_criteria)
     submission_set = get_submission_set(submissions, request.user)
+
+    # Find out if the 'more' link should be shown.
+    show_more_link = True
+    if Submission.objects.count() <= MAX_SUBMISSIONS:
+        show_more_link = False
 
     response = render_to_response('ed_news/new.html',
                               {'submission_set': submission_set,
+                               'show_more_link': show_more_link,
+                               'start_numbering': 0,
                                },
                               context_instance = RequestContext(request))
     patch_cache_control(response, no_cache=True, no_store=True, must_revalidate=True, max_age=600)

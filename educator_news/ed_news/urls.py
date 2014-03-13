@@ -8,6 +8,8 @@ urlpatterns = patterns('',
     url(r'^$', views.index, name='index'),
 
     url(r'^new/', views.new, name='new'),
+    url(r'^more_submissions/(?P<page_number>\d+)/$', views.more_submissions, name='more_submissions'),
+    url(r'^more_new_submissions/(?P<page_number>\d+)/$', views.more_new_submissions, name='more_new_submissions'),
 
     url(r'^submit_link/', views.submit_link, name='submit_link'),
     url(r'^submit_textpost/', views.submit_textpost, name='submit_textpost'),

@@ -5,4 +5,8 @@
     <h2>New Submissions</h2>
 	 {% include 'ed_news/submission_list.html' %}
 
+    {% if show_more_link %}
+      <a href="{% url 'ed_news:more_new_submissions' 2 %}">more</a>
+	 {% endif %}
+
 {% endblock %}
