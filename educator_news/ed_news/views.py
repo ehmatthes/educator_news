@@ -47,6 +47,7 @@ def index(request):
     response = render_to_response('ed_news/index.html',
                               {'submission_set': submission_set,
                                'show_more_link': show_more_link,
+                               'start_numbering': 0,
                                },
                               context_instance = RequestContext(request))
     patch_cache_control(response, no_cache=True, no_store=True, must_revalidate=True, max_age=600)
@@ -75,6 +76,8 @@ def more_submissions(request, page_number):
     response = render_to_response('ed_news/more_submissions.html',
                               {'submission_set': submission_set,
                                'show_more_link': show_more_link,
+                               'start_numbering': (page_number-1) * MAX_SUBMISSIONS,
+                               'page_number': page_number,
                                },
                               context_instance = RequestContext(request))
     return response

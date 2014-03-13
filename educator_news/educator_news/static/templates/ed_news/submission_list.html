@@ -8,7 +8,7 @@
 
         <div class='title_line'>
 
-			 {{ forloop.counter }}. 
+			 {{ start_numbering|add:forloop.counter }}. 
 
 			 {% if submission_dict.submission.submitter == user or not user.is_authenticated %}
 				  <a class='title_without_upvote' href="{{ submission_dict.submission.url }}">{{ submission_dict.submission.title }}</a>
