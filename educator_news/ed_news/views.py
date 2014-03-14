@@ -285,6 +285,11 @@ def register(request):
             # Registration was successful.
             registered = True
 
+            # Log the user in, and redirect to the home page.
+            user = authenticate(username=user_form.cleaned_data['username'], password=user_form.cleaned_data['password'])
+            login(request, user)
+            return redirect('/')
+
         else:
             # Invalid form/s.
             #  Print errors to console; should log these?
