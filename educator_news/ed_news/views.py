@@ -994,7 +994,9 @@ def get_newness_points(submission):
     #  rather than a linear function.
     # DEV: Should call get_age_seconds()
     age = (datetime.utcnow().replace(tzinfo=utc) - submission.submission_time).seconds
-    newness_points = int(max((((86400.0-age)/86400)*30),0))
+    # Should this be min???
+    #  Yes, should be min
+    newness_points = int(min((((86400.0-age)/86400)*30),0))
     return newness_points
 
 
