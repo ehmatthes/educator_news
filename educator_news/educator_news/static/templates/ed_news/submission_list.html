@@ -37,6 +37,10 @@
 				{% if submission_dict.comment_count == 0 %}discuss{% elif submission_dict.comment_count == 1 %}1 comment{% else %}{{ submission_dict.comment_count }} comments{% endif %}
 		    </a>
 
+			 {% if user.username == 'ehm' %}
+			     | hi eric
+			 {% endif %}
+
 		  </div>
 
 
