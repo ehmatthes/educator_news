@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import pytz
 
 from django.test import TestCase
 from django.test.client import Client
@@ -241,7 +242,7 @@ class EdNewsViewTests(TestCase):
 
                 # Get an artificial age, from 0 to 86400 seconds.
                 age = timedelta(seconds=random.randint(0,86400))
-                submission_time = datetime.utcnow() - age
+                submission_time = datetime.utcnow().replace(tzinfo=pytz.utc) - age
                 article.submission_time = submission_time
                 article.save()
 
