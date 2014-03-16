@@ -1002,6 +1002,7 @@ def get_newness_factor(submission, newness_period):
     #    3^(((86400-age)/86400)^2)
     #  Drops from 3 to 1 over 24 hour period, with faster than linear curve.
     #  Newest submissions get factor of 3, drops to 1.
+    #  Exponent of fraction affects dropoff speed.
     if age > newness_period:
         #print 'too old - age, np:', age, newness_period
         newness_factor = 1
