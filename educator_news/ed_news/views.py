@@ -963,11 +963,14 @@ def update_submission_ranking_points():
     # DEV: Unclear whether prefetch_related('comment_set') would help.
     submissions = Submission.objects.all().prefetch_related('flags', 'upvotes', 'comment_set')
     for submission in submissions:
-        newness_points = get_newness_points(submission)
+        # Submissions get a boost for 1 day.
+        newness_period = 86400*1
+        newness_factor = get_newness_factor(submission, newness_period)
         comment_points = 5*get_comment_count(submission)
         # Flags affect submissions proportionally.
         flag_factor = 0.8**submission.flags.count()
-        updated_ranking_points = flag_factor*(10*submission.upvotes.count() + comment_points + newness_points)
+        updated_ranking_points = flag_factor*(10*submission.upvotes.count() + comment_points)
+        updated_ranking_points = updated_ranking_points * newness_factor
         updated_ranking_points = int(round(updated_ranking_points))
         # Only re-save submission if points have changed.
         if updated_ranking_points != submission.ranking_points:
@@ -979,25 +982,34 @@ def update_comment_ranking_points(article):
     # Update the ranking points for an article's comments.
     comments = article.comment_set.all().prefetch_related('upvotes', 'downvotes', 'flags')
     for comment in comments:
-        newness_points = get_newness_points(comment)
+        # Comments are more important for 30 min.
+        newness_period = 60 * 30
+        newness_factor = get_newness_factor(comment, newness_period)
         voting_points = comment.upvotes.count() - comment.downvotes.count() - 3*comment.flags.count()
         # For now, 5*voting_points.
-        new_ranking_points = 5*voting_points + newness_points
+        new_ranking_points = 5*voting_points
+        new_ranking_points = newness_factor * new_ranking_points
         # Only save if number of points has changed.
         if new_ranking_points != comment.ranking_points:
             comment.save()
     
 
-def get_newness_points(submission):
-    # From 0 to 30 points, depending on newness. Linear function.
-    #  This should probably be a rapidly-decaying function,
-    #  rather than a linear function.
-    # DEV: Should call get_age_seconds()
-    age = (datetime.utcnow().replace(tzinfo=utc) - submission.submission_time).seconds
-    # Should this be min???
-    #  Yes, should be min
-    newness_points = int(min((((86400.0-age)/86400)*30),0))
-    return newness_points
+def get_newness_factor(submission, newness_period):
+    # newness_period is time in seconds where being new helps.
+    max_newness_factor = 3
+    age = get_age_seconds(submission.submission_time)
+    # Spreadsheet formula (max factor of 3, newness period 1 day):
+    #    3^(((86400-age)/86400)^2)
+    #  Drops from 3 to 1 over 24 hour period, with faster than linear curve.
+    #  Newest submissions get factor of 3, drops to 1.
+    if age > newness_period:
+        #print 'too old - age, np:', age, newness_period
+        newness_factor = 1
+    else:
+        exponent = (((float(newness_period)-age)/newness_period)**2.0)
+        newness_factor = max_newness_factor**exponent
+        #print 'age, np, exp, nf:', age, newness_period, exponent, newness_factor
+    return newness_factor
 
 
 def get_comment_count(submission):
@@ -1134,7 +1146,7 @@ def can_edit_textpost(textpost, request):
 
 
 def get_age_seconds(timestamp_in):
-    age = (datetime.utcnow().replace(tzinfo=utc) - timestamp_in).seconds
+    age = int((datetime.utcnow().replace(tzinfo=utc) - timestamp_in).total_seconds())
     return age
 
 def get_parent_submission(comment):
