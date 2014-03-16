@@ -486,7 +486,7 @@ def reply(request, submission_id, comment_id):
     comment = Comment.objects.get(id=comment_id)
     comment_age = get_submission_age(comment)
 
-    parent_submission = get_parent_submission(comment)
+    parent_submission = comment.parent_submission
     parent_comment = comment.parent_comment
     
     # Redirect unauthenticated users to register/ login.
@@ -562,7 +562,7 @@ def edit_comment(request, comment_id):
     comment = Comment.objects.get(id=comment_id)
     comment_age = get_submission_age(comment)
 
-    parent_submission = get_parent_submission(comment)
+    parent_submission = comment.parent_submission
     parent_comment = comment.parent_comment
     
     # Redirect unauthenticated users to register/ login.
@@ -751,7 +751,7 @@ def upvote_comment(request, comment_id):
         increment_karma(comment.author)
 
     # Recalculate comment order.
-    submission = get_parent_submission(comment)
+    submission = comment.parent_submission
     update_comment_ranking_points(submission)
 
     # Invalidate caches: index, 
@@ -794,7 +794,7 @@ def downvote_comment(request, comment_id):
         decrement_karma(comment.author)
 
     # Recalculate comment order.
-    submission = get_parent_submission(comment)
+    submission = comment.parent_submission
     update_comment_ranking_points(submission)
 
     # Invalidate caches: index, 
@@ -1149,18 +1149,6 @@ def can_edit_textpost(textpost, request):
 def get_age_seconds(timestamp_in):
     age = int((datetime.utcnow().replace(tzinfo=utc) - timestamp_in).total_seconds())
     return age
-
-def get_parent_submission(comment):
-    """Takes in a comment, and searches up the comment chain to find
-    the parent submission.
-    """
-
-    if comment.parent_submission:
-        parent_object = comment.parent_submission
-    else:
-        parent_object = get_parent_submission(comment.parent_comment)
-
-    return parent_object
 
 
 def is_active_member(user):

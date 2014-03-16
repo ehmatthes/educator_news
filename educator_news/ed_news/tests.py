@@ -14,7 +14,6 @@ from django.contrib.auth import login
 from ed_news.models import UserProfile
 from ed_news.views import KARMA_LEVEL_ACTIVE_MEMBERS
 from ed_news.views import increment_karma, decrement_karma, is_active_member
-from ed_news.views import get_parent_submission
 import ed_news.views as views
 
 from ed_news.models import Submission, Article, Comment
@@ -319,7 +318,7 @@ class EdNewsViewTests(TestCase):
                 if user in target_comment.flags.all():
                     # Deal with flags.
                     pass
-                parent_submission = views.get_parent_submission(target_comment)
+                parent_submission = target_comment.parent_submission
 
                 print '%s upvoted %s.' % (user.username, target_comment)
 
@@ -433,7 +432,7 @@ class EdNewsViewTests(TestCase):
             for reply_num in range(0, num_replies):
                 c.login(username=user.username, password=user.username)
                 target_comment = random.choice(Comment.objects.all())
-                parent_submission = get_parent_submission(target_comment)
+                parent_submission = target_comment.parent_submission
                 reply_text = "Yeah, I was kind of thinking that."
                 print 'parent_submission, target_comment', parent_submission.id, target_comment.id
                 print Submission.objects.get(id=parent_submission.id)
