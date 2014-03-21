@@ -480,6 +480,16 @@ def discuss(request, submission_id, admin=False):
     return response
 
 
+def conversations(request):
+
+    comment_set = []
+    get_comment_set_conversations(request, comment_set)
+    response = render_to_response('ed_news/conversations.html',
+                                  {'comment_set': comment_set},
+                                  context_instance = RequestContext(request))
+    return response
+
+
 def reply(request, submission_id, comment_id):
     submission = Submission.objects.get(id=submission_id)
 
@@ -1033,6 +1043,17 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
             first_order_comments.append(comment)
     
     build_comment_reply_set(first_order_comments, all_comments, request, comment_set)
+
+
+def get_comment_set_conversations(request, comment_set):
+    # Get all comments a user has made, and all replies.
+    #  Get these in a format that can be used to render
+    #  all comments and replies on a page.
+
+    # Get all comments this user has made.
+    first_order_comments = Comment.objects.filter(author=request.user).reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author', 'parent_comment')
+
+    build_comment_reply_set(first_order_comments, first_order_comments, request, comment_set)
 
 
 
