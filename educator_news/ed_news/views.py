@@ -1074,12 +1074,12 @@ def get_comment_set_conversations(request, comment_set):
         if is_first_order:
             first_order_comments.append(comment)
 
-    print 'len uc, foc', len(user_comments), len(first_order_comments)
-
     descendent_comments = []
     build_descendent_comments(first_order_comments, descendent_comments)
 
-    build_comment_reply_set(user_comments, descendent_comments, request, comment_set)
+    print 'len uc, foc, dc', len(user_comments), len(first_order_comments), len(descendent_comments)
+
+    build_comment_reply_set(first_order_comments, descendent_comments, request, comment_set)
 
 
 def get_ancestor_comments(comment):
