@@ -126,11 +126,14 @@ class EdNewsTestLoad(TestCase):
         # Create some comments.
         # Go through all submissions.
         #  Pick num_comments random users to make a comment.
+        # Make a unique identifier for every comment, for debugging comment system.
         all_users = User.objects.all()
+        comment_number = 0
         for submission in Submission.objects.all():
             for comment_num in range(0, num_comments):
                 user = random.choice(all_users)
-                comment_text = "I just don't think you'll ever make a magnetic monopole."
+                comment_text = "I just don't think you'll ever make a magnetic monopole. %d" % comment_number
+                comment_number += 1
                 new_comment = Comment(comment_text=comment_text, author=user, parent_submission=submission)
                 new_comment.save()
                 print 'Made comment %d for %s.' % (comment_num, user.username)
@@ -149,7 +152,8 @@ class EdNewsTestLoad(TestCase):
                 all_comments = Comment.objects.all()
 
                 target_comment = random.choice(all_comments)
-                reply_text = "Yeah, I was kind of thinking that."
+                reply_text = "Yeah, I was kind of thinking that. %d" % comment_number
+                comment_number += 1
                 # A reply has the same parent_submission as the target comment.
                 new_reply = Comment(comment_text=reply_text, author=user,
                                     parent_comment=target_comment,
