@@ -33,7 +33,7 @@ class EdNewsTestLoad(TestCase):
 
         size = 'tiny'
         if size == 'tiny':
-            num_users = 2
+            num_users = 3
             # Number of links each user submits.
             num_link_submissions = 2
             # Number of text posts each user submits.
@@ -41,7 +41,7 @@ class EdNewsTestLoad(TestCase):
             # Number of submissions each user comments on.
             num_comments = 3
             # Number of comments each user replies to.
-            num_replies = 2
+            num_replies = 10
             # Number of items each user will vote/ flag.
             num_submission_upvotes = 2
             num_comment_upvotes = 2
@@ -139,7 +139,15 @@ class EdNewsTestLoad(TestCase):
         # For each user, pick some random comments to reply to.
         all_comments = Comment.objects.all()
         for user in User.objects.all():
+            # Getting comments here results in more nesting of replies,
+            #  but slows down test for larger datasets.
+            # Comment this line if tests are taking too long.
+            all_comments = Comment.objects.all()
+
             for reply_num in range(0, num_replies):
+                # If test running slowly, comment this line out.
+                all_comments = Comment.objects.all()
+
                 target_comment = random.choice(all_comments)
                 reply_text = "Yeah, I was kind of thinking that."
                 # A reply has the same parent_submission as the target comment.

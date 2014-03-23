@@ -70,6 +70,8 @@ class Comment(models.Model):
     visible = models.BooleanField(default=True)
 
     # If it's a first-level reply, there is a parent submission.
+    # Changed: All comments have a parent_submission now,
+    #  to facilitate displaying submission discussions.
     parent_submission = models.ForeignKey(Submission, blank=True, null=True)
 
     # If it's a reply, there is a parent comment.

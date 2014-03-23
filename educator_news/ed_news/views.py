@@ -482,6 +482,10 @@ def discuss(request, submission_id, admin=False):
 
 def conversations(request):
 
+    # Redirect unauthenticated users to register/ login.
+    if not request.user.is_authenticated():
+        return redirect('/login')
+
     comment_set = []
     get_comment_set_conversations(request, comment_set)
     response = render_to_response('ed_news/conversations.html',
@@ -1051,10 +1055,47 @@ def get_comment_set_conversations(request, comment_set):
     #  all comments and replies on a page.
 
     # Get all comments this user has made.
-    first_order_comments = Comment.objects.filter(author=request.user).reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author', 'parent_comment')
+    #  How get other comments efficiently?
+    #  Why doesn't prefetch_related('comment_set') grab replies from other authors?
+    #  These are not all first-order comments; some are in the same thread.
+    user_comments = Comment.objects.filter(author=request.user).reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author', 'parent_comment')
 
-    build_comment_reply_set(first_order_comments, first_order_comments, request, comment_set)
+    # Need to get first order comments.
+    #  These are user's comments that are not self-replies.
+    #  Go through user_comments, find comments that don't have
+    #   an ancestor comment in user_comments.
+    first_order_comments = []
+    for comment in user_comments:
+        is_first_order = True
+        for ancestor_comment in get_ancestor_comments(comment):
+            if ancestor_comment.author == request.user:
+                is_first_order = False
+                break
+        if is_first_order:
+            first_order_comments.append(comment)
 
+    print 'len uc, foc', len(user_comments), len(first_order_comments)
+
+
+    descendent_comments = []
+    build_descendent_comments(user_comments, descendent_comments)
+
+    build_comment_reply_set(user_comments, user_comments, request, comment_set)
+
+
+def get_ancestor_comments(comment):
+    # Returns ancestor comment chain for a comment.
+    ancestor_comments = []
+    ancestor_comment = comment.parent_comment
+    while ancestor_comment:
+        ancestor_comments.append(ancestor_comment)
+        ancestor_comment = ancestor_comment.parent_comment
+    return ancestor_comments
+
+
+def build_descendent_comments(first_order_comments, descendent_comments):
+    # Get the full comment set for a user's comments.
+    pass
 
 
 def build_comment_reply_set(current_level_comments, all_comments, request, comment_set, nesting_level=0):
