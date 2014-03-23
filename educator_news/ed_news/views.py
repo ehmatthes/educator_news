@@ -1076,11 +1076,10 @@ def get_comment_set_conversations(request, comment_set):
 
     print 'len uc, foc', len(user_comments), len(first_order_comments)
 
-
     descendent_comments = []
-    build_descendent_comments(user_comments, descendent_comments)
+    build_descendent_comments(first_order_comments, descendent_comments)
 
-    build_comment_reply_set(user_comments, user_comments, request, comment_set)
+    build_comment_reply_set(user_comments, descendent_comments, request, comment_set)
 
 
 def get_ancestor_comments(comment):
@@ -1093,9 +1092,17 @@ def get_ancestor_comments(comment):
     return ancestor_comments
 
 
-def build_descendent_comments(first_order_comments, descendent_comments):
+def build_descendent_comments(current_level_comments, descendent_comments):
     # Get the full comment set for a user's comments.
-    pass
+    next_level_comments = []
+    for comment in current_level_comments:
+        reply_set = comment.comment_set.all()
+        for reply in reply_set:
+            next_level_comments.append(reply)
+            descendent_comments.append(reply)
+    # User recursion to get subsequent levels of replies.
+    if next_level_comments:
+        build_descendent_comments(next_level_comments, descendent_comments)
 
 
 def build_comment_reply_set(current_level_comments, all_comments, request, comment_set, nesting_level=0):
