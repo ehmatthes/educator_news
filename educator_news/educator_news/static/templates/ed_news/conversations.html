@@ -7,6 +7,11 @@
 	 {% comment %} --- All comments --- {% endcomment%}
     {% for comment_dict in comment_set %}
 
+	     {% comment %} If first comment in a conversation, add an hr. {% endcomment %}
+	     {% if comment_dict.nesting_level == 0 %}
+	         <hr />
+		  {% endif %}
+
 		  <div class='comment' style='margin-left: {{ comment_dict.margin_left }}px; color: {{ comment_dict.text_color }}'>
 			   <div>
 
