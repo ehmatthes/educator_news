@@ -1058,7 +1058,8 @@ def get_comment_set_conversations(request, comment_set):
     #  How get other comments efficiently?
     #  Why doesn't prefetch_related('comment_set') grab replies from other authors?
     #  These are not all first-order comments; some are in the same thread.
-    user_comments = Comment.objects.filter(author=request.user).order_by('submission_time').reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author', 'parent_comment')
+    #user_comments = Comment.objects.filter(author=request.user).order_by('submission_time').reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author', 'parent_comment')
+    user_comments = request.user.comments.order_by('submission_time').reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author', 'parent_comment')
 
     # Need to get first order comments.
     #  These are user's comments that are not self-replies.
