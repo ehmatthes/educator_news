@@ -29,6 +29,8 @@ urlpatterns = patterns('',
 
     url(r'^flag_submission/(?P<submission_id>\d+)/$', views.flag_submission, name='flag_submission'),
 
+    url(r'^conversations/', views.conversations, name='conversations'),
+
     url(r'^about/', views.about, name='about'),
     url(r'^guidelines/', views.guidelines, name='guidelines'),
 
