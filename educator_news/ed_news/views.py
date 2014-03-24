@@ -1006,10 +1006,12 @@ def update_comment_ranking_points(article):
         newness_factor = get_newness_factor(comment, newness_period)
         voting_points = comment.upvotes.count() - comment.downvotes.count() - 3*comment.flags.count()
         # For now, 5*voting_points.
+        old_ranking_points = comment.ranking_points
         new_ranking_points = 5*voting_points
-        new_ranking_points = newness_factor * new_ranking_points
+        new_ranking_points *= newness_factor
         # Only save if number of points has changed.
-        if new_ranking_points != comment.ranking_points:
+        if new_ranking_points != old_ranking_points:
+            comment.ranking_points = new_ranking_points
             comment.save()
     
 
@@ -1171,10 +1173,6 @@ def build_comment_reply_set(current_level_comments, all_comments, request, comme
         for reply in all_comments:
             if reply.parent_comment == comment:
                 replies.append(reply)
-
-        # Verify that the replies are in appropriate order:
-        for reply in replies:
-            print 'rrp: ', reply.ranking_points
 
         if replies:
             build_comment_reply_set(replies, all_comments, request, comment_set, nesting_level+1)
