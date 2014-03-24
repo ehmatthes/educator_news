@@ -33,6 +33,7 @@ urlpatterns = patterns('',
 
     url(r'^about/', views.about, name='about'),
     url(r'^guidelines/', views.guidelines, name='guidelines'),
+    url(r'^features/', views.features, name='features'),
 
     # --- My admin pages ---
 )

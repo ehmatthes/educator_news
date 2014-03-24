@@ -49,7 +49,7 @@
 				  {% if comment_dict.comment.parent_comment %}
 						| <a href="{% url 'ed_news:reply' comment_dict.comment.parent_submission.id comment_dict.comment.parent_comment.id %}">parent comment</a>
 				  {% endif %}
-						| <a href="{% url 'ed_news:discuss' comment_dict.comment.parent_submission.id %}">parent submission</a>
+						| on: <a href="{% url 'ed_news:discuss' comment_dict.comment.parent_submission.id %}">{{ comment_dict.comment.parent_submission.title }}</a>
 
 				  {% if comment_dict.can_edit %}
 						| <a href="{% url 'ed_news:edit_comment' comment_dict.comment.id %}">edit</a>

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="jumbotron my_small_jumbotron">
+		<h1>Educator News - Features</h1>
+		<p>Educator News aims to be simple and easy to use. Every feature has a clear purpose, and this page will help you understand what the purpose of each new feature is.</p>
+	 </div>
+
+	 <h2>Contents</h2>
+	 <ul>
+		<li><a href="#conversations">Conversations</a></li>
+	 </ul>
+
+
+	 <h2><a name='conversations' class='anchor_tag'>Conversations</a></h2>
+	 <p>One of the main goals of Educator News is to enocurage high-level conversation between participants. To maintain a high-level conversation, you need to know when someone has replied to one of your comments. It is particularly important to know if someone has asked you a follow-up question, or answered a question that you posed. The <a href="{% url 'ed_news:conversations' %}">Conversations</a> link allows you to see the replies that other people have made to each of your comments.</p>
+	 <p>You need to be <a href="{% url 'login_view' %}">logged in</a> to see your conversations.</p>
+	 <p>The <a href="{% url 'ed_news:conversations' %}">Conversations</a> page will be improved slightly, to make it easier to follow:</p>
+	 <ul>
+		<li>Right now the conversations are in an order based on your highest-level comment on each submission. This will be modifed so that conversations with the most recent replies will be listed first.</li>
+	 </ul>
+
+	 <p><a href='#'>top</a>
+
+
+{% endblock %}

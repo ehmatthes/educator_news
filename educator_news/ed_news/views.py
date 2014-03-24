@@ -158,6 +158,11 @@ def guidelines(request):
                               context_instance = RequestContext(request))
 
 
+def features(request):
+    return render_to_response('ed_news/features.html',
+                              {},
+                              context_instance = RequestContext(request))
+
 
 # --- Authentication views ---
 def login_view(request):
