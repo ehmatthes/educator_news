@@ -31,7 +31,7 @@ class EdNewsTestLoad(TestCase):
         # Create a number of comments on each submission.
         # Create a random number of upvotes and downvotes.
 
-        size = 'tiny'
+        size = 'small'
         if size == 'tiny':
             num_users = 3
             # Number of links each user submits.
@@ -41,7 +41,7 @@ class EdNewsTestLoad(TestCase):
             # Number of submissions each user comments on.
             num_comments = 3
             # Number of comments each user replies to.
-            num_replies = 10
+            num_replies = 7
             # Number of items each user will vote/ flag.
             num_submission_upvotes = 2
             num_comment_upvotes = 2
@@ -115,8 +115,8 @@ class EdNewsTestLoad(TestCase):
                 self.assertEqual(latest_submission.url, url)
                 self.assertEqual(latest_submission.title, title)
 
-                # Get an artificial age, from 0 to 86400 seconds.
-                age = timedelta(seconds=random.randint(0,86400))
+                # Get an artificial age, from 0 to 2*86400 seconds.
+                age = timedelta(seconds=random.randint(0,2*86400))
                 submission_time = datetime.utcnow().replace(tzinfo=pytz.utc) - age
                 article.submission_time = submission_time
                 article.save()
@@ -136,7 +136,8 @@ class EdNewsTestLoad(TestCase):
                 comment_number += 1
                 new_comment = Comment(comment_text=comment_text, author=user, parent_submission=submission)
                 new_comment.save()
-                print 'Made comment %d for %s.' % (comment_num, user.username)
+                self.randomize_comment_submission_time(new_comment, submission)
+
         print '%d comments made.' % Comment.objects.count()
 
         # For each user, pick some random comments to reply to.
@@ -159,6 +160,8 @@ class EdNewsTestLoad(TestCase):
                                     parent_comment=target_comment,
                                     parent_submission=target_comment.parent_submission)
                 new_reply.save()
+                self.randomize_comment_submission_time(new_reply, target_comment)
+
                 print 'Made reply %d for %s.' % (reply_num, user.username)
         print 'finished replying.'
 
@@ -234,3 +237,15 @@ class EdNewsTestLoad(TestCase):
         # Assumes being run from same directory as manage.py.
         with open('ed_news/fixtures/test_fixture.json', 'w') as f:
             call_command('dumpdata', stdout=f)
+
+
+    def randomize_comment_submission_time(self, comment, parent):
+        # Make an artificial age for this comment. Random int between 0 and age of parent.
+        #  Number generated is time after parent submission time.
+        # This needs to happen after initial save, otherwise submission time is auto-generated.
+        parent_age = views.get_age_seconds(parent.submission_time)
+        comment_interval = random.randint(0, parent_age)
+        comment_age = timedelta(seconds=parent_age-comment_interval)
+        comment.submission_time = datetime.utcnow().replace(tzinfo=pytz.utc) - comment_age
+        comment.save()
+        
