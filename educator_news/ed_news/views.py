@@ -1119,10 +1119,6 @@ def reorder_conversations(comment_set):
     # The last conversation was not added to conversations.
     conversations.append(conversation)
 
-    print 'conversations:'
-    for conversation in conversations:
-        pass#print conversation
-
     # Get ages of conversations.
     # Build dictionary of min_age: conversation.
     # Then loop dict sorted by keys, and rebuild conversations.
@@ -1134,18 +1130,11 @@ def reorder_conversations(comment_set):
         min_age = min(comment_ages)
         conversations_dict[min_age] = conversation
 
-    #print conversations_dict
-    print "CONVERSATIONS"
+    # Can't just comment_set=[], because lose reference to
+    #  original list that was passed in.
     del comment_set[:]
     for age in sorted(conversations_dict.iterkeys()):
-        print 'age', age
         comment_set += conversations_dict[age]
-        #print conversations_dict[age]
-    print 'COMMENT_SET'
-    #print comment_set
-    for index, comment_dict in enumerate(comment_set):
-        print '\ncs: ', comment_dict['comment'].comment_text
-        #print 'ncs:', new_comment_set[index]['comment'].comment_text
 
 
 def get_ancestor_comments(comment):
