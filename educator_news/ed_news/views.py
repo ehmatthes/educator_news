@@ -1084,13 +1084,38 @@ def get_comment_set_conversations(request, comment_set):
     build_comment_reply_set(first_order_comments, descendent_comments, request, comment_set)
 
     # Rearrange comment_set so it's in order of most recent reply.
+    reorder_conversations(comment_set)
+
+
+def reorder_conversations(comment_set):
+    # Conversations are currently in order based on first-order comments.
+    #  Should be in order of most recent reply.
     #  Go through all the comment_dicts, splitting out conversations.
     #  Conversations start with a nesting_level = 0.
     #  Find the most recent submission_time in each conversation.
     #  Use that to define an order.
     #  Rebuild comment_set based on this order.
 
+    # Each conversation is a list of comment_dicts.
+    conversations = []
+    conversation = []
+    for comment_dict in comment_set:
+        if comment_dict['nesting_level'] == 0:
+            # Add conversation to conversations, and start a new conversation.
+            #  Don't include first empty conversation.
+            if conversation:
+                conversations.append(conversation)
+            conversation = []
+        # Always add the comment_dict to the current conversation.
+        conversation.append(comment_dict)
 
+    # The last conversation was not added to conversations.
+    conversations.append(conversation)
+
+    print 'conversations:'
+    for conversation in conversations:
+        print conversation
+        
 
 def get_ancestor_comments(comment):
     # Returns ancestor comment chain for a comment.
