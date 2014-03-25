@@ -1114,8 +1114,32 @@ def reorder_conversations(comment_set):
 
     print 'conversations:'
     for conversation in conversations:
-        print conversation
-        
+        pass#print conversation
+
+    # Get ages of conversations.
+    # Build dictionary of min_age: conversation.
+    # Then loop dict sorted by keys, and rebuild conversations.
+    conversations_dict = {}
+    for conversation in conversations:
+        comment_ages = []
+        for comment_dict in conversation:
+            comment_ages.append(get_age_seconds(comment_dict['comment'].submission_time))
+        min_age = min(comment_ages)
+        conversations_dict[min_age] = conversation
+
+    #print conversations_dict
+    print "CONVERSATIONS"
+    del comment_set[:]
+    for age in sorted(conversations_dict.iterkeys()):
+        print 'age', age
+        comment_set += conversations_dict[age]
+        #print conversations_dict[age]
+    print 'COMMENT_SET'
+    #print comment_set
+    for index, comment_dict in enumerate(comment_set):
+        print '\ncs: ', comment_dict['comment'].comment_text
+        #print 'ncs:', new_comment_set[index]['comment'].comment_text
+
 
 def get_ancestor_comments(comment):
     # Returns ancestor comment chain for a comment.
