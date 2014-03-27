@@ -403,7 +403,7 @@ def new(request):
 
     # Find out if the 'more' link should be shown.
     show_more_link = True
-    if Submission.objects.count() <= MAX_SUBMISSIONS:
+    if Submission.objects.count() <= int(MAX_SUBMISSIONS/2):
         show_more_link = False
 
     response = render_to_response('ed_news/new.html',
@@ -493,8 +493,42 @@ def conversations(request):
 
     comment_set = []
     get_comment_set_conversations(request, comment_set)
+
+    # Should 'more' link be shown?
+    show_more_link = True
+    if request.user.comments.count() <= int(MAX_SUBMISSIONS/2):
+        show_more_link = False
+    page_number = 1
+
     response = render_to_response('ed_news/conversations.html',
-                                  {'comment_set': comment_set},
+                                  {'comment_set': comment_set,
+                                   'show_more_link': show_more_link,
+                                   'page_number': page_number,
+                                   },
+                                  context_instance = RequestContext(request))
+    return response
+
+
+def more_conversations(request, page_number):
+    # Redirect unauthenticated users to register/ login.
+    if not request.user.is_authenticated():
+        return redirect('/login')
+
+    page_number = int(page_number)
+
+    comment_set = []
+    get_comment_set_conversations(request, comment_set, page_number)
+
+    # Should 'more' link be shown?
+    show_more_link = True
+    if request.user.comments.count() <= page_number*int(MAX_SUBMISSIONS/2):
+        show_more_link = False
+
+    response = render_to_response('ed_news/conversations.html',
+                                  {'comment_set': comment_set,
+                                   'show_more_link': show_more_link,
+                                   'page_number': page_number,
+                                   },
                                   context_instance = RequestContext(request))
     return response
 
@@ -1056,7 +1090,7 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
     build_comment_reply_set(first_order_comments, all_comments, request, comment_set)
 
 
-def get_comment_set_conversations(request, comment_set):
+def get_comment_set_conversations(request, comment_set, page_number=1):
     # Get all comments a user has made, and all replies.
     #  Get these in a format that can be used to render
     #  all comments and replies on a page.
@@ -1067,7 +1101,12 @@ def get_comment_set_conversations(request, comment_set):
     #  These are not all first-order comments; some are in the same thread.
     #user_comments = Comment.objects.filter(author=request.user).order_by('submission_time').reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author', 'parent_comment')
     # This is slightly more efficient.
-    user_comments = request.user.comments.order_by('submission_time').reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author', 'parent_comment')
+
+    # Get appropriate range of user comments.
+    start_index = (page_number-1) * int(MAX_SUBMISSIONS/2)
+    end_index = page_number*int(MAX_SUBMISSIONS/2)
+
+    user_comments = request.user.comments.order_by('submission_time').reverse()[start_index:end_index].prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author', 'parent_comment')
 
     # Need to get first order comments.
     #  These are user's comments that are not self-replies.
@@ -1085,8 +1124,6 @@ def get_comment_set_conversations(request, comment_set):
 
     descendent_comments = []
     build_descendent_comments(first_order_comments, descendent_comments)
-
-    print 'len uc, foc, dc', len(user_comments), len(first_order_comments), len(descendent_comments)
 
     build_comment_reply_set(first_order_comments, descendent_comments, request, comment_set)
 
