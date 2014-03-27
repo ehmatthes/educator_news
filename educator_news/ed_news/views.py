@@ -1106,7 +1106,7 @@ def get_comment_set_conversations(request, comment_set, page_number=1):
     start_index = (page_number-1) * int(MAX_SUBMISSIONS/2)
     end_index = page_number*int(MAX_SUBMISSIONS/2)
 
-    user_comments = request.user.comments.order_by('submission_time').reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author', 'parent_comment')[start_index:end_index]
+    user_comments = request.user.comments.order_by('submission_time').reverse()[start_index:end_index].prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author', 'parent_comment')
 
     # Need to get first order comments.
     #  These are user's comments that are not self-replies.
@@ -1124,8 +1124,6 @@ def get_comment_set_conversations(request, comment_set, page_number=1):
 
     descendent_comments = []
     build_descendent_comments(first_order_comments, descendent_comments)
-
-    print 'len uc, foc, dc', len(user_comments), len(first_order_comments), len(descendent_comments)
 
     build_comment_reply_set(first_order_comments, descendent_comments, request, comment_set)
 
