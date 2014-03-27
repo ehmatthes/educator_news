@@ -19,6 +19,8 @@ from ed_news.forms import MyLoginForm
 
 from ed_news.models import Submission, Article, TextPost, Comment
 
+import utilities
+
 
 # These should be moved to a settings, config, or .env file.
 # Active members level will start at 10, increase as site becomes more active.
@@ -35,7 +37,7 @@ COMMENT_EDIT_WINDOW = 60*10
 def index(request):
     # Get a list of submissions, sorted by ranking_points.
     order_by_criteria = ['ranking_points', 'submission_time']
-    submissions = get_submissions(request, order_by_criteria)
+    submissions = utilities.get_submissions(request, order_by_criteria, start_index=0, end_index=MAX_SUBMISSIONS)
     submission_set = get_submission_set(submissions, request.user)
 
     # Find out if the 'more' link should be shown.
@@ -61,7 +63,7 @@ def more_submissions(request, page_number):
     end_index = page_number * MAX_SUBMISSIONS
 
     order_by_criteria = ['ranking_points', 'submission_time']
-    submissions = get_submissions(request, order_by_criteria, start_index=start_index, end_index=end_index)
+    submissions = utilities.get_submissions(request, order_by_criteria, start_index=start_index, end_index=end_index)
     submission_set = get_submission_set(submissions, request.user)
 
     # Find out if the 'more' link should be shown.
@@ -88,7 +90,7 @@ def more_new_submissions(request, page_number):
     end_index = page_number * MAX_SUBMISSIONS
 
     order_by_criteria = ['submission_time']
-    submissions = get_submissions(request, order_by_criteria, start_index=start_index, end_index=end_index)
+    submissions = utilities.get_submissions(request, order_by_criteria, start_index=start_index, end_index=end_index)
     submission_set = get_submission_set(submissions, request.user)
 
     # Find out if the 'more' link should be shown.
@@ -104,14 +106,6 @@ def more_new_submissions(request, page_number):
                                },
                               context_instance = RequestContext(request))
     return response
-
-
-def get_submissions(request, order_by_criteria, start_index=0, end_index=MAX_SUBMISSIONS):
-    if request.user.is_authenticated() and request.user.userprofile.show_invisible:
-        submissions = Submission.objects.all().order_by(*order_by_criteria).reverse()[start_index:end_index].prefetch_related('flags', 'upvotes', 'comment_set', 'submitter')
-    else:
-        submissions = Submission.objects.filter(visible=True).order_by(*order_by_criteria).reverse()[start_index:end_index].prefetch_related('flags', 'upvotes', 'comment_set', 'submitter')
-    return submissions
 
 
 def get_submission_set(submissions, user):
@@ -398,7 +392,7 @@ def new(request):
 
     # Get a list of submissions, sorted by date.
     order_by_criteria = ['submission_time']
-    submissions = get_submissions(request, order_by_criteria)
+    submissions = utilities.get_submissions(request, order_by_criteria, start_index=0, end_index=MAX_SUBMISSIONS)
     submission_set = get_submission_set(submissions, request.user)
 
     # Find out if the 'more' link should be shown.
