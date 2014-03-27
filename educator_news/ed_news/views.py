@@ -493,6 +493,29 @@ def conversations(request):
 
     comment_set = []
     get_comment_set_conversations(request, comment_set)
+
+    # Should 'more' link be shown?
+    show_more_link = True
+    if request.user.comments.count() <= 5:
+        show_more_link = False
+    page_number = 0
+
+    response = render_to_response('ed_news/conversations.html',
+                                  {'comment_set': comment_set,
+                                   'show_more_link': show_more_link,
+                                   'page_number': page_number,
+                                   },
+                                  context_instance = RequestContext(request))
+    return response
+
+
+def more_conversations(request, page_number):
+    # Redirect unauthenticated users to register/ login.
+    if not request.user.is_authenticated():
+        return redirect('/login')
+
+    comment_set = []
+    get_comment_set_conversations(request, comment_set, page_number)
     response = render_to_response('ed_news/conversations.html',
                                   {'comment_set': comment_set},
                                   context_instance = RequestContext(request))
@@ -1056,7 +1079,7 @@ def get_comment_set(submission, request, comment_set, nesting_level=0):
     build_comment_reply_set(first_order_comments, all_comments, request, comment_set)
 
 
-def get_comment_set_conversations(request, comment_set):
+def get_comment_set_conversations(request, comment_set, page_number=0):
     # Get all comments a user has made, and all replies.
     #  Get these in a format that can be used to render
     #  all comments and replies on a page.
@@ -1067,7 +1090,12 @@ def get_comment_set_conversations(request, comment_set):
     #  These are not all first-order comments; some are in the same thread.
     #user_comments = Comment.objects.filter(author=request.user).order_by('submission_time').reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author', 'parent_comment')
     # This is slightly more efficient.
-    user_comments = request.user.comments.order_by('submission_time').reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author', 'parent_comment')
+
+    # Get appropriate range of user comments.
+    start_index = page_number*5
+    end_index = page_number*5 + 5
+
+    user_comments = request.user.comments.order_by('submission_time').reverse().prefetch_related('upvotes', 'downvotes', 'flags', 'comment_set', 'author', 'parent_comment')[start_index:end_index]
 
     # Need to get first order comments.
     #  These are user's comments that are not self-replies.

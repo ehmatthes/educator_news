@@ -83,6 +83,10 @@
 
 	 {% endfor %}
 
+	 {% if show_more_link %}
+		  <hr />
+		  <p><a href="{% url 'ed_news:more_conversations' page_number|add:1 %}">more</a></p>
+	 {% endif %}
 
 
 {% endblock %}
