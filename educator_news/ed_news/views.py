@@ -403,7 +403,7 @@ def new(request):
 
     # Find out if the 'more' link should be shown.
     show_more_link = True
-    if Submission.objects.count() <= int(MAX_SUBMISSIONS/2):
+    if Submission.objects.count() <= MAX_SUBMISSIONS:
         show_more_link = False
 
     response = render_to_response('ed_news/new.html',
@@ -486,6 +486,8 @@ def discuss(request, submission_id, admin=False):
 
 
 def conversations(request):
+
+    # If this view ends up buggy, check pagination logic first.
 
     # Redirect unauthenticated users to register/ login.
     if not request.user.is_authenticated():

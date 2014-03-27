@@ -49,7 +49,7 @@ class EdNewsTestLoad(TestCase):
         elif size == 'small':
             num_users = 7
             # Number of links each user submits.
-            num_link_submissions = 3
+            num_link_submissions = 10
             # Number of text posts each user submits.
             num_textpost_submissions = 2
             # Number of submissions each user comments on.
